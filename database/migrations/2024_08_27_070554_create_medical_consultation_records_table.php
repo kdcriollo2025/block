@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('medical_history_id');
             $table->date('consultation_date');
             $table->string('reason', 255)->nullable(); // <-- Agregamos reason
-            $table->string('reported_symptoms', 255);
+            $table->string('symptoms', 255);
             $table->string('diagnosis', 255);
             $table->string('treatment', 255);
             $table->timestamps();
