@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('symptoms', 255);
             $table->string('diagnosis', 255);
             $table->string('treatment', 255);
+            $table->date('next_appointment')->nullable();
             $table->timestamps();
         });
     }
