@@ -59,7 +59,7 @@ Route::get('password/reset/{token}', [ResetPasswordController::class, 'showReset
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 // Rutas para administradores
-Route::middleware(['auth', \App\Http\Middleware\CheckUserType::class.':admin'])->name('admin.')->prefix('admin')->group(function () {
+Route::middleware(['auth', 'user.type:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('medicos', MedicoController::class);
     Route::patch('medicos/{medico}/toggle-status', [MedicoController::class, 'toggleStatus'])->name('medicos.toggle-status');
 
@@ -72,7 +72,7 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserType::class.':admin'])-
 });
 
 // Rutas para médicos
-Route::middleware(['auth', \App\Http\Middleware\CheckUserType::class.':medico'])->prefix('medico')->name('medico.')->group(function () {
+Route::middleware(['auth', 'user.type:medico'])->prefix('medico')->name('medico.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Rutas para pacientes
@@ -104,6 +104,8 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserType::class.':medico'])
     
     // Rutas para vacunas
     Route::resource('vaccination_records', VaccinationRecordController::class);
+
+    Route::get('consultations', [DashboardController::class, 'consultations'])->name('consultations');
 });
 
 // Rutas para cambio de contraseña

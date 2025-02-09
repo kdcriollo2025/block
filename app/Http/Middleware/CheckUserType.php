@@ -7,10 +7,11 @@ use Illuminate\Http\Request;
 
 class CheckUserType
 {
-    public function handle(Request $request, Closure $next, string $type)
+    public function handle(Request $request, Closure $next, $type)
     {
-        if ($request->user()->type !== $type) {
-            abort(403, 'No tienes permiso para acceder a esta sección.');
+        if (!auth()->check() || auth()->user()->type !== $type) {
+            return redirect()->route('home')
+                ->with('error', 'No tienes permiso para acceder a esta sección.');
         }
 
         return $next($request);

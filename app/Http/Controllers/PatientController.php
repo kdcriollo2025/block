@@ -31,16 +31,18 @@ class PatientController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
+            'cedula' => 'required|string|size:10|unique:patients',
+            'email' => 'required|string|email|max:255|unique:patients',
             'birth_date' => 'required|date',
             'gender' => 'required|string|in:Masculino,Femenino,Otro',
             'address' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
             'phone_number' => 'required|string|max:20',
             'blood_type' => 'required|string|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
         ]);
 
+        $validated = $request->all();
         $validated['doctor_id'] = Auth::user()->medico->id;
         
         Patient::create($validated);
@@ -75,9 +77,13 @@ class PatientController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'cedula' => 'required|string|size:10|unique:patients,cedula,' . $patient->id,
+            'email' => 'required|string|email|max:255|unique:patients,email,' . $patient->id,
             'birth_date' => 'required|date',
             'gender' => 'required|string|in:Masculino,Femenino,Otro',
             'address' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:20',
+            'blood_type' => 'required|string|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
         ]);
 
         $patient->update($validated);

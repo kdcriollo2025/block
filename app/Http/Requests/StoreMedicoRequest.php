@@ -9,19 +9,21 @@ class StoreMedicoRequest extends FormRequest
     public function rules()
     {
         return [
-            'cedula' => [
-                'required',
-                'string',
-                'size:10',
-                'unique:medicos',
-                'unique:users',
-                function ($attribute, $value, $fail) {
-                    if (!$this->validarCedula($value)) {
-                        $fail('La cédula ingresada no es válida.');
-                    }
-                },
-            ],
-            // ... otras reglas
+            'name' => 'required|string|max:255',
+            'cedula' => 'required|string|size:10|unique:medicos|unique:users',
+            'email' => 'required|string|email|max:255|unique:medicos|unique:users',
+            'specialty' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:20',
+            'password' => 'required|string|min:8|confirmed',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'cedula.required' => 'La cédula es obligatoria',
+            'cedula.size' => 'La cédula debe tener exactamente 10 dígitos',
+            'cedula.unique' => 'Esta cédula ya está registrada',
         ];
     }
 

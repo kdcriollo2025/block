@@ -17,6 +17,7 @@ return new class extends Migration
             $table->date('birth_date');
             $table->char('gender', 36);
             $table->text('address');
+            $table->string('cedula', 10)->unique();
             $table->timestamps();
         });
     }

@@ -70,4 +70,24 @@ class DashboardController extends Controller
             return response()->view('errors.500', [], 500);
         }
     }
+
+    public function consultations()
+    {
+        try {
+            $medico = auth()->user()->medico;
+            if (!$medico) {
+                throw new \Exception('Perfil de médico no encontrado');
+            }
+            
+            $consultations = $medico->medicalConsultations()
+                ->with(['patient', 'medicalHistory'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+                
+            return view('dashboard.consultations', compact('consultations'));
+        } catch (\Exception $e) {
+            \Log::error('Error en consultations: ' . $e->getMessage());
+            return back()->with('error', 'Ha ocurrido un error al cargar las consultas.');
+        }
+    }
 } 

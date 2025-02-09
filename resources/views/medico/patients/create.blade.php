@@ -3,7 +3,7 @@
 @section('title', 'Nuevo Paciente')
 
 @section('content_header')
-    <h1>Registrar Nuevo Paciente</h1>
+    <h1>Crear Paciente</h1>
 @stop
 
 @section('content')
@@ -13,18 +13,26 @@
             @csrf
             
             <div class="form-group">
-                <label for="cedula">Cédula</label>
+                <label for="name">Nombre Completo *</label>
+                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" required>
+                @error('name')
+                    <span class="invalid-feedback">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="cedula">Cédula *</label>
                 <input type="text" name="cedula" id="cedula" class="form-control @error('cedula') is-invalid @enderror" 
                        maxlength="10" required>
                 <div class="invalid-feedback" id="cedulaError"></div>
                 @error('cedula')
-                    <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                    <span class="invalid-feedback">{{ $message }}</span>
                 @enderror
             </div>
 
             <!-- ... resto del formulario ... -->
 
-            <button type="submit" class="btn btn-primary" id="submitBtn">Guardar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
         </form>
     </div>
 </div>
@@ -35,11 +43,9 @@
 <script>
 document.getElementById('patientForm').addEventListener('submit', function(e) {
     const cedula = document.getElementById('cedula').value;
-    const cedulaError = document.getElementById('cedulaError');
-    
     if (!validarCedula(cedula)) {
         e.preventDefault();
-        cedulaError.textContent = 'La cédula ingresada no es válida';
+        document.getElementById('cedulaError').textContent = 'La cédula ingresada no es válida';
         document.getElementById('cedula').classList.add('is-invalid');
     }
 });

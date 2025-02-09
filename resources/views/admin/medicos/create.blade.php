@@ -13,12 +13,20 @@
             @csrf
             
             <div class="form-group">
-                <label for="cedula">Cédula</label>
+                <label for="name">Nombre Completo *</label>
+                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" required>
+                @error('name')
+                    <span class="invalid-feedback">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="cedula">Cédula *</label>
                 <input type="text" name="cedula" id="cedula" class="form-control @error('cedula') is-invalid @enderror" 
                        maxlength="10" required>
                 <div class="invalid-feedback" id="cedulaError"></div>
                 @error('cedula')
-                    <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                    <span class="invalid-feedback">{{ $message }}</span>
                 @enderror
             </div>
 

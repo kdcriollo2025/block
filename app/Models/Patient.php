@@ -15,6 +15,7 @@ class Patient extends Model
     protected $fillable = [
         'name',
         'email',
+        'cedula',
         'phone_number',
         'birth_date',
         'gender',
