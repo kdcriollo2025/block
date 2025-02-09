@@ -2,8 +2,7 @@
 
 @section('auth_body')
     <form method="POST" action="{{ route('login') }}" id="loginForm">
-        {{-- Comentamos o removemos la directiva @csrf --}}
-        {{-- @csrf --}}
+        @csrf
         
         {{-- Email field --}}
         <div class="input-group mb-3">

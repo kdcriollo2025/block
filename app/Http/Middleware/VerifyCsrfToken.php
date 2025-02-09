@@ -12,9 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        'login',
-        'logout',
-        'password/*'
+        '*'  // Temporalmente deshabilitamos CSRF para todas las rutas
     ];
 
     /**

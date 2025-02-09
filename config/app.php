@@ -42,7 +42,7 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    'debug' => env('APP_DEBUG', true),
 
     /*
     |--------------------------------------------------------------------------
@@ -55,7 +55,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'http://18.215.154.0:8002'),
 
     /*
     |--------------------------------------------------------------------------
@@ -144,5 +144,7 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         'PDF' => Elibyy\TCPDF\Facades\TCPDF::class,
     ])->toArray(),
+
+    'asset_url' => env('ASSET_URL'),
 
 ];
