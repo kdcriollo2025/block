@@ -371,7 +371,7 @@
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
     'cipher' => 'AES-256-CBC',
-    'key' => 'base64:m9bZTJ0Qfb7bIMTi6FfluJjmpuVUemNeC/2Ldz0QcZA=',
+    'key' => 'base64:BbNIpif4Zw3HSDgBjzz9ZhF36RHzfkZuw9alDhw3yoA=',
     'previous_keys' => 
     array (
     ),
@@ -590,6 +590,7 @@
         'prefix_schema' => '',
         'edition' => 'ora$base',
         'server_version' => '11g',
+        'timezone' => '-05:00',
       ),
       'sqlite' => 
       array (
@@ -601,6 +602,7 @@
         'busy_timeout' => NULL,
         'journal_mode' => NULL,
         'synchronous' => NULL,
+        'timezone' => '-05:00',
       ),
       'mysql' => 
       array (
@@ -621,6 +623,7 @@
         'options' => 
         array (
         ),
+        'timezone' => '-05:00',
       ),
       'mariadb' => 
       array (
@@ -641,6 +644,7 @@
         'options' => 
         array (
         ),
+        'timezone' => '-05:00',
       ),
       'pgsql' => 
       array (
@@ -656,6 +660,7 @@
         'prefix_indexes' => true,
         'search_path' => 'public',
         'sslmode' => 'prefer',
+        'timezone' => '-05:00',
       ),
       'sqlsrv' => 
       array (
@@ -669,6 +674,7 @@
         'charset' => 'utf8',
         'prefix' => '',
         'prefix_indexes' => true,
+        'timezone' => '-05:00',
       ),
     ),
     'migrations' => 
@@ -1067,8 +1073,8 @@
   'session' => 
   array (
     'driver' => 'file',
-    'lifetime' => 3,
-    'expire_on_close' => true,
+    'lifetime' => '120',
+    'expire_on_close' => false,
     'encrypt' => false,
     'files' => '/home/ubuntu/block/storage/framework/sessions',
     'connection' => NULL,
@@ -1084,7 +1090,7 @@
     'domain' => NULL,
     'secure' => true,
     'http_only' => true,
-    'same_site' => 'strict',
+    'same_site' => 'lax',
     'partitioned' => false,
   ),
   'hashing' => 
