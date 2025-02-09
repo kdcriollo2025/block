@@ -40,6 +40,7 @@ return [
             'busy_timeout' => null,
             'journal_mode' => null,
             'synchronous' => null,
+            'timezone' => env('DB_TIMEZONE', '-05:00'),
         ],
 
         'mysql' => [
@@ -60,6 +61,7 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+            'timezone' => env('DB_TIMEZONE', '-05:00'),
         ],
 
         'mariadb' => [
@@ -80,6 +82,7 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+            'timezone' => env('DB_TIMEZONE', '-05:00'),
         ],
 
         'pgsql' => [
@@ -95,6 +98,7 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => 'prefer',
+            'timezone' => env('DB_TIMEZONE', '-05:00'),
         ],
 
         'sqlsrv' => [
@@ -110,6 +114,7 @@ return [
             'prefix_indexes' => true,
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+            'timezone' => env('DB_TIMEZONE', '-05:00'),
         ],
 
         'oracle' => [
@@ -125,6 +130,7 @@ return [
             'prefix_schema'  => env('DB_SCHEMA_PREFIX', ''),
             'edition'        => env('DB_EDITION', 'ora$base'),
             'server_version' => env('DB_SERVER_VERSION', '11g'),
+            'timezone'       => env('DB_TIMEZONE', '-05:00'),
         ],
     ],
 

@@ -7,3 +7,8 @@
         </a>
     </p>
 @stop
+
+<form method="POST" action="{{ route('login') }}">
+    @csrf
+    <!-- resto del formulario -->
+</form>

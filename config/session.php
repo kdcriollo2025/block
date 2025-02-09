@@ -32,9 +32,9 @@ return [
     |
     */
 
-    'lifetime' => 3,
+    'lifetime' => env('SESSION_LIFETIME', 120),
 
-    'expire_on_close' => true,
+    'expire_on_close' => false,
 
     /*
     |--------------------------------------------------------------------------
@@ -156,9 +156,7 @@ return [
     |
     */
 
-    //'domain' => env('SESSION_DOMAIN'),
-
-    'domain' => null,
+    'domain' => env('SESSION_DOMAIN', null),
 
     /*
     |--------------------------------------------------------------------------
@@ -171,7 +169,7 @@ return [
     |
     */
 
-    'secure' => true,
+    'secure' => env('SESSION_SECURE_COOKIE', true),
 
     /*
     |--------------------------------------------------------------------------
@@ -201,7 +199,7 @@ return [
     |
     */
 
-    'same_site' => 'strict',
+    'same_site' => 'lax',
 
     /*
     |--------------------------------------------------------------------------
