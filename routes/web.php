@@ -31,21 +31,15 @@ use Illuminate\Support\Facades\Log;
 
 // Ruta principal
 Route::get('/', function () {
-    try {
-        if (Auth::check()) {
-            $user = Auth::user();
-            if ($user->type === 'admin') {
-                return redirect()->route('admin.medicos.index');
-            } elseif ($user->type === 'medico') {
-                return redirect()->route('medico.dashboard');
-            }
-        }
-        return redirect()->route('login');
-    } catch (\Exception $e) {
-        Log::error('Error en ruta principal: ' . $e->getMessage());
-        return redirect()->route('login')
-            ->with('error', 'Ha ocurrido un error. Por favor, intenta de nuevo.');
+    if (auth()->check()) {
+        $user = auth()->user();
+        return match($user->type) {
+            'admin' => redirect()->route('admin.medicos.index'),
+            'medico' => redirect()->route('medico.dashboard'),
+            default => redirect()->route('login')
+        };
     }
+    return redirect()->route('login');
 })->name('home');
 
 // Rutas de autenticación

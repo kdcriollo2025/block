@@ -16,6 +16,12 @@ class CheckUserType
             }
 
             $user = auth()->user();
+            
+            Log::info('User type check', [
+                'user_type' => $user->type,
+                'required_type' => $type
+            ]);
+
             if (!$user || $user->type !== $type) {
                 if ($request->expectsJson()) {
                     return response()->json(['error' => 'No autorizado'], 403);
@@ -28,6 +34,8 @@ class CheckUserType
             return $next($request);
         } catch (\Exception $e) {
             Log::error('Error en CheckUserType: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
             if ($request->expectsJson()) {
                 return response()->json(['error' => 'Error del servidor'], 500);
             }
