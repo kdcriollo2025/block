@@ -24,17 +24,31 @@ class UsersTableSeeder extends Seeder
         }
 
         // Crear usuario administrador
-        $admin = User::create([
+        User::create([
             'name' => 'Admin ESPE',
             'email' => 'admin@espe.edu.ec',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
+            'cedula' => '1234567890',
+            'password' => Hash::make('12345678'),
             'type' => 'admin',
-            'created_at' => now(),
-            'updated_at' => now()
+            'first_login' => false,
+            'email_verified_at' => now(),
+        ]);
+
+        // Crear usuario médico de ejemplo
+        User::create([
+            'name' => 'Dr. Juan Pérez',
+            'email' => 'medico@espe.edu.ec',
+            'cedula' => '0987654321',
+            'password' => Hash::make('12345678'),
+            'type' => 'medico',
+            'first_login' => false,
+            'email_verified_at' => now(),
         ]);
 
         // Asignar rol
-        $admin->assignRole($adminRole);
+        $admin = User::where('email', 'admin@espe.edu.ec')->first();
+        if ($admin) {
+            $admin->assignRole($adminRole);
+        }
     }
 }
