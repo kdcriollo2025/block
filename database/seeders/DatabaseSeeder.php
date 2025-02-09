@@ -15,8 +15,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
-            // Comentar UsersTableSeeder si prefieres usar solo InitialDataSeeder
-            // UsersTableSeeder::class,
+            //RoleSeeder::class,
+            UsersTableSeeder::class,
             InitialDataSeeder::class
         ]);
     }

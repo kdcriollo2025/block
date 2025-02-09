@@ -24,38 +24,35 @@ class InitialDataSeeder extends Seeder
     {
         // Crear usuario administrador
         $adminUser = User::create([
-            'name' => 'Admin',
-            'email' => 'admin@example.com',
-            'cedula' => '1234567890',
-            'password' => Hash::make('password'),
+            'name' => 'Administrador',
+            'email' => 'admin@gmail.com',
+            'password' => Hash::make('12345678'),
             'type' => 'admin',
             'first_login' => false,
         ]);
 
-        // Crear médico
+        // Crear usuario médico
         $medicoUser = User::create([
             'name' => 'Dr. Juan Pérez',
-            'email' => 'doctor@example.com',
-            'cedula' => '0987654321',
-            'password' => Hash::make('password'),
+            'email' => 'medico1@gmail.com',
+            'password' => Hash::make('12345678'),
             'type' => 'medico',
             'first_login' => false,
         ]);
 
+        // Crear perfil del médico
         $medico = Medico::create([
             'name' => 'Dr. Juan Pérez',
-            'email' => 'doctor@example.com',
-            'cedula' => '0987654321',
-            'specialty' => 'Medicina General',
-            'phone_number' => '0987654321',
+            'email' => 'medico1@gmail.com',
+            'specialty' => 'Cardiología',
+            'phone_number' => '0996512993',
             'is_active' => true,
         ]);
 
-        // Crear pacientes
+        // Crear pacientes para el médico
         $patient1 = Patient::create([
             'name' => 'María García',
             'email' => 'maria@gmail.com',
-            'cedula' => '1712345678',
             'phone_number' => '0987654321',
             'birth_date' => '1990-05-15',
             'gender' => 'Femenino',
@@ -67,7 +64,6 @@ class InitialDataSeeder extends Seeder
         $patient2 = Patient::create([
             'name' => 'Carlos López',
             'email' => 'carlos@gmail.com',
-            'cedula' => '1798765432',
             'phone_number' => '0998765432',
             'birth_date' => '1985-08-20',
             'gender' => 'Masculino',
@@ -79,12 +75,12 @@ class InitialDataSeeder extends Seeder
         // Crear historiales médicos
         $history1 = MedicalHistory::create([
             'patient_id' => $patient1->id,
-            'hash' => Str::random(64),
+            'hash' => Str::random(64), // Generar un hash aleatorio
         ]);
 
         $history2 = MedicalHistory::create([
             'patient_id' => $patient2->id,
-            'hash' => Str::random(64),
+            'hash' => Str::random(64), // Generar un hash aleatorio
         ]);
 
         // Crear registros de alergias

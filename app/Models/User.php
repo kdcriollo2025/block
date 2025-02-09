@@ -25,7 +25,6 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'cedula',
         'password',
         'type',
         'first_login',
@@ -49,7 +48,6 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'first_login' => 'boolean',
     ];
 
     /**

@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MedicalHistory extends Model
 {
@@ -16,28 +14,33 @@ class MedicalHistory extends Model
         'hash'
     ];
 
-    public function patient(): BelongsTo
+    public function patient()
     {
-        return $this->belongsTo(Patient::class);
+        return $this->belongsTo(Patient::class, 'patient_id');
     }
 
-    public function allergyRecords(): HasMany
+    public function allergyRecords()
     {
-        return $this->hasMany(AllergyRecord::class);
+        return $this->hasMany(AllergyRecord::class, 'medical_history_id');
     }
 
-    public function surgeryRecords(): HasMany
+    public function surgeryRecords()
     {
-        return $this->hasMany(SurgeryRecord::class);
+        return $this->hasMany(SurgeryRecord::class, 'medical_history_id');
     }
 
-    public function medicalConsultationRecords(): HasMany
+    public function medicalConsultationRecords()
     {
-        return $this->hasMany(MedicalConsultationRecord::class);
+        return $this->hasMany(MedicalConsultationRecord::class, 'medical_history_id');
     }
 
-    public function vaccinationRecords(): HasMany
+    public function therapyRecords()
     {
-        return $this->hasMany(VaccinationRecord::class);
+        return $this->hasMany(TherapyRecord::class, 'medical_history_id');
+    }
+
+    public function vaccinationRecords()
+    {
+        return $this->hasMany(VaccinationRecord::class, 'medical_history_id');
     }
 }

@@ -27,7 +27,7 @@ class MedicoController extends Controller
     public function index()
     {
         $medicos = Medico::all();
-        return view('admin.medicos.index', compact('medicos'));
+        return view('medicos.index', compact('medicos'));
     }
 
     /**
@@ -43,10 +43,9 @@ class MedicoController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'cedula' => 'required|string|size:10|unique:medicos|unique:users',
-            'email' => 'required|string|email|max:255|unique:medicos|unique:users',
+            'email' => 'required|string|email|max:255|unique:users',
             'specialty' => 'required|string|max:255',
             'phone_number' => 'required|string|max:20',
             'password' => 'required|string|min:8|confirmed',
@@ -55,20 +54,18 @@ class MedicoController extends Controller
         DB::beginTransaction();
         try {
             $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'cedula' => $request->cedula,
-                'password' => Hash::make($request->password),
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
                 'type' => 'medico',
                 'first_login' => true,
             ]);
 
             Medico::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'cedula' => $request->cedula,
-                'specialty' => $request->specialty,
-                'phone_number' => $request->phone_number,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'specialty' => $validated['specialty'],
+                'phone_number' => $validated['phone_number'],
                 'is_active' => true,
             ]);
 
@@ -97,7 +94,6 @@ class MedicoController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $medico->user->id,
-            'cedula' => 'required|string|size:10|unique:users,cedula,' . $medico->user->id . '|unique:medicos,cedula,' . $medico->id,
             'specialty' => 'required|string|max:255',
             'phone_number' => 'required|string|max:20',
         ]);
@@ -106,13 +102,9 @@ class MedicoController extends Controller
             $medico->user->update([
                 'name' => $request->name,
                 'email' => $request->email,
-                'cedula' => $request->cedula,
             ]);
 
             $medico->update([
-                'name' => $request->name,
-                'email' => $request->email,
-                'cedula' => $request->cedula,
                 'specialty' => $request->specialty,
                 'phone_number' => $request->phone_number,
             ]);

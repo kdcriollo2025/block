@@ -18,7 +18,6 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\Admin\ReportController;
-use Illuminate\Support\Facades\Log;
 
 /*
 |-------------------------------------------------------------------------- 
@@ -29,18 +28,17 @@ use Illuminate\Support\Facades\Log;
 | be assigned to the "web" middleware group. Make something great!
 */
 
-// Ruta principal
+// Rutas públicas
 Route::get('/', function () {
-    if (auth()->check()) {
-        $user = auth()->user();
-        return match($user->type) {
-            'admin' => redirect()->route('admin.medicos.index'),
-            'medico' => redirect()->route('medico.dashboard'),
-            default => redirect()->route('login')
-        };
+    if (Auth::check()) {
+        if (Auth::user()->type === 'admin') {
+            return redirect('/admin/medicos');
+        } else {
+            return redirect('/medico/dashboard');
+        }
     }
-    return redirect()->route('login');
-})->name('home');
+    return redirect('/login');
+});
 
 // Rutas de autenticación
 Route::middleware('guest')->group(function () {
@@ -61,10 +59,9 @@ Route::get('password/reset/{token}', [ResetPasswordController::class, 'showReset
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 // Rutas para administradores
-Route::middleware(['auth', 'user.type:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserType::class.':admin'])->name('admin.')->prefix('admin')->group(function () {
     Route::resource('medicos', MedicoController::class);
-    Route::patch('medicos/{medico}/toggle-status', [MedicoController::class, 'toggleStatus'])
-        ->name('medicos.toggle-status');
+    Route::patch('medicos/{medico}/toggle-status', [MedicoController::class, 'toggleStatus'])->name('medicos.toggle-status');
 
     // Rutas de reportes
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
@@ -72,12 +69,10 @@ Route::middleware(['auth', 'user.type:admin'])->prefix('admin')->name('admin.')-
     Route::get('/reports/common-diagnoses', [ReportController::class, 'commonDiagnoses'])->name('reports.common-diagnoses');
     Route::get('/reports/consultations-over-time', [ReportController::class, 'consultationsOverTime'])->name('reports.consultations-over-time');
     Route::get('/reports/patient-demographics', [ReportController::class, 'patientDemographics'])->name('reports.patient-demographics');
-
-    Route::get('/medicos', [MedicoController::class, 'index'])->name('medicos.index');
 });
 
 // Rutas para médicos
-Route::middleware(['auth', 'user.type:medico'])->prefix('medico')->name('medico.')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserType::class.':medico'])->prefix('medico')->name('medico.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Rutas para pacientes
@@ -95,22 +90,13 @@ Route::middleware(['auth', 'user.type:medico'])->prefix('medico')->name('medico.
     Route::resource('surgery_records', SurgeryRecordController::class);
     
     // Rutas para consultas médicas
-    Route::get('/medical-consultation-records', [MedicalConsultationRecordController::class, 'index'])
-        ->name('medical_consultation_records.index');
-    Route::get('/medical-consultation-records/create', [MedicalConsultationRecordController::class, 'create'])
-        ->name('medical_consultation_records.create');
-    Route::post('/medical-consultation-records', [MedicalConsultationRecordController::class, 'store'])
-        ->name('medical_consultation_records.store');
-    Route::get('/medical-consultation-records/{medical_consultation_record}', [MedicalConsultationRecordController::class, 'show'])
-        ->name('medical_consultation_records.show');
+    Route::resource('medical_consultation_records', MedicalConsultationRecordController::class);
     
     // Rutas para terapias
     Route::resource('therapy_records', TherapyRecordController::class);
     
     // Rutas para vacunas
     Route::resource('vaccination_records', VaccinationRecordController::class);
-
-    Route::get('consultations', [DashboardController::class, 'consultations'])->name('consultations');
 });
 
 // Rutas para cambio de contraseña
