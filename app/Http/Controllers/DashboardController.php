@@ -6,17 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Patient;
 use App\Models\MedicalConsultationRecord;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function __construct()
     {
-        // Establecer la zona horaria para Quito
-        date_default_timezone_set('America/Guayaquil');
-        Carbon::setLocale('es');
-        
         $this->middleware(function ($request, $next) {
             if (Auth::user()->type !== 'medico') {
                 return redirect()->route('home');
@@ -38,10 +33,6 @@ class DashboardController extends Controller
             $query->where('doctor_id', $medico->id);
         })->count();
 
-        // Obtener la fecha actual en formato español
-        $currentDate = Carbon::now()->locale('es')->isoFormat('dddd, D [de] MMMM [de] YYYY');
-        $currentTime = Carbon::now()->format('h:i A');
-
         // Obtener consultas por mes (últimos 6 meses)
         $consultationsByMonth = DB::table('medical_consultation_records')
             ->join('medical_histories', 'medical_consultation_records.medical_history_id', '=', 'medical_histories.id')
@@ -54,7 +45,7 @@ class DashboardController extends Controller
             ->get()
             ->map(function($item) {
                 return [
-                    'month' => Carbon::parse($item->month)->locale('es')->isoFormat('MMMM YYYY'),
+                    'month' => date('F Y', strtotime($item->month)),
                     'total' => $item->total
                 ];
             });
@@ -63,9 +54,7 @@ class DashboardController extends Controller
             'medico',
             'totalPatients',
             'totalConsultations',
-            'consultationsByMonth',
-            'currentDate',
-            'currentTime'
+            'consultationsByMonth'
         ));
     }
 } 
