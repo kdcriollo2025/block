@@ -26,6 +26,7 @@ class InitialDataSeeder extends Seeder
         $adminUser = User::create([
             'name' => 'Administrador',
             'email' => 'admin@gmail.com',
+            'cedula' => '1234567890',
             'password' => Hash::make('12345678'),
             'type' => 'admin',
             'first_login' => false,
@@ -35,6 +36,7 @@ class InitialDataSeeder extends Seeder
         $medicoUser = User::create([
             'name' => 'Dr. Juan Pérez',
             'email' => 'medico1@gmail.com',
+            'cedula' => '0987654321',
             'password' => Hash::make('12345678'),
             'type' => 'medico',
             'first_login' => false,
@@ -44,6 +46,7 @@ class InitialDataSeeder extends Seeder
         $medico = Medico::create([
             'name' => 'Dr. Juan Pérez',
             'email' => 'medico1@gmail.com',
+            'cedula' => '0987654321',
             'specialty' => 'Cardiología',
             'phone_number' => '0996512993',
             'is_active' => true,

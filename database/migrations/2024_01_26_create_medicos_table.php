@@ -15,8 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('cedula', 10)->unique();
             $table->string('specialty', 100);
             $table->string('phone_number', 15);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

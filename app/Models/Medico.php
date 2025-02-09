@@ -13,6 +13,7 @@ class Medico extends Model
     protected $fillable = [
         'name',
         'email',
+        'cedula',
         'specialty',
         'phone_number',
         'is_active',
