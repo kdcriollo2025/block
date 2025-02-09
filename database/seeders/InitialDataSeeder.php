@@ -22,67 +22,74 @@ class InitialDataSeeder extends Seeder
      */
     public function run(): void
     {
-        // Crear usuario administrador con una cédula diferente
+        // Crear usuario administrador
         $adminUser = User::create([
-            'name' => 'Administrador',
-            'email' => 'admin@gmail.com',
-            'cedula' => '1712345678', // Cédula diferente
-            'password' => Hash::make('12345678'),
+            'name' => 'Admin',
+            'email' => 'admin@example.com',
+            'cedula' => '1234567890',
+            'password' => Hash::make('password'),
             'type' => 'admin',
             'first_login' => false,
         ]);
 
-        // Crear usuario médico con una cédula diferente
+        // Crear médico
         $medicoUser = User::create([
             'name' => 'Dr. Juan Pérez',
-            'email' => 'medico1@gmail.com',
-            'cedula' => '1798765432', // Cédula diferente
-            'password' => Hash::make('12345678'),
+            'email' => 'doctor@example.com',
+            'cedula' => '0987654321',
+            'password' => Hash::make('password'),
             'type' => 'medico',
             'first_login' => false,
         ]);
 
-        // Crear perfil del médico
         $medico = Medico::create([
             'name' => 'Dr. Juan Pérez',
-            'email' => 'medico1@gmail.com',
-            'cedula' => '1798765432', // Misma cédula que el usuario médico
-            'specialty' => 'Cardiología',
-            'phone_number' => '0996512993',
+            'email' => 'doctor@example.com',
+            'cedula' => '0987654321',
+            'specialty' => 'Medicina General',
+            'phone_number' => '0987654321',
             'is_active' => true,
         ]);
 
-        // Crear pacientes para el médico
-        $patient1 = Patient::create([
-            'name' => 'María García',
-            'email' => 'maria@gmail.com',
-            'phone_number' => '0987654321',
-            'birth_date' => '1990-05-15',
-            'gender' => 'Femenino',
-            'blood_type' => 'O+',
-            'address' => 'Av. Principal 123',
-            'doctor_id' => $medico->id,
-        ]);
+        // Crear algunos pacientes de ejemplo
+        $patients = [
+            [
+                'name' => 'María García',
+                'email' => 'maria@gmail.com',
+                'cedula' => '1712345678',
+                'phone_number' => '0987654321',
+                'birth_date' => '1990-05-15',
+                'gender' => 'Femenino',
+                'blood_type' => 'O+',
+                'address' => 'Av. Principal 123',
+                'doctor_id' => $medico->id,
+            ],
+            [
+                'name' => 'Carlos López',
+                'email' => 'carlos@gmail.com',
+                'cedula' => '1798765432',
+                'phone_number' => '0998765432',
+                'birth_date' => '1985-08-20',
+                'gender' => 'Masculino',
+                'blood_type' => 'A+',
+                'address' => 'Calle Secundaria 456',
+                'doctor_id' => $medico->id,
+            ],
+            // Puedes agregar más pacientes aquí
+        ];
 
-        $patient2 = Patient::create([
-            'name' => 'Carlos López',
-            'email' => 'carlos@gmail.com',
-            'phone_number' => '0998765432',
-            'birth_date' => '1985-08-20',
-            'gender' => 'Masculino',
-            'blood_type' => 'A+',
-            'address' => 'Calle Secundaria 456',
-            'doctor_id' => $medico->id,
-        ]);
+        foreach ($patients as $patientData) {
+            Patient::create($patientData);
+        }
 
         // Crear historiales médicos
         $history1 = MedicalHistory::create([
-            'patient_id' => $patient1->id,
+            'patient_id' => $patients[0]['id'],
             'hash' => Str::random(64), // Generar un hash aleatorio
         ]);
 
         $history2 = MedicalHistory::create([
-            'patient_id' => $patient2->id,
+            'patient_id' => $patients[1]['id'],
             'hash' => Str::random(64), // Generar un hash aleatorio
         ]);
 
