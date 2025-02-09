@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\Admin\ReportController;
+use Illuminate\Support\Facades\Log;
 
 /*
 |-------------------------------------------------------------------------- 
@@ -28,17 +29,24 @@ use App\Http\Controllers\Admin\ReportController;
 | be assigned to the "web" middleware group. Make something great!
 */
 
-// Rutas públicas
+// Ruta principal
 Route::get('/', function () {
-    if (Auth::check()) {
-        if (Auth::user()->type === 'admin') {
-            return redirect('/admin/medicos');
-        } else {
-            return redirect('/medico/dashboard');
+    try {
+        if (Auth::check()) {
+            $user = Auth::user();
+            if ($user->type === 'admin') {
+                return redirect()->route('admin.medicos.index');
+            } elseif ($user->type === 'medico') {
+                return redirect()->route('medico.dashboard');
+            }
         }
+        return redirect()->route('login');
+    } catch (\Exception $e) {
+        Log::error('Error en ruta principal: ' . $e->getMessage());
+        return redirect()->route('login')
+            ->with('error', 'Ha ocurrido un error. Por favor, intenta de nuevo.');
     }
-    return redirect('/login');
-});
+})->name('home');
 
 // Rutas de autenticación
 Route::middleware('guest')->group(function () {
