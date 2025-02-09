@@ -660,7 +660,6 @@
         'prefix_indexes' => true,
         'search_path' => 'public',
         'sslmode' => 'prefer',
-        'timezone' => '-05:00',
       ),
       'sqlsrv' => 
       array (
@@ -1088,9 +1087,9 @@
     'cookie' => 'laravel_session',
     'path' => '/',
     'domain' => NULL,
-    'secure' => true,
-    'http_only' => true,
-    'same_site' => 'lax',
+    'secure' => false,
+    'http_only' => false,
+    'same_site' => NULL,
     'partitioned' => false,
   ),
   'hashing' => 
