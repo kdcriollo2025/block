@@ -71,6 +71,8 @@ Route::middleware(['auth', 'user.type:admin'])->prefix('admin')->name('admin.')-
     Route::get('/reports/common-diagnoses', [ReportController::class, 'commonDiagnoses'])->name('reports.common-diagnoses');
     Route::get('/reports/consultations-over-time', [ReportController::class, 'consultationsOverTime'])->name('reports.consultations-over-time');
     Route::get('/reports/patient-demographics', [ReportController::class, 'patientDemographics'])->name('reports.patient-demographics');
+
+    Route::get('/medicos', [MedicoController::class, 'index'])->name('medicos.index');
 });
 
 // Rutas para médicos
