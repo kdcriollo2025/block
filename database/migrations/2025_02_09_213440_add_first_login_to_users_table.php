@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('medicos', function (Blueprint $table) {
-            $table->boolean('is_active')->default(true)->after('phone_number');
+        Schema::table('users', function (Blueprint $table) {
+            //
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('medicos', function (Blueprint $table) {
-            $table->dropColumn('is_active');
+        Schema::table('users', function (Blueprint $table) {
+            //
         });
     }
 };

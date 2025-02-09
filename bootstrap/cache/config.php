@@ -363,9 +363,10 @@
     'name' => 'Laravel',
     'env' => 'production',
     'debug' => false,
-    'url' => 'http://3.80.66.59:8002',
+    'url' => 'http://18.215.154.0:8002',
     'frontend_url' => 'http://localhost:3000',
     'asset_url' => NULL,
+    'timezone' => 'UTC',
     'locale' => 'en',
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
@@ -504,7 +505,7 @@
   ),
   'cache' => 
   array (
-    'default' => 'database',
+    'default' => 'file',
     'stores' => 
     array (
       'array' => 
@@ -524,7 +525,6 @@
       array (
         'driver' => 'file',
         'path' => '/home/ubuntu/block/storage/framework/cache/data',
-        'lock_path' => '/home/ubuntu/block/storage/framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -589,7 +589,6 @@
         'prefix_schema' => '',
         'edition' => 'ora$base',
         'server_version' => '11g',
-        'timezone' => '-05:00',
       ),
       'sqlite' => 
       array (
@@ -601,7 +600,6 @@
         'busy_timeout' => NULL,
         'journal_mode' => NULL,
         'synchronous' => NULL,
-        'timezone' => '-05:00',
       ),
       'mysql' => 
       array (
@@ -622,7 +620,6 @@
         'options' => 
         array (
         ),
-        'timezone' => '-05:00',
       ),
       'mariadb' => 
       array (
@@ -643,7 +640,6 @@
         'options' => 
         array (
         ),
-        'timezone' => '-05:00',
       ),
       'pgsql' => 
       array (
@@ -672,7 +668,6 @@
         'charset' => 'utf8',
         'prefix' => '',
         'prefix_indexes' => true,
-        'timezone' => '-05:00',
       ),
     ),
     'migrations' => 
@@ -723,7 +718,7 @@
       array (
         'driver' => 'local',
         'root' => '/home/ubuntu/block/storage/app/public',
-        'url' => 'http://3.80.66.59:8002/storage',
+        'url' => 'http://18.215.154.0:8002/storage',
         'visibility' => 'public',
         'throw' => false,
       ),
@@ -858,7 +853,7 @@
         'username' => NULL,
         'password' => NULL,
         'timeout' => NULL,
-        'local_domain' => '3.80.66.59',
+        'local_domain' => '18.215.154.0',
       ),
       'ses' => 
       array (
@@ -1028,7 +1023,7 @@
       2 => '127.0.0.1',
       3 => '127.0.0.1:8000',
       4 => '::1',
-      5 => '3.80.66.59:8002',
+      5 => '18.215.154.0:8002',
     ),
     'guard' => 
     array (
