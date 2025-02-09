@@ -19,6 +19,10 @@ class Medico extends Model
         'is_active',
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
     /**
      * Get the patients for the doctor.
      */
@@ -32,7 +36,14 @@ class Medico extends Model
      */
     public function medicalConsultations(): HasMany
     {
-        return $this->hasMany(MedicalConsultationRecord::class, 'doctor_id');
+        return $this->hasManyThrough(
+            MedicalConsultationRecord::class,
+            Patient::class,
+            'doctor_id',
+            'medical_history_id',
+            'id',
+            'id'
+        );
     }
 
     /**

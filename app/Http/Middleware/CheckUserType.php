@@ -17,28 +17,21 @@ class CheckUserType
 
             $user = auth()->user();
             
-            Log::info('User type check', [
-                'user_type' => $user->type,
-                'required_type' => $type
-            ]);
-
-            if (!$user || $user->type !== $type) {
-                if ($request->expectsJson()) {
-                    return response()->json(['error' => 'No autorizado'], 403);
-                }
-                
+            if ($user->type !== $type) {
                 return redirect()->route('home')
                     ->with('error', 'No tienes permiso para acceder a esta sección.');
+            }
+
+            if ($type === 'medico' && !$user->medico) {
+                Log::error('Usuario médico sin perfil de médico: ' . $user->id);
+                return redirect()->route('home')
+                    ->with('error', 'No se encontró el perfil de médico.');
             }
 
             return $next($request);
         } catch (\Exception $e) {
             Log::error('Error en CheckUserType: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
-            
-            if ($request->expectsJson()) {
-                return response()->json(['error' => 'Error del servidor'], 500);
-            }
             return redirect()->route('home')
                 ->with('error', 'Ha ocurrido un error. Por favor, intenta de nuevo.');
         }
