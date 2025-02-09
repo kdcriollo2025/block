@@ -51,46 +51,40 @@ class InitialDataSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Crear algunos pacientes de ejemplo
-        $patients = [
-            [
-                'name' => 'María García',
-                'email' => 'maria@gmail.com',
-                'cedula' => '1712345678',
-                'phone_number' => '0987654321',
-                'birth_date' => '1990-05-15',
-                'gender' => 'Femenino',
-                'blood_type' => 'O+',
-                'address' => 'Av. Principal 123',
-                'doctor_id' => $medico->id,
-            ],
-            [
-                'name' => 'Carlos López',
-                'email' => 'carlos@gmail.com',
-                'cedula' => '1798765432',
-                'phone_number' => '0998765432',
-                'birth_date' => '1985-08-20',
-                'gender' => 'Masculino',
-                'blood_type' => 'A+',
-                'address' => 'Calle Secundaria 456',
-                'doctor_id' => $medico->id,
-            ],
-            // Puedes agregar más pacientes aquí
-        ];
+        // Crear pacientes
+        $patient1 = Patient::create([
+            'name' => 'María García',
+            'email' => 'maria@gmail.com',
+            'cedula' => '1712345678',
+            'phone_number' => '0987654321',
+            'birth_date' => '1990-05-15',
+            'gender' => 'Femenino',
+            'blood_type' => 'O+',
+            'address' => 'Av. Principal 123',
+            'doctor_id' => $medico->id,
+        ]);
 
-        foreach ($patients as $patientData) {
-            Patient::create($patientData);
-        }
+        $patient2 = Patient::create([
+            'name' => 'Carlos López',
+            'email' => 'carlos@gmail.com',
+            'cedula' => '1798765432',
+            'phone_number' => '0998765432',
+            'birth_date' => '1985-08-20',
+            'gender' => 'Masculino',
+            'blood_type' => 'A+',
+            'address' => 'Calle Secundaria 456',
+            'doctor_id' => $medico->id,
+        ]);
 
         // Crear historiales médicos
         $history1 = MedicalHistory::create([
-            'patient_id' => $patients[0]['id'],
-            'hash' => Str::random(64), // Generar un hash aleatorio
+            'patient_id' => $patient1->id,
+            'hash' => Str::random(64),
         ]);
 
         $history2 = MedicalHistory::create([
-            'patient_id' => $patients[1]['id'],
-            'hash' => Str::random(64), // Generar un hash aleatorio
+            'patient_id' => $patient2->id,
+            'hash' => Str::random(64),
         ]);
 
         // Crear registros de alergias
