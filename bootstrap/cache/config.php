@@ -363,7 +363,7 @@
     'name' => 'Laravel',
     'env' => 'production',
     'debug' => false,
-    'url' => 'http://54.90.76.135:8002',
+    'url' => 'http://3.80.66.59:8002',
     'frontend_url' => 'http://localhost:3000',
     'asset_url' => NULL,
     'timezone' => 'America/Guayaquil',
@@ -719,7 +719,7 @@
       array (
         'driver' => 'local',
         'root' => '/home/ubuntu/block/storage/app/public',
-        'url' => 'http://54.90.76.135:8002/storage',
+        'url' => 'http://3.80.66.59:8002/storage',
         'visibility' => 'public',
         'throw' => false,
       ),
@@ -854,7 +854,7 @@
         'username' => NULL,
         'password' => NULL,
         'timeout' => NULL,
-        'local_domain' => '54.90.76.135',
+        'local_domain' => '3.80.66.59',
       ),
       'ses' => 
       array (
@@ -1024,7 +1024,7 @@
       2 => '127.0.0.1',
       3 => '127.0.0.1:8000',
       4 => '::1',
-      5 => '54.90.76.135:8002',
+      5 => '3.80.66.59:8002',
     ),
     'guard' => 
     array (
