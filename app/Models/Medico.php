@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Medico extends Model
@@ -34,22 +35,15 @@ class Medico extends Model
     /**
      * Get the medical consultations for the doctor.
      */
-    public function medicalConsultations(): HasMany
+    public function consultations(): HasMany
     {
-        return $this->hasManyThrough(
-            MedicalConsultationRecord::class,
-            Patient::class,
-            'doctor_id',
-            'medical_history_id',
-            'id',
-            'id'
-        );
+        return $this->hasMany(MedicalConsultationRecord::class, 'doctor_id');
     }
 
     /**
      * Get the user associated with the doctor.
      */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'email', 'email');
     }

@@ -22,10 +22,17 @@ class CheckUserType
                     ->with('error', 'No tienes permiso para acceder a esta sección.');
             }
 
-            if ($type === 'medico' && !$user->medico) {
-                Log::error('Usuario médico sin perfil de médico: ' . $user->id);
-                return redirect()->route('home')
-                    ->with('error', 'No se encontró el perfil de médico.');
+            if ($type === 'medico') {
+                $medico = $user->medico;
+                if (!$medico) {
+                    Log::error('Usuario médico sin perfil de médico: ' . $user->id);
+                    return redirect()->route('home')
+                        ->with('error', 'No se encontró el perfil de médico.');
+                }
+                if (!$medico->is_active) {
+                    return redirect()->route('home')
+                        ->with('error', 'Tu cuenta está desactivada. Contacta al administrador.');
+                }
             }
 
             return $next($request);
