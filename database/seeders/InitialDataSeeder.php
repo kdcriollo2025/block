@@ -22,21 +22,21 @@ class InitialDataSeeder extends Seeder
      */
     public function run(): void
     {
-        // Crear usuario administrador
+        // Crear usuario administrador con una cédula diferente
         $adminUser = User::create([
             'name' => 'Administrador',
             'email' => 'admin@gmail.com',
-            'cedula' => '1234567890',
+            'cedula' => '1712345678', // Cédula diferente
             'password' => Hash::make('12345678'),
             'type' => 'admin',
             'first_login' => false,
         ]);
 
-        // Crear usuario médico
+        // Crear usuario médico con una cédula diferente
         $medicoUser = User::create([
             'name' => 'Dr. Juan Pérez',
             'email' => 'medico1@gmail.com',
-            'cedula' => '0987654321',
+            'cedula' => '1798765432', // Cédula diferente
             'password' => Hash::make('12345678'),
             'type' => 'medico',
             'first_login' => false,
@@ -46,7 +46,7 @@ class InitialDataSeeder extends Seeder
         $medico = Medico::create([
             'name' => 'Dr. Juan Pérez',
             'email' => 'medico1@gmail.com',
-            'cedula' => '0987654321',
+            'cedula' => '1798765432', // Misma cédula que el usuario médico
             'specialty' => 'Cardiología',
             'phone_number' => '0996512993',
             'is_active' => true,
