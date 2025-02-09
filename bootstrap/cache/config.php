@@ -366,7 +366,6 @@
     'url' => 'http://3.80.66.59:8002',
     'frontend_url' => 'http://localhost:3000',
     'asset_url' => NULL,
-    'timezone' => 'America/Guayaquil',
     'locale' => 'en',
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
