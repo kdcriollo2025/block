@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title', 'Dashboard')
+@section('title', 'Dashboard Médico')
 
 @section('content_header')
     <h1>Dashboard</h1>
@@ -12,11 +12,14 @@
             <div class="small-box bg-info">
                 <div class="inner">
                     <h3>{{ $totalPatients }}</h3>
-                    <p>Total Pacientes</p>
+                    <p>Pacientes Totales</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-users"></i>
                 </div>
+                <a href="{{ route('medico.patients.index') }}" class="small-box-footer">
+                    Ver más <i class="fas fa-arrow-circle-right"></i>
+                </a>
             </div>
         </div>
 
@@ -24,11 +27,14 @@
             <div class="small-box bg-success">
                 <div class="inner">
                     <h3>{{ $totalConsultations }}</h3>
-                    <p>Total Consultas</p>
+                    <p>Consultas Realizadas</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-stethoscope"></i>
                 </div>
+                <a href="{{ route('medico.medical_consultation_records.index') }}" class="small-box-footer">
+                    Ver más <i class="fas fa-arrow-circle-right"></i>
+                </a>
             </div>
         </div>
     </div>
@@ -56,19 +62,21 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('consultationsChart').getContext('2d');
+            const data = @json($consultationsByMonth);
+            
             new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
-                    labels: {!! json_encode($consultationsByMonth->pluck('month')) !!},
+                    labels: data.map(item => new Date(item.month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })),
                     datasets: [{
                         label: 'Consultas por Mes',
-                        data: {!! json_encode($consultationsByMonth->pluck('total')) !!},
-                        backgroundColor: 'rgba(60,141,188,0.9)',
-                        borderColor: 'rgba(60,141,188,0.8)',
-                        borderWidth: 1
+                        data: data.map(item => item.total),
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
                     }]
                 },
                 options: {
+                    responsive: true,
                     scales: {
                         y: {
                             beginAtZero: true,
