@@ -27,7 +27,7 @@ class MedicoController extends Controller
     public function index()
     {
         $medicos = Medico::all();
-        return view('medicos.index', compact('medicos'));
+        return view('admin.medicos.index', compact('medicos'));
     }
 
     /**
