@@ -227,7 +227,10 @@
                 <i class="fas fa-arrow-left"></i> Volver
             </a>
             <a href="{{ route('medico.medical_consultation_records.create', $medicalHistory) }}" class="btn btn-primary">
-                Nueva Consulta
+                <i class="fas fa-plus"></i> Nueva Consulta
+            </a>
+            <a href="{{ route('medico.medical_consultation_records.index') }}" class="btn btn-info">
+                <i class="fas fa-list"></i> Ver Todas las Consultas
             </a>
         </div>
     </div>
