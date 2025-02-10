@@ -22,10 +22,14 @@ class MedicalConsultationRecordController extends Controller
     
     public function index()
     {
-        $medicalConsultationRecords = MedicalConsultationRecord::whereHas('medicalHistory.patient', function($query) {
-            $query->where('doctor_id', Auth::user()->medico->id);
-        })->get();
-        return view('medical_consultation_records.index', compact('medicalConsultationRecords'));
+        $consultations = MedicalConsultationRecord::with(['medicalHistory.patient'])
+            ->whereHas('medicalHistory.patient', function($query) {
+                $query->where('doctor_id', auth()->user()->medico->id);
+            })
+            ->orderBy('consultation_date', 'desc')
+            ->get();
+
+        return view('medical_consultation_records.index', compact('consultations'));
     }
 
     public function create(MedicalHistory $medicalHistory)

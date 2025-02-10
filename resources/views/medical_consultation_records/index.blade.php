@@ -1,42 +1,55 @@
 @extends('adminlte::page')
 
-@section('title', 'Registros de Consultas Médicas')
+@section('title', 'Consultas Médicas')
 
 @section('content_header')
-    <h1>Registros de Consultas Médicas</h1>
+    <h1>Consultas Médicas</h1>
 @stop
 
 @section('content')
-    <a href="{{ route('medico.medical_consultation_records.create') }}" class="btn btn-primary btn-sm mb-3">Nuevo</a>
-    <table class="table table-hover table-dark dataTable">
-        <thead>
-        <tr>
-            <th scope="col">Paciente</th>
-            <th scope="col">Fecha</th>
-            <th scope="col">Síntomas</th>
-            <th scope="col">Diagnóstico</th>
-            <th scope="col">Tratamiento</th>
-            <th scope="col">Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach ($medicalConsultationRecords as $consultation)
-            <tr>
-                <td>{{ $consultation->medicalHistory->patient->name }}</td>
-                <td>{{ $consultation->consultation_date->format('d/m/Y') }}</td>
-                <td>{{ Str::limit($consultation->reported_symptoms, 50) }}</td>
-                <td>{{ Str::limit($consultation->diagnosis, 50) }}</td>
-                <td>{{ Str::limit($consultation->treatment, 50) }}</td>
-                <td>
-                    <a href="{{ route('medico.medical_consultation_records.edit', ['medical_consultation_record' => $consultation->id]) }}"
-                       class="btn btn-warning btn-sm" title="Editar">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                </td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Paciente</th>
+                            <th>Motivo</th>
+                            <th>Síntomas</th>
+                            <th>Diagnóstico</th>
+                            <th>Tratamiento</th>
+                            <th>Próxima Cita</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($consultations as $consultation)
+                            <tr>
+                                <td>{{ $consultation->consultation_date->format('d/m/Y') }}</td>
+                                <td>{{ $consultation->medicalHistory->patient->name }}</td>
+                                <td>{{ $consultation->reason }}</td>
+                                <td>{{ $consultation->symptoms }}</td>
+                                <td>{{ $consultation->diagnosis }}</td>
+                                <td>{{ $consultation->treatment }}</td>
+                                <td>{{ $consultation->next_appointment ? $consultation->next_appointment->format('d/m/Y') : 'No programada' }}</td>
+                                <td>
+                                    <a href="{{ route('medico.medical_histories.show', $consultation->medicalHistory) }}" 
+                                       class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="text-center">No hay consultas médicas registradas</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 @stop
 
 @section('css')
@@ -44,14 +57,4 @@
 @stop
 
 @section('js')
-    <script>
-        $(document).ready(function() {
-            $('.dataTable').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
-                },
-                "order": [[1, "desc"]]
-            });
-        });
-    </script>
 @stop
