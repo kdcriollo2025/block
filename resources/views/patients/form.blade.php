@@ -31,6 +31,18 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="cedula">Cédula <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('cedula') is-invalid @enderror" 
+                                   id="cedula" name="cedula" maxlength="10"
+                                   value="{{ old('cedula', isset($patient) ? $patient->cedula : '') }}" required>
+                            @error('cedula')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
                             <label for="birth_date">Fecha de Nacimiento <span class="text-danger">*</span></label>
                             <input type="date" class="form-control @error('birth_date') is-invalid @enderror" 
                                    id="birth_date" name="birth_date" 
