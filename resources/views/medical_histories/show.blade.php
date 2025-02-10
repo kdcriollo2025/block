@@ -226,6 +226,9 @@
             <a href="{{ route('medico.medical_histories.index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>
+            <a href="{{ route('medico.medical_consultation_records.create', $medicalHistory) }}" class="btn btn-primary">
+                Nueva Consulta
+            </a>
         </div>
     </div>
 @stop
