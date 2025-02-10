@@ -331,7 +331,7 @@ return [
         ],
         [
             'text' => 'Consultas Médicas',
-            'url'  => 'medico/medical_consultation_records',
+            'url'  => 'medico/medical-consultation-records',
             'icon' => 'fas fa-fw fa-stethoscope',
             'can'  => 'medico'
         ],
