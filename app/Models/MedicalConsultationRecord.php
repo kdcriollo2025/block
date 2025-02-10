@@ -12,15 +12,18 @@ class MedicalConsultationRecord extends Model
 
     protected $fillable = [
         'medical_history_id',
-        'doctor_id',
         'consultation_date',
-        'reported_symptoms',
+        'reason',
+        'symptoms',
         'diagnosis',
-        'treatment'
+        'treatment',
+        'next_appointment',
+        'doctor_id'
     ];
 
     protected $casts = [
-        'consultation_date' => 'date'
+        'consultation_date' => 'date',
+        'next_appointment' => 'date'
     ];
 
     /**
@@ -36,6 +39,6 @@ class MedicalConsultationRecord extends Model
      */
     public function doctor(): BelongsTo
     {
-        return $this->belongsTo(Medico::class, 'doctor_id');
+        return $this->belongsTo(Medico::class);
     }
 }

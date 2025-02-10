@@ -38,32 +38,26 @@ class MedicalConsultationRecordController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'medical_history_id' => 'required|integer|exists:medical_histories,id',
+        $validated = $request->validate([
+            'medical_history_id' => 'required|exists:medical_histories,id',
             'consultation_date' => 'required|date',
-            'reported_symptoms' => 'required|string|max:300',
-            'diagnosis' => 'required|string|max:300',
-            'treatment' => 'required|string|max:300',
+            'reason' => 'nullable|string|max:255',
+            'symptoms' => 'required|string|max:255',
+            'diagnosis' => 'required|string|max:255',
+            'treatment' => 'required|string|max:255',
+            'next_appointment' => 'nullable|date',
         ]);
 
-        // Verificar que la historia médica pertenece a un paciente del médico actual
-        $medicalHistory = MedicalHistory::findOrFail($request->medical_history_id);
-        if ($medicalHistory->patient->doctor_id !== Auth::user()->medico->id) {
-            return redirect()->route('medico.medical_consultation_records.index')
-                ->with('error', 'No tiene permiso para acceder a este historial médico.');
+        // Agregar el ID del médico actual
+        $validated['doctor_id'] = auth()->user()->medico->id;
+
+        try {
+            MedicalConsultationRecord::create($validated);
+            return redirect()->back()->with('success', 'Consulta médica registrada exitosamente.');
+        } catch (\Exception $e) {
+            \Log::error('Error al crear consulta médica: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al registrar la consulta médica.');
         }
-
-        MedicalConsultationRecord::create([
-            'medical_history_id' => $request->medical_history_id,
-            'doctor_id' => Auth::user()->medico->id,
-            'consultation_date' => $request->consultation_date,
-            'reported_symptoms' => $request->reported_symptoms,
-            'diagnosis' => $request->diagnosis,
-            'treatment' => $request->treatment,
-        ]);
-
-        return redirect()->route('medico.medical_consultation_records.index')
-            ->with('success', 'Registro de consulta médica creado exitosamente.');
     }
 
     public function show(MedicalConsultationRecord $medicalConsultationRecord)
