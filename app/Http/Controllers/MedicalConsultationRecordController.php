@@ -58,27 +58,23 @@ class MedicalConsultationRecordController extends Controller
             // Agregar el ID del médico actual
             $validated['doctor_id'] = auth()->user()->medico->id;
 
-            // Imprimir los datos para debug
-            dd([
-                'validated_data' => $validated,
-                'request_all' => $request->all(),
-                'auth_user' => auth()->user(),
-                'medico' => auth()->user()->medico
-            ]);
-
+            // Crear la consulta médica
             $record = MedicalConsultationRecord::create($validated);
             
-            return redirect()->back()->with('success', 'Consulta médica registrada exitosamente.');
-        } catch (\Exception $e) {
-            // Mostrar el error específico
-            dd([
-                'error_message' => $e->getMessage(),
-                'error_line' => $e->getLine(),
-                'error_file' => $e->getFile(),
-                'error_trace' => $e->getTraceAsString()
-            ]);
+            // Redireccionar al historial médico con mensaje de éxito
+            return redirect()
+                ->route('medico.medical_histories.show', $validated['medical_history_id'])
+                ->with('success', 'Consulta médica registrada exitosamente.');
             
-            return redirect()->back()->with('error', 'Error al registrar la consulta médica: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            // Log del error para debugging
+            \Log::error('Error al crear consulta médica: ' . $e->getMessage());
+            
+            // Redireccionar con mensaje de error
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Error al registrar la consulta médica. Por favor, intente nuevamente.');
         }
     }
 
