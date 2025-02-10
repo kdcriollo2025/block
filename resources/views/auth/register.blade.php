@@ -1,7 +1,7 @@
 @extends('adminlte::auth.register')
 
 @section('auth_body')
-    <form action="{{ route('register') }}" method="post">
+    <form action="{{ route('register') }}" method="POST">
         @csrf
 
         {{-- Name field --}}
@@ -16,6 +16,24 @@
             </div>
 
             @error('name')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+            @enderror
+        </div>
+
+        {{-- Cedula field --}}
+        <div class="input-group mb-3">
+            <input type="text" name="cedula" class="form-control @error('cedula') is-invalid @enderror"
+                   value="{{ old('cedula') }}" placeholder="Cédula" maxlength="10">
+
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-id-card"></span>
+                </div>
+            </div>
+
+            @error('cedula')
                 <span class="invalid-feedback" role="alert">
                     <strong>{{ $message }}</strong>
                 </span>

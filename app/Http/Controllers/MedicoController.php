@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class MedicoController extends Controller
 {
@@ -120,5 +121,16 @@ class MedicoController extends Controller
         $status = $medico->is_active ? 'activado' : 'desactivado';
         return redirect()->route('admin.medicos.index')
             ->with('success', "El médico ha sido {$status} exitosamente.");
+    }
+
+    protected function validator(array $data)
+    {
+        return Validator::make($data, [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:patients'],
+            'cedula' => ['required', 'string', 'size:10', 'unique:patients'],
+            'phone_number' => ['required', 'string', 'max:20'],
+            // otros campos de validación...
+        ]);
     }
 } 

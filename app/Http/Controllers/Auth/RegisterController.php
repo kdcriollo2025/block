@@ -54,8 +54,8 @@ class RegisterController extends Controller
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'type' => ['required', 'string', 'in:admin,medico'],
+            'cedula' => ['required', 'string', 'size:10', 'unique:users'],
+            'password' => ['required', 'string', 'min:8'],
         ]);
     }
 
@@ -72,12 +72,13 @@ class RegisterController extends Controller
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
+                'cedula' => $data['cedula'],
                 'password' => Hash::make($data['password']),
-                'type' => $data['type'],
+                'type' => 'medico',
             ]);
 
             // Asignar rol según el tipo
-            $role = Role::firstOrCreate(['name' => $data['type']]);
+            $role = Role::firstOrCreate(['name' => 'medico']);
             $user->assignRole($role);
 
             // Si es médico, crear también el registro en la tabla médicos
