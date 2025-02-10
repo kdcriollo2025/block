@@ -90,7 +90,12 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserType::class.':medico'])
     Route::resource('surgery_records', SurgeryRecordController::class);
     
     // Rutas para consultas médicas
-    Route::resource('medical_consultation_records', MedicalConsultationRecordController::class);
+    Route::middleware(['auth', 'medico'])->group(function () {
+        Route::get('medical-histories/{medicalHistory}/consultations/create', [MedicalConsultationRecordController::class, 'create'])
+            ->name('medico.medical_consultation_records.create');
+        Route::post('medical-consultation-records', [MedicalConsultationRecordController::class, 'store'])
+            ->name('medico.medical_consultation_records.store');
+    });
     
     // Rutas para terapias
     Route::resource('therapy_records', TherapyRecordController::class);

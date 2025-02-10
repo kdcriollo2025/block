@@ -28,35 +28,53 @@ class MedicalConsultationRecordController extends Controller
         return view('medical_consultation_records.index', compact('medicalConsultationRecords'));
     }
 
-    public function create()
+    public function create(MedicalHistory $medicalHistory)
     {
-        $medicalHistories = MedicalHistory::whereHas('patient', function($query) {
-            $query->where('doctor_id', Auth::user()->medico->id);
-        })->get();
-        return view('medical_consultation_records.form', compact('medicalHistories'));
+        // Verificar que el médico actual puede acceder a esta historia médica
+        if ($medicalHistory->patient->doctor_id !== auth()->user()->medico->id) {
+            return redirect()->back()->with('error', 'No tiene permiso para acceder a esta historia médica');
+        }
+
+        return view('medical_consultation_records.form', compact('medicalHistory'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'medical_history_id' => 'required|exists:medical_histories,id',
-            'consultation_date' => 'required|date',
-            'reason' => 'nullable|string|max:255',
-            'symptoms' => 'required|string|max:255',
-            'diagnosis' => 'required|string|max:255',
-            'treatment' => 'required|string|max:255',
-            'next_appointment' => 'nullable|date',
-        ]);
-
-        // Agregar el ID del médico actual
-        $validated['doctor_id'] = auth()->user()->medico->id;
-
         try {
-            MedicalConsultationRecord::create($validated);
+            $validated = $request->validate([
+                'medical_history_id' => 'required|exists:medical_histories,id',
+                'consultation_date' => 'required|date',
+                'reason' => 'nullable|string|max:255',
+                'symptoms' => 'required|string|max:255',
+                'diagnosis' => 'required|string|max:255',
+                'treatment' => 'required|string|max:255',
+                'next_appointment' => 'nullable|date',
+            ]);
+
+            // Agregar el ID del médico actual
+            $validated['doctor_id'] = auth()->user()->medico->id;
+
+            // Imprimir los datos para debug
+            dd([
+                'validated_data' => $validated,
+                'request_all' => $request->all(),
+                'auth_user' => auth()->user(),
+                'medico' => auth()->user()->medico
+            ]);
+
+            $record = MedicalConsultationRecord::create($validated);
+            
             return redirect()->back()->with('success', 'Consulta médica registrada exitosamente.');
         } catch (\Exception $e) {
-            \Log::error('Error al crear consulta médica: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Error al registrar la consulta médica.');
+            // Mostrar el error específico
+            dd([
+                'error_message' => $e->getMessage(),
+                'error_line' => $e->getLine(),
+                'error_file' => $e->getFile(),
+                'error_trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()->with('error', 'Error al registrar la consulta médica: ' . $e->getMessage());
         }
     }
 
