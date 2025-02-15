@@ -22,14 +22,19 @@ class MedicalConsultationRecordController extends Controller
     
     public function index()
     {
-        $consultations = MedicalConsultationRecord::with(['medicalHistory.patient'])
-            ->whereHas('medicalHistory.patient', function($query) {
-                $query->where('doctor_id', auth()->user()->medico->id);
-            })
-            ->orderBy('consultation_date', 'desc')
-            ->get();
+        try {
+            $consultations = MedicalConsultationRecord::with(['medicalHistory.patient'])
+                ->whereHas('medicalHistory.patient', function($query) {
+                    $query->where('doctor_id', auth()->user()->medico->id);
+                })
+                ->orderBy('consultation_date', 'desc')
+                ->get();
 
-        return view('medical_consultation_records.index', compact('consultations'));
+            return view('medical_consultation_records.index', compact('consultations'));
+        } catch (\Exception $e) {
+            \Log::error('Error en consultas médicas: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al cargar las consultas médicas');
+        }
     }
 
     public function create(MedicalHistory $medicalHistory)
