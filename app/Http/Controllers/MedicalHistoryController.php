@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\View;
-use Elibyy\TCPDF\Facades\TCPDF;
+use PDF;
 
 class MedicalHistoryController extends Controller
 {
@@ -135,37 +135,32 @@ class MedicalHistoryController extends Controller
 
     public function downloadPdf(MedicalHistory $medicalHistory)
     {
-        if ($medicalHistory->patient->doctor_id !== Auth::user()->medico->id) {
-            return redirect()->route('medico.medical_histories.index')
-                ->with('error', 'No tiene permiso para acceder a este historial médico.');
+        try {
+            // Verificar que el médico actual puede acceder a esta historia médica
+            if ($medicalHistory->patient->doctor_id !== auth()->user()->medico->id) {
+                return redirect()->back()->with('error', 'No tiene permiso para acceder a esta historia médica');
+            }
+
+            // Crear el PDF
+            $pdf = PDF::loadView('medical_histories.pdf', [
+                'medicalHistory' => $medicalHistory,
+                'patient' => $medicalHistory->patient,
+                'consultations' => $medicalHistory->consultationRecords()->orderBy('consultation_date', 'desc')->get(),
+                'allergies' => $medicalHistory->allergyRecords,
+                'surgeries' => $medicalHistory->surgeryRecords,
+                'vaccinations' => $medicalHistory->vaccinationRecords,
+                'therapies' => $medicalHistory->therapyRecords,
+            ]);
+
+            // Generar nombre del archivo
+            $fileName = 'historia_medica_' . $medicalHistory->patient->name . '_' . date('Y-m-d') . '.pdf';
+
+            // Descargar el PDF
+            return $pdf->download($fileName);
+
+        } catch (\Exception $e) {
+            \Log::error('Error al generar PDF: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al generar el PDF. Por favor, intente nuevamente.');
         }
-
-        $pdf = new \TCPDF();
-        
-        // Establecer información del documento
-        $pdf->SetCreator(PDF_CREATOR);
-        $pdf->SetAuthor('Sistema Médico');
-        $pdf->SetTitle('Historial Médico - ' . $medicalHistory->patient->name);
-
-        // Establecer márgenes
-        $pdf->SetMargins(15, 15, 15);
-
-        // Establecer saltos de página automáticos
-        $pdf->SetAutoPageBreak(TRUE, 15);
-
-        // Agregar una página
-        $pdf->AddPage();
-
-        // Establecer fuente
-        $pdf->SetFont('helvetica', '', 11);
-
-        // Generar el contenido HTML
-        $html = View::make('medical_histories.pdf', compact('medicalHistory'))->render();
-
-        // Escribir el HTML en el PDF
-        $pdf->writeHTML($html, true, false, true, false, '');
-
-        // Cerrar y generar el PDF
-        return $pdf->Output('historial-medico-' . Str::slug($medicalHistory->patient->name) . '.pdf', 'D');
     }
 }
