@@ -55,22 +55,26 @@
                             <thead>
                                 <tr>
                                     <th>Fecha</th>
+                                    <th>Motivo</th>
                                     <th>Síntomas</th>
                                     <th>Diagnóstico</th>
                                     <th>Tratamiento</th>
+                                    <th>Próxima Cita</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($medicalHistory->medicalConsultationRecords as $consultation)
+                                @forelse($medicalHistory->consultationRecords as $consultation)
                                     <tr>
                                         <td>{{ $consultation->consultation_date->format('d/m/Y') }}</td>
-                                        <td>{{ $consultation->reported_symptoms }}</td>
+                                        <td>{{ $consultation->reason }}</td>
+                                        <td>{{ $consultation->symptoms }}</td>
                                         <td>{{ $consultation->diagnosis }}</td>
                                         <td>{{ $consultation->treatment }}</td>
+                                        <td>{{ $consultation->next_appointment ? $consultation->next_appointment->format('d/m/Y') : 'No programada' }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center">No hay registros de consultas médicas</td>
+                                        <td colspan="6" class="text-center">No hay registros de consultas médicas</td>
                                     </tr>
                                 @endforelse
                             </tbody>

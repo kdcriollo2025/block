@@ -31,6 +31,8 @@ class InitialDataSeeder extends Seeder
             'first_login' => false,
         ]);
 
+        
+
         // Crear usuario médico
         $medicoUser = User::create([
             'name' => 'Dr. Juan Pérez',
