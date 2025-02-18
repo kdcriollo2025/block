@@ -81,7 +81,7 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserType::class.':medico'])
     
     // Rutas para historias médicas
     Route::get('medical_histories/{medicalHistory}/download-pdf', [MedicalHistoryController::class, 'downloadPdf'])
-        ->name('medical_histories.download-pdf');
+        ->name('medico.medical_histories.download-pdf');
     Route::resource('medical_histories', MedicalHistoryController::class);
     
     // Rutas para alergias

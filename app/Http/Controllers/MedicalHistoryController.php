@@ -136,15 +136,29 @@ class MedicalHistoryController extends Controller
 
     public function downloadPdf(MedicalHistory $medicalHistory)
     {
-        // Verifica que el médico actual tenga acceso a este historial
-        $this->authorize('view', $medicalHistory);
+        try {
+            // Verifica que el médico actual tenga acceso a este historial
+            if ($medicalHistory->patient->doctor_id !== auth()->user()->medico->id) {
+                abort(403, 'No autorizado');
+            }
 
-        $pdf = PDF::loadView('medical_histories.pdf', [
-            'medicalHistory' => $medicalHistory
-        ]);
+            $data = [
+                'medicalHistory' => $medicalHistory,
+                'consultations' => $medicalHistory->consultationRecords()->orderBy('consultation_date', 'desc')->get(),
+                'allergies' => $medicalHistory->allergyRecords,
+                'surgeries' => $medicalHistory->surgeryRecords,
+                'vaccinations' => $medicalHistory->vaccinationRecords,
+                'therapies' => $medicalHistory->therapyRecords,
+            ];
 
-        $fileName = 'historial_medico_' . $medicalHistory->patient->full_name . '.pdf';
-        
-        return $pdf->download($fileName);
+            $pdf = PDF::loadView('medical_histories.pdf', $data);
+            
+            $fileName = 'historial_medico_' . str_slug($medicalHistory->patient->full_name) . '.pdf';
+            
+            return $pdf->download($fileName);
+        } catch (\Exception $e) {
+            \Log::error('Error al generar PDF: ' . $e->getMessage());
+            return back()->with('error', 'Error al generar el PDF: ' . $e->getMessage());
+        }
     }
 }
