@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Models\NFT;
+use PDF;
 
 class MedicoController extends Controller
 {
@@ -132,5 +135,46 @@ class MedicoController extends Controller
             'phone_number' => ['required', 'string', 'max:20'],
         
         ]);
+    }
+
+    public function generateQR($patientId)
+    {
+        // Generar código QR con la URL del historial médico
+        $qrCode = QrCode::size(300)
+            ->generate(route('patient.medical.history', $patientId));
+        
+        // Guardar o actualizar el QR en la base de datos
+        $nft = NFT::updateOrCreate(
+            ['patient_id' => $patientId],
+            ['qr_code' => $qrCode]
+        );
+
+        return $nft;
+    }
+
+    public function showMedicalHistory($patientId)
+    {
+        $patient = Patient::findOrFail($patientId);
+        $nft = NFT::where('patient_id', $patientId)->first();
+        
+        if (!$nft) {
+            $nft = $this->generateQR($patientId);
+        }
+
+        return view('medico.dashboard', compact('patient', 'nft'));
+    }
+
+    public function generatePDF($patientId)
+    {
+        $patient = Patient::findOrFail($patientId);
+        $nft = NFT::where('patient_id', $patientId)->first();
+        
+        if (!$nft) {
+            $nft = $this->generateQR($patientId);
+        }
+        
+        $pdf = PDF::loadView('medico.medical_history_pdf', compact('patient', 'nft'));
+        
+        return $pdf->download('historial-medico.pdf');
     }
 } 
