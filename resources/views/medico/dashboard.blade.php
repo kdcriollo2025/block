@@ -79,25 +79,6 @@
             </div>
         </div>
     </div>
-
-    <div class="medical-records">
-        @foreach($medicalRecords as $record)
-            <div class="record-card">
-                <!-- ... existing record information ... -->
-                
-                @if($record->nft)
-                    <div class="nft-section">
-                        <h4>NFT Information</h4>
-                        <div class="qr-code">
-                            {!! QrCode::size(100)->generate(route('nft.view', $record->nft->asset_id)) !!}
-                        </div>
-                        <p>Asset ID: {{ $record->nft->asset_id }}</p>
-                        <p>Blockchain Hash: {{ $record->nft->blockchain_hash }}</p>
-                    </div>
-                @endif
-            </div>
-        @endforeach
-    </div>
 @stop
 
 @section('css')
