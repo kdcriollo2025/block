@@ -16,9 +16,11 @@
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.6",
         "nesbot/carbon": "^3.8",
+        "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-permission": "^6.10",
         "symfony/polyfill-php72": "^1.31",
         "tecnickcom/tcpdf": "^6.8",
+        "web3p/web3.php": "^0.1.6",
         "yajra/laravel-oci8": "^11.0"
     },
     "require-dev": {
