@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Observers\MedicalRecordObserver;
 use App\Models\MedicalRecord;
+use App\Observers\MedicalRecordObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        MedicalRecord::observe(MedicalRecordObserver::class);
+        if (class_exists(MedicalRecord::class)) {
+            MedicalRecord::observe(MedicalRecordObserver::class);
+        }
     }
 }
