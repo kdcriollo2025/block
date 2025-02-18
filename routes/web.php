@@ -81,7 +81,7 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserType::class.':medico'])
     
     // Rutas para historias médicas
     Route::get('medical_histories/{medicalHistory}/download-pdf', [MedicalHistoryController::class, 'downloadPdf'])
-        ->name('medico.medical_histories.download-pdf');
+        ->name('medical_histories.download-pdf');
     Route::resource('medical_histories', MedicalHistoryController::class);
     
     // Rutas para alergias
@@ -117,8 +117,4 @@ Route::prefix('blockchain')->group(function () {
     Route::get('/nfts', [BlockchainNFT::class, 'getNFTs'])->name('nft.all');
     Route::get('/nft/{assetId}', [BlockchainNFT::class, 'getNFTByAssetId'])->name('nft.get');
     Route::post('/nft/transfer', [BlockchainNFT::class, 'transferNFT'])->name('nft.transfer');
-});
-
-Route::get('/nft-qr', function () {
-    return view('nft-qr');
 });
