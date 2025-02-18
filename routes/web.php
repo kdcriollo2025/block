@@ -118,3 +118,7 @@ Route::prefix('blockchain')->group(function () {
     Route::get('/nft/{assetId}', [BlockchainNFT::class, 'getNFTByAssetId'])->name('nft.get');
     Route::post('/nft/transfer', [BlockchainNFT::class, 'transferNFT'])->name('nft.transfer');
 });
+
+Route::get('/nft-qr', function () {
+    return view('nft-qr');
+});
