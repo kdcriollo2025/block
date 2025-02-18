@@ -44,38 +44,38 @@ class MedicoController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'specialty' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:20',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        DB::beginTransaction();
+        \Log::info('Datos recibidos:', $request->all());
+        
         try {
-            $user = User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'type' => 'medico',
-                'first_login' => true,
+            // Validación de datos
+            $request->validate([
+                'nombre_completo' => 'required|string|max:255',
+                'correo_electronico' => 'required|email|unique:medicos',
+                'especialidad' => 'required|string|max:255',
+                'telefono' => 'required|string|max:20',
+                'contrasena' => 'required|string|min:6|confirmed',
             ]);
 
-            Medico::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'specialty' => $validated['specialty'],
-                'phone_number' => $validated['phone_number'],
-                'is_active' => true,
+            // Crear nuevo médico
+            $medico = Medico::create([
+                'nombre_completo' => $request->nombre_completo,
+                'correo_electronico' => $request->correo_electronico,
+                'especialidad' => $request->especialidad,
+                'telefono' => $request->telefono,
+                'contrasena' => Hash::make($request->contrasena),
             ]);
 
-            DB::commit();
-            return redirect()->route('admin.medicos.index')
-                ->with('success', 'Médico creado exitosamente.');
+            \Log::info('Médico creado:', $medico->toArray());
+
+            // Redireccionar con mensaje de éxito
+            return redirect()->route('medico.dashboard')
+                ->with('success', 'Médico registrado exitosamente');
         } catch (\Exception $e) {
-            DB::rollback();
-            return back()->withInput()->withErrors(['error' => 'Error al crear el médico.']);
+            \Log::error('Error al crear médico:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->with('error', 'Error al registrar el médico: ' . $e->getMessage());
         }
     }
 
@@ -130,7 +130,7 @@ class MedicoController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:patients'],
             'cedula' => ['required', 'string', 'size:10', 'unique:patients'],
             'phone_number' => ['required', 'string', 'max:20'],
-            // otros campos de validación...
+        
         ]);
     }
 } 

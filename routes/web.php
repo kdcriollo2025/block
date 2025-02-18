@@ -118,3 +118,5 @@ Route::prefix('blockchain')->group(function () {
     Route::get('/nft/{assetId}', [BlockchainNFT::class, 'getNFTByAssetId'])->name('nft.get');
     Route::post('/nft/transfer', [BlockchainNFT::class, 'transferNFT'])->name('nft.transfer');
 });
+
+Route::post('/medico/registrar', [MedicoController::class, 'store'])->name('medico.store');
