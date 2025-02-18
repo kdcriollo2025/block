@@ -79,21 +79,6 @@
             </div>
         </div>
     </div>
-
-    <div class="medical-history-section">
-        <h2>Historial Médico</h2>
-        <!-- Contenido del historial médico -->
-        
-        @if($nft)
-        <div class="qr-section">
-            <h3>Código QR del Historial Médico</h3>
-            <div class="qr-code">
-                {!! $nft->qr_code !!}
-            </div>
-            <p class="text-muted">Escanee este código QR para acceder al historial médico</p>
-        </div>
-        @endif
-    </div>
 @stop
 
 @section('css')

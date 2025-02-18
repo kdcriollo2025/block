@@ -12,12 +12,8 @@ class NFT extends Model
     protected $table = 'nfts';
 
     protected $fillable = [
-        'patient_id',
-        'qr_code'
+        'asset_id',
+        'name',
+        'owner'
     ];
-
-    public function patient()
-    {
-        return $this->belongsTo(Patient::class);
-    }
 } 

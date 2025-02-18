@@ -118,6 +118,3 @@ Route::prefix('blockchain')->group(function () {
     Route::get('/nft/{assetId}', [BlockchainNFT::class, 'getNFTByAssetId'])->name('nft.get');
     Route::post('/nft/transfer', [BlockchainNFT::class, 'transferNFT'])->name('nft.transfer');
 });
-
-Route::get('/medical-history/{patientId}', [MedicoController::class, 'showMedicalHistory'])->name('patient.medical.history');
-Route::get('/medical-history/{patientId}/pdf', [MedicoController::class, 'generatePDF'])->name('patient.medical.history.pdf');
