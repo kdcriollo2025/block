@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class LoginController extends Controller
 {
@@ -58,6 +60,8 @@ class LoginController extends Controller
 
     protected function authenticated(Request $request, $user)
     {
+        Log::info('User authenticated successfully', ['user_id' => $user->id]);
+        
         session(['last_activity' => Carbon::now()]);
 
         // Verificar si es médico y está activo
@@ -111,5 +115,26 @@ class LoginController extends Controller
             'login' => 'required|string',
             'password' => 'required|string',
         ]);
+    }
+
+    protected function attemptLogin(Request $request)
+    {
+        try {
+            // Verificar conexión a la base de datos
+            DB::connection()->getPdo();
+            Log::info('Database connected successfully');
+            
+            // Intentar login
+            $result = $this->guard()->attempt(
+                $this->credentials($request), $request->filled('remember')
+            );
+            
+            Log::info('Login attempt result:', ['success' => $result]);
+            
+            return $result;
+        } catch (\Exception $e) {
+            Log::error('Login error: ' . $e->getMessage());
+            return false;
+        }
     }
 }
