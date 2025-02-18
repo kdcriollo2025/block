@@ -44,8 +44,10 @@
     40 => 'App\\Providers\\AuthServiceProvider',
     41 => 'App\\Providers\\EventServiceProvider',
     42 => 'App\\Providers\\RouteServiceProvider',
-    43 => 'App\\Providers\\AppServiceProvider',
-    44 => 'Spatie\\Permission\\PermissionServiceProvider',
+    43 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
+    44 => 'Barryvdh\\DomPDF\\ServiceProvider',
+    45 => 'App\\Providers\\AppServiceProvider',
+    46 => 'Spatie\\Permission\\PermissionServiceProvider',
   ),
   'eager' => 
   array (
@@ -76,8 +78,10 @@
     24 => 'App\\Providers\\AuthServiceProvider',
     25 => 'App\\Providers\\EventServiceProvider',
     26 => 'App\\Providers\\RouteServiceProvider',
-    27 => 'App\\Providers\\AppServiceProvider',
-    28 => 'Spatie\\Permission\\PermissionServiceProvider',
+    27 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
+    28 => 'Barryvdh\\DomPDF\\ServiceProvider',
+    29 => 'App\\Providers\\AppServiceProvider',
+    30 => 'Spatie\\Permission\\PermissionServiceProvider',
   ),
   'deferred' => 
   array (
