@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Models\MedicalRecord;
 use App\Observers\MedicalRecordObserver;
+use App\Services\NFTService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +14,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(NFTService::class, function ($app) {
+            return new NFTService();
+        });
     }
 
     /**

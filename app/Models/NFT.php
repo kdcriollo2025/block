@@ -16,6 +16,7 @@ class NFT extends Model
         'name',
         'owner',
         'blockchain_hash',
+        'medical_record_id'
     ];
 
     public function medicalRecord()

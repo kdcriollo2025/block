@@ -10,13 +10,24 @@ return new class extends Migration
     {
         Schema::create('medical_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->constrained('users');
-            $table->foreignId('doctor_id')->constrained('users');
+            $table->unsignedBigInteger('patient_id');
+            $table->unsignedBigInteger('doctor_id');
             $table->text('diagnosis');
             $table->text('treatment')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes(); // Para mantener el registro incluso si se "elimina"
+
+            // Añadimos las foreign keys con onDelete cascade
+            $table->foreign('patient_id')
+                  ->references('id')
+                  ->on('users')
+                  ->onDelete('cascade');
+            
+            $table->foreign('doctor_id')
+                  ->references('id')
+                  ->on('users')
+                  ->onDelete('cascade');
         });
     }
 

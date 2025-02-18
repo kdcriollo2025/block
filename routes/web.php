@@ -19,6 +19,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\BlockchainNFT;
+use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\NFTController;
 
 /*
 |-------------------------------------------------------------------------- 
@@ -117,4 +119,11 @@ Route::prefix('blockchain')->group(function () {
     Route::get('/nfts', [BlockchainNFT::class, 'getNFTs'])->name('nft.all');
     Route::get('/nft/{assetId}', [BlockchainNFT::class, 'getNFTByAssetId'])->name('nft.get');
     Route::post('/nft/transfer', [BlockchainNFT::class, 'transferNFT'])->name('nft.transfer');
+});
+
+// Añade estas rutas
+Route::middleware(['auth'])->group(function () {
+    Route::get('/medical-records', [MedicalRecordController::class, 'index'])->name('medical-records.index');
+    Route::get('/medical-records/{record}', [MedicalRecordController::class, 'show'])->name('medical-records.show');
+    Route::get('/nft/{asset_id}', [NFTController::class, 'view'])->name('nft.view');
 });
