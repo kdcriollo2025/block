@@ -2,28 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Medico extends Authenticatable
+class Medico extends Model
 {
-    use HasFactory, Notifiable;
-
-    protected $table = 'medicos';
+    use HasFactory;
 
     protected $fillable = [
-        'nombre_completo',
-        'correo_electronico',
-        'especialidad',
-        'telefono',
-        'contrasena',
-    ];
-
-    protected $hidden = [
-        'contrasena',
-        'remember_token',
+        'name',
+        'email',
+        'specialty',
+        'phone_number',
+        'is_active',
     ];
 
     /**
