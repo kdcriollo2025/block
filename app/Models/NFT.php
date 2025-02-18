@@ -14,6 +14,12 @@ class NFT extends Model
     protected $fillable = [
         'asset_id',
         'name',
-        'owner'
+        'owner',
+        'blockchain_hash',
     ];
+
+    public function medicalRecord()
+    {
+        return $this->belongsTo(MedicalRecord::class);
+    }
 } 
