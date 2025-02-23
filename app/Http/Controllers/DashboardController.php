@@ -8,6 +8,7 @@ use App\Models\Patient;
 use App\Models\MedicalConsultationRecord;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Models\Medico;
 
 class DashboardController extends Controller
 {
@@ -31,8 +32,14 @@ class DashboardController extends Controller
             $user = Auth::user();
             \Log::info('Usuario autenticado:', ['id' => $user->id, 'type' => $user->type]);
 
-            // Cargar la relación médico con usuario
-            $medico = $user->medico()->with('user')->first();
+            // Verificar si el usuario es médico
+            if ($user->type !== 'medico') {
+                \Log::error('Usuario no es médico:', ['type' => $user->type]);
+                return redirect()->route('home')->with('error', 'Acceso no autorizado');
+            }
+
+            // Obtener el médico sin eager loading primero
+            $medico = Medico::where('user_id', $user->id)->first();
             \Log::info('Datos del médico:', ['medico' => $medico]);
 
             if (!$medico) {
@@ -40,18 +47,22 @@ class DashboardController extends Controller
                 return redirect()->route('home')->with('error', 'No se encontró información del médico');
             }
 
-            // Solo datos básicos primero
+            // Datos básicos
             $data = [
                 'medico' => $medico,
                 'totalPatients' => Patient::where('doctor_id', $medico->id)->count(),
-                'currentDate' => Carbon::now()->locale('es')->isoFormat('dddd, D [de] MMMM [de] YYYY'),
-                'currentTime' => Carbon::now()->format('h:i A'),
+                'currentDate' => now()->format('l, d \d\e F \d\e Y'),
+                'currentTime' => now()->format('h:i A')
             ];
 
-            \Log::info('Datos del dashboard:', $data);
             return view('medico.dashboard', $data);
 
         } catch (\Exception $e) {
+            // En desarrollo, mostrar el error completo
+            if (config('app.debug')) {
+                throw $e;
+            }
+            
             \Log::error('Error en dashboard: ' . $e->getMessage());
             \Log::error('Stack trace: ' . $e->getTraceAsString());
             return back()->with('error', 'Error al cargar el dashboard');
