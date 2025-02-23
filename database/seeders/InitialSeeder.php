@@ -7,8 +7,6 @@ use App\Models\User;
 use App\Models\Medico;
 use App\Models\Patient;
 use App\Models\MedicalHistory;
-use App\Models\AllergyRecord;
-use App\Models\SurgeryRecord;
 use Illuminate\Support\Facades\Hash;
 use Faker\Factory as Faker;
 
@@ -46,7 +44,7 @@ class InitialSeeder extends Seeder
             ['user_id' => $medicoUser->id],
             [
                 'specialty' => 'Medicina Interna',
-                'phone' => '0991234567',
+                'phone' => '0991234567',  // Cambiado de phone_number a phone
                 'cedula' => $medicoUser->cedula,
             ]
         );
@@ -80,7 +78,7 @@ class InitialSeeder extends Seeder
                 'name' => $firstName . ' ' . $lastName,
                 'email' => strtolower($firstName) . '.' . strtolower(explode(' ', $lastName)[0]) . '@gmail.com',
                 'cedula' => $cedula,
-                'phone' => '09' . $faker->numberBetween(80000000, 99999999),
+                'phone' => '09' . $faker->numberBetween(80000000, 99999999),  // Cambiado de phone_number a phone
                 'address' => $faker->streetAddress . ', ' . $faker->randomElement([
                     'La Carolina', 'El Condado', 'La Mariscal', 'Quitumbe', 
                     'Cumbayá', 'El Batán', 'La González Suárez', 'San Carlos'
@@ -121,4 +119,4 @@ class InitialSeeder extends Seeder
             ])
         ]);
     }
-} 
+}
