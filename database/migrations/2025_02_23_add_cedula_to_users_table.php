@@ -10,14 +10,13 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('cedula')->unique()->after('email');
-            $table->string('type')->default('user')->after('cedula');
         });
     }
 
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['cedula', 'type']);
+            $table->dropColumn('cedula');
         });
     }
 }; 
