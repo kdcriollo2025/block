@@ -12,8 +12,8 @@ class Medico extends Model
 
     protected $fillable = [
         'user_id',
-        'especialidad',
-        'telefono',
+        'specialty',
+        'phone_number',
         'cedula'
     ];
 

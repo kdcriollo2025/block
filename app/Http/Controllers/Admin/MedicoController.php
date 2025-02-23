@@ -13,8 +13,13 @@ class MedicoController extends Controller
 {
     public function index()
     {
-        $medicos = Medico::all();
-        return view('admin.medicos.index', compact('medicos'));
+        try {
+            $medicos = Medico::with('user')->get();  // Eager loading de la relación user
+            return view('admin.medicos.index', compact('medicos'));
+        } catch (\Exception $e) {
+            \Log::error('Error en MedicoController@index: ' . $e->getMessage());
+            return back()->with('error', 'Error al cargar la lista de médicos');
+        }
     }
 
     public function create()
