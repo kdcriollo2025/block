@@ -17,7 +17,7 @@ class Handler extends ExceptionHandler
     ];
 
     /**
-     * A list of the inputs that are never flashed for validation exceptions.
+     * The list of the inputs that are never flashed to the session on validation exceptions.
      *
      * @var array<int, string>
      */
@@ -29,20 +29,31 @@ class Handler extends ExceptionHandler
 
     /**
      * Register the exception handling callbacks for the application.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
 
-        $this->renderable(function (Throwable $e) {
-            // Mostrar errores en desarrollo
-            if (config('app.debug')) {
-                return response()->view('errors.500', ['error' => $e->getMessage()], 500);
-            }
-        });
+    /**
+     * Render an exception into an HTTP response.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Throwable  $e
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function render($request, Throwable $e)
+    {
+        if (config('app.debug')) {
+            return parent::render($request, $e);
+        }
+
+        // Log the error
+        \Log::error($e->getMessage());
+        \Log::error($e->getTraceAsString());
+
+        return response()->view('errors.500', [], 500);
     }
 } 
