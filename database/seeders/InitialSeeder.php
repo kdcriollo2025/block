@@ -66,17 +66,20 @@ class InitialSeeder extends Seeder
             $firstName = $faker->firstName($gender);
             $lastName = $faker->lastName . ' ' . $faker->lastName;
 
-            // Generar una cédula ecuatoriana válida de 10 dígitos
+            // Generar una cédula ecuatoriana válida
             $provincia = str_pad($faker->numberBetween(1, 24), 2, '0', STR_PAD_LEFT);
             $tercerDigito = $faker->numberBetween(0, 5);
             $numeroSecuencial = str_pad($faker->numberBetween(0, 9999), 4, '0', STR_PAD_LEFT);
             $cedula = $provincia . $tercerDigito . $numeroSecuencial;
+            
+            // Asegurarnos de que la cédula tenga 9 dígitos antes de calcular el verificador
+            $cedula = str_pad($cedula, 9, '0');
 
             // Calcular dígito verificador
-            $coeficientes = [2,1,2,1,2,1,2,1,2];
             $suma = 0;
             for ($j = 0; $j < 9; $j++) {
-                $valor = intval($cedula[$j]) * $coeficientes[$j];
+                $multiplicador = ($j % 2 == 0) ? 2 : 1;
+                $valor = intval($cedula[$j]) * $multiplicador;
                 $suma += ($valor >= 10) ? $valor - 9 : $valor;
             }
             $digitoVerificador = ($suma % 10 === 0) ? 0 : 10 - ($suma % 10);
