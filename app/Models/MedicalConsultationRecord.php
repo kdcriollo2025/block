@@ -26,6 +26,12 @@ class MedicalConsultationRecord extends Model
         'next_appointment' => 'date'
     ];
 
+    protected $dates = [
+        'consultation_date',
+        'created_at',
+        'updated_at'
+    ];
+
     /**
      * Get the medical history that owns the consultation record.
      */

@@ -67,9 +67,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     // Rutas de reportes
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/patients-per-doctor', [ReportController::class, 'patientsPerDoctor'])->name('reports.patients-per-doctor');
+    Route::get('/reports/patients-per-doctor', [ReportController::class, 'patientsPerDoctor'])
+        ->name('reports.patients-per-doctor');
     Route::get('/reports/common-diagnoses', [ReportController::class, 'commonDiagnoses'])->name('reports.common-diagnoses');
-    Route::get('/reports/consultations-over-time', [ReportController::class, 'consultationsOverTime'])->name('reports.consultations-over-time');
+    Route::get('/reports/consultations-over-time', [ReportController::class, 'consultationsOverTime'])
+        ->name('reports.consultations-over-time');
     Route::get('/reports/patient-demographics', [ReportController::class, 'patientDemographics'])->name('reports.patient-demographics');
 });
 

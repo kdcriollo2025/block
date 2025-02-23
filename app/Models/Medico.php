@@ -26,7 +26,7 @@ class Medico extends Model
     /**
      * Get the patients for the doctor.
      */
-    public function pacientes(): HasMany
+    public function pacientes()
     {
         return $this->hasMany(Patient::class, 'doctor_id');
     }

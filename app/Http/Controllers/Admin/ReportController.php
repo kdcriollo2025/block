@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Medico;
 use App\Models\MedicalConsultationRecord;
-use Carbon\Carbon;
+use App\Models\Medico;
+use App\Models\Patient;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
@@ -26,88 +26,123 @@ class ReportController extends Controller
         return view('admin.reports.index');
     }
 
-    public function patientsPerDoctor(Request $request)
+    public function patientsPerDoctor()
     {
-        $startDate = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now()->subMonth();
-        $endDate = $request->input('end_date') ? Carbon::parse($request->input('end_date')) : Carbon::now();
+        try {
+            \Log::info('Iniciando reporte de pacientes por doctor');
+            
+            $data = Medico::with('user')
+                ->withCount('pacientes')
+                ->get()
+                ->map(function ($medico) {
+                    \Log::info('Procesando médico: ' . $medico->id);
+                    return [
+                        'doctor' => $medico->user->name ?? 'N/A',
+                        'total_pacientes' => $medico->pacientes_count ?? 0
+                    ];
+                });
 
-        $report = DB::table('medical_consultation_records')
-            ->join('medical_histories', 'medical_consultation_records.medical_history_id', '=', 'medical_histories.id')
-            ->join('patients', 'medical_histories.patient_id', '=', 'patients.id')
-            ->join('medicos', 'patients.doctor_id', '=', 'medicos.id')
-            ->whereBetween('medical_consultation_records.consultation_date', [$startDate, $endDate])
-            ->select(
-                'medicos.name as doctor_name',
-                DB::raw('COUNT(DISTINCT patients.id) as total_patients'),
-                DB::raw('COUNT(medical_consultation_records.id) as total_consultations')
-            )
-            ->groupBy('medicos.id', 'medicos.name')
-            ->get();
-
-        return view('admin.reports.patients_per_doctor', compact('report', 'startDate', 'endDate'));
+            \Log::info('Reporte generado exitosamente');
+            return view('admin.reports.patients-per-doctor', compact('data'));
+        } catch (\Exception $e) {
+            \Log::error('Error en reporte de pacientes por doctor: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            
+            if (app()->environment('local', 'development') || config('app.debug')) {
+                throw $e;
+            }
+            
+            return back()->with('error', 'Error al generar el reporte: ' . $e->getMessage());
+        }
     }
 
     public function commonDiagnoses(Request $request)
     {
-        $startDate = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now()->subMonth();
-        $endDate = $request->input('end_date') ? Carbon::parse($request->input('end_date')) : Carbon::now();
+        try {
+            $query = MedicalConsultationRecord::query();
 
-        $report = DB::table('medical_consultation_records')
-            ->whereBetween('consultation_date', [$startDate, $endDate])
-            ->select('diagnosis', DB::raw('COUNT(*) as total'))
-            ->groupBy('diagnosis')
-            ->orderByDesc('total')
-            ->limit(10)
-            ->get();
+            if ($request->filled(['start_date', 'end_date'])) {
+                $query->whereBetween('consultation_date', [
+                    $request->start_date,
+                    $request->end_date
+                ]);
+            }
 
-        return view('admin.reports.common_diagnoses', compact('report', 'startDate', 'endDate'));
+            $data = $query->select('diagnosis', DB::raw('COUNT(*) as total'))
+                ->groupBy('diagnosis')
+                ->orderByDesc('total')
+                ->get()
+                ->map(function ($record) use ($query) {
+                    $total_consultas = $query->count();
+                    return [
+                        'diagnostico' => $record->diagnosis,
+                        'total_casos' => $record->total,
+                        'porcentaje' => round(($record->total / $total_consultas) * 100, 2)
+                    ];
+                });
+
+            return view('admin.reports.common-diagnoses', compact('data'));
+        } catch (\Exception $e) {
+            \Log::error('Error en reporte de diagnósticos comunes: ' . $e->getMessage());
+            return back()->with('error', 'Error al generar el reporte');
+        }
     }
 
     public function consultationsOverTime(Request $request)
     {
-        $startDate = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now()->subMonths(6);
-        $endDate = $request->input('end_date') ? Carbon::parse($request->input('end_date')) : Carbon::now();
+        try {
+            $query = MedicalConsultationRecord::query();
 
-        $report = DB::table('medical_consultation_records')
-            ->whereBetween('consultation_date', [$startDate, $endDate])
-            ->select(
-                DB::raw('DATE_TRUNC(\'month\', consultation_date) as month'),
+            if ($request->filled(['start_date', 'end_date'])) {
+                $query->whereBetween('consultation_date', [
+                    $request->start_date,
+                    $request->end_date
+                ]);
+            }
+
+            $data = $query->select(
+                DB::raw('DATE(consultation_date) as fecha'),
                 DB::raw('COUNT(*) as total')
             )
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->map(function($item) {
-                return [
-                    'month' => Carbon::parse($item->month)->format('Y-m'),
-                    'total' => $item->total
-                ];
-            });
+                ->groupBy('fecha')
+                ->orderBy('fecha')
+                ->get();
 
-        return view('admin.reports.consultations_over_time', compact('report', 'startDate', 'endDate'));
+            return view('admin.reports.consultations-over-time', compact('data'));
+        } catch (\Exception $e) {
+            \Log::error('Error en reporte de consultas en el tiempo: ' . $e->getMessage());
+            return back()->with('error', 'Error al generar el reporte');
+        }
     }
 
     public function patientDemographics()
     {
-        $genderDistribution = DB::table('patients')
-            ->select('gender', DB::raw('COUNT(*) as total'))
-            ->groupBy('gender')
-            ->get();
+        try {
+            $data = [
+                'gender' => Patient::select('gender', DB::raw('COUNT(*) as total'))
+                    ->groupBy('gender')
+                    ->get(),
+                'age_groups' => Patient::select(
+                    DB::raw('
+                        CASE 
+                            WHEN age < 18 THEN "0-17"
+                            WHEN age BETWEEN 18 AND 30 THEN "18-30"
+                            WHEN age BETWEEN 31 AND 50 THEN "31-50"
+                            WHEN age BETWEEN 51 AND 70 THEN "51-70"
+                            ELSE "71+"
+                        END as age_group
+                    '),
+                    DB::raw('COUNT(*) as total')
+                )
+                    ->groupBy('age_group')
+                    ->orderBy('age_group')
+                    ->get()
+            ];
 
-        $ageGroups = DB::table('patients')
-            ->select(DB::raw('
-                CASE 
-                    WHEN age(birth_date) < interval \'18 years\' THEN \'0-17\'
-                    WHEN age(birth_date) < interval \'30 years\' THEN \'18-29\'
-                    WHEN age(birth_date) < interval \'50 years\' THEN \'30-49\'
-                    WHEN age(birth_date) < interval \'70 years\' THEN \'50-69\'
-                    ELSE \'70+\'
-                END as age_group
-            '), DB::raw('COUNT(*) as total'))
-            ->groupBy('age_group')
-            ->orderBy('age_group')
-            ->get();
-
-        return view('admin.reports.patient_demographics', compact('genderDistribution', 'ageGroups'));
+            return view('admin.reports.patient-demographics', compact('data'));
+        } catch (\Exception $e) {
+            \Log::error('Error en reporte demográfico: ' . $e->getMessage());
+            return back()->with('error', 'Error al generar el reporte');
+        }
     }
 } 
