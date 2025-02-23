@@ -78,7 +78,7 @@ class InitialSeeder extends Seeder
                 'name' => $firstName . ' ' . $lastName,
                 'email' => strtolower($firstName) . '.' . strtolower(explode(' ', $lastName)[0]) . '@gmail.com',
                 'cedula' => $cedula,
-                'phone' => '09' . $faker->numberBetween(80000000, 99999999),  // Cambiado de phone_number a phone
+                'phone' => '09' . $faker->numberBetween(80000000, 99999999),  // Asegúrate que sea 'phone'
                 'address' => $faker->streetAddress . ', ' . $faker->randomElement([
                     'La Carolina', 'El Condado', 'La Mariscal', 'Quitumbe', 
                     'Cumbayá', 'El Batán', 'La González Suárez', 'San Carlos'
