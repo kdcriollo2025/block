@@ -51,22 +51,7 @@ class InitialSeeder extends Seeder
             ]
         );
 
-        // Lista de alergias comunes
-        $alergias = [
-            'Penicilina', 'Aspirina', 'Ibuprofeno', 'Polen', 
-            'Ácaros del polvo', 'Mariscos', 'Nueces', 'Látex',
-            'Huevo', 'Leche', 'Gluten', 'Picadura de abeja'
-        ];
-
-        // Lista de cirugías comunes
-        $cirugias = [
-            'Apendicectomía', 'Amigdalectomía', 'Colecistectomía',
-            'Hernioplastia', 'Artroscopia de rodilla', 'Rinoplastia',
-            'Extracción de cordales', 'Cesárea', 'Laparoscopia',
-            'Cirugía de cataratas'
-        ];
-
-        // Crear 100 pacientes con sus historiales
+        // Crear pacientes con datos ecuatorianos
         for ($i = 0; $i < 100; $i++) {
             $gender = $faker->randomElement(['male', 'female']);
             $firstName = $faker->firstName($gender);
@@ -77,8 +62,6 @@ class InitialSeeder extends Seeder
             $tercerDigito = $faker->numberBetween(0, 5);
             $numeroSecuencial = str_pad($faker->numberBetween(0, 9999), 4, '0', STR_PAD_LEFT);
             $cedula = $provincia . $tercerDigito . $numeroSecuencial;
-            
-            // Asegurarnos de que la cédula tenga 9 dígitos antes de calcular el verificador
             $cedula = str_pad($cedula, 9, '0');
 
             // Calcular dígito verificador
@@ -91,79 +74,51 @@ class InitialSeeder extends Seeder
             $digitoVerificador = ($suma % 10 === 0) ? 0 : 10 - ($suma % 10);
             $cedula .= $digitoVerificador;
 
+            // Crear paciente
             $patient = Patient::create([
                 'doctor_id' => $medico->id,
                 'name' => $firstName . ' ' . $lastName,
                 'email' => strtolower($firstName) . '.' . strtolower(explode(' ', $lastName)[0]) . '@gmail.com',
                 'cedula' => $cedula,
                 'phone' => '09' . $faker->numberBetween(80000000, 99999999),
-                'address' => $faker->address,
+                'address' => $faker->streetAddress . ', ' . $faker->randomElement([
+                    'La Carolina', 'El Condado', 'La Mariscal', 'Quitumbe', 
+                    'Cumbayá', 'El Batán', 'La González Suárez', 'San Carlos'
+                ]) . ', Quito',
                 'birth_date' => $faker->dateTimeBetween('-70 years', '-18 years'),
                 'gender' => $gender == 'male' ? 'M' : 'F',
                 'blood_type' => $faker->randomElement(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']),
-                'allergies' => $faker->optional()->text
-            ]);
-
-            $history = MedicalHistory::create([
-                'patient_id' => $patient->id,
-                'family_history' => $faker->optional(0.7)->randomElement([
-                    'Diabetes tipo 2 en padre y abuelos',
-                    'Hipertensión arterial en madre',
-                    'Cáncer de mama en familia materna',
-                    'Cardiopatías en familia paterna',
-                    'Sin antecedentes familiares relevantes'
-                ]),
-                'personal_history' => $faker->optional(0.6)->randomElement([
-                    'Hipertensión arterial controlada',
-                    'Diabetes tipo 2 en tratamiento',
-                    'Asma bronquial',
-                    'Migraña crónica',
-                    'Sin antecedentes personales relevantes'
+                'allergies' => $faker->optional()->randomElement([
+                    'Penicilina', 'Aspirina', 'Polen', 'Mariscos', 
+                    'Nueces', 'Látex', 'Ninguna conocida'
                 ])
             ]);
 
-            // Agregar alergias aleatoriamente (30% de probabilidad)
-            if ($faker->boolean(30)) {
-                $numAlergias = $faker->numberBetween(1, 3);
-                $alergiasSeleccionadas = $faker->randomElements($alergias, $numAlergias);
-                foreach ($alergiasSeleccionadas as $alergia) {
-                    AllergyRecord::create([
-                        'medical_history_id' => $history->id,
-                        'allergy_type' => $alergia,
-                        'severity' => $faker->randomElement(['Leve', 'Moderada', 'Grave']),
-                        'diagnosis_date' => $faker->dateTimeBetween('-10 years', 'now'),
-                        'treatment' => $faker->randomElement([
-                            'Antihistamínicos orales',
-                            'Evitar exposición',
-                            'Epinefrina de emergencia',
-                            'Corticosteroides tópicos'
-                        ])
-                    ]);
-                }
-            }
-
-            // Agregar cirugías aleatoriamente (20% de probabilidad)
-            if ($faker->boolean(20)) {
-                $numCirugias = $faker->numberBetween(1, 2);
-                $cirugiasSeleccionadas = $faker->randomElements($cirugias, $numCirugias);
-                foreach ($cirugiasSeleccionadas as $cirugia) {
-                    SurgeryRecord::create([
-                        'medical_history_id' => $history->id,
-                        'surgery_type' => $cirugia,
-                        'surgery_date' => $faker->dateTimeBetween('-5 years', 'now'),
-                        'surgeon' => 'Dr. ' . $faker->name,
-                        'hospital' => $faker->randomElement([
-                            'Hospital Metropolitano',
-                            'Clínica Internacional',
-                            'Hospital Vozandes',
-                            'Hospital de los Valles',
-                            'Clínica Pasteur'
-                        ]),
-                        'description' => $faker->sentence(),
-                        'complications' => $faker->boolean(20) ? $faker->sentence() : null
-                    ]);
-                }
+            // Crear historial médico
+            if ($patient) {
+                $this->createMedicalHistory($patient, $faker);
             }
         }
+    }
+
+    private function createMedicalHistory($patient, $faker)
+    {
+        return MedicalHistory::create([
+            'patient_id' => $patient->id,
+            'family_history' => $faker->optional(0.7)->randomElement([
+                'Diabetes tipo 2 en padre y abuelos',
+                'Hipertensión arterial en madre',
+                'Cáncer de mama en familia materna',
+                'Cardiopatías en familia paterna',
+                'Sin antecedentes familiares relevantes'
+            ]),
+            'personal_history' => $faker->optional(0.6)->randomElement([
+                'Hipertensión arterial controlada',
+                'Diabetes tipo 2 en tratamiento',
+                'Asma bronquial',
+                'Migraña crónica',
+                'Sin antecedentes personales relevantes'
+            ])
+        ]);
     }
 } 
