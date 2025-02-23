@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Patient extends Model
 {
@@ -58,5 +59,30 @@ class Patient extends Model
             'id', // Local key on patients table...
             'id' // Local key on medical_histories table...
         );
+    }
+
+    public function allergyRecords(): HasMany
+    {
+        return $this->hasMany(AllergyRecord::class);
+    }
+
+    public function surgeryRecords(): HasMany
+    {
+        return $this->hasMany(SurgeryRecord::class);
+    }
+
+    public function medicalConsultationRecords(): HasMany
+    {
+        return $this->hasMany(MedicalConsultationRecord::class);
+    }
+
+    public function therapyRecords(): HasMany
+    {
+        return $this->hasMany(TherapyRecord::class);
+    }
+
+    public function vaccinationRecords(): HasMany
+    {
+        return $this->hasMany(VaccinationRecord::class);
     }
 }
