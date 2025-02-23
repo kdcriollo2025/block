@@ -18,11 +18,12 @@ class MedicoController extends Controller
 
     public function create()
     {
-        return view('medicos.form');
+        return view('admin.medicos.create');
     }
 
     public function store(Request $request)
     {
+        dd($request->all()); // Esto mostrará todos los datos que llegan
         try {
             // Validar los datos con los nombres exactos del formulario
             $validated = $request->validate([
