@@ -9,6 +9,7 @@ use App\Models\MedicalConsultationRecord;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\Medico;
+use App\Models\User;
 
 class DashboardController extends Controller
 {
@@ -17,30 +18,27 @@ class DashboardController extends Controller
         // Establecer la zona horaria para Quito
         date_default_timezone_set('America/Guayaquil');
         Carbon::setLocale('es');
-        
-        $this->middleware(function ($request, $next) {
-            if (Auth::user()->type !== 'medico') {
-                return redirect()->route('home');
-            }
-            return $next($request);
-        });
     }
 
     public function index()
     {
+        // 1. Verificar el usuario autenticado
         $user = Auth::user();
-        
-        // Cargar el médico con su relación user
-        $medico = Medico::with('user')->where('user_id', $user->id)->first();
-        
-        if (!$medico) {
-            dd('Médico no encontrado', $user->toArray());
+        if (!$user) {
+            dd('Usuario no autenticado');
         }
-
-        // Vista simplificada
-        return view('medico.dashboard', [
-            'medico' => $medico,
-            'name' => $medico->user->name
+        
+        // 2. Verificar los datos del usuario
+        dd([
+            'user_id' => $user->id,
+            'user_type' => $user->type,
+            'user_name' => $user->name,
+            // 3. Buscar directamente en la tabla medicos
+            'medico' => Medico::where('user_id', $user->id)->first(),
+            // 4. Verificar la relación desde User
+            'medico_relation' => $user->medico,
+            // 5. Verificar todos los médicos
+            'all_medicos' => Medico::all()->toArray()
         ]);
     }
 } 
