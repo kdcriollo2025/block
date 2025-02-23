@@ -13,21 +13,19 @@ class MedicoController extends Controller
 {
     public function index()
     {
-        // Implement the logic to retrieve and display a list of medicos
+        $medicos = Medico::all();
+        return view('admin.medicos.index', compact('medicos'));
     }
 
     public function create()
     {
-        return view('medicos.form');
+        return view('admin.medicos.form');
     }
 
     public function store(Request $request)
     {
         try {
-            // Agregar el dd aquí, antes de la validación
-            dd($request->all());
-
-            // Validar los datos con los nombres exactos del formulario
+            // Validar los datos
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
@@ -62,6 +60,9 @@ class MedicoController extends Controller
                 ->with('success', 'Médico registrado exitosamente');
 
         } catch (\Exception $e) {
+            // Log del error para debugging
+            \Log::error('Error al crear médico: ' . $e->getMessage());
+            
             return redirect()
                 ->back()
                 ->withInput()
