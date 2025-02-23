@@ -33,16 +33,10 @@ class ReportController extends Controller
             
             $data = Medico::with('user')
                 ->withCount('pacientes')
-                ->get()
-                ->map(function ($medico) {
-                    \Log::info('Procesando médico: ' . $medico->id);
-                    return [
-                        'doctor' => $medico->user->name ?? 'N/A',
-                        'total_pacientes' => $medico->pacientes_count ?? 0
-                    ];
-                });
+                ->get();
 
-            \Log::info('Reporte generado exitosamente');
+            \Log::info('Reporte generado exitosamente. Total médicos: ' . $data->count());
+            
             return view('admin.reports.patients-per-doctor', compact('data'));
         } catch (\Exception $e) {
             \Log::error('Error en reporte de pacientes por doctor: ' . $e->getMessage());
