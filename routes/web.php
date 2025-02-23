@@ -10,7 +10,7 @@ use App\Http\Controllers\SurgeryRecordController;
 use App\Http\Controllers\MedicalConsultationRecordController;
 use App\Http\Controllers\TherapyRecordController;
 use App\Http\Controllers\VaccinationRecordController;
-use App\Http\Controllers\MedicoController;
+use App\Http\Controllers\Admin\MedicoController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\ForgotPasswordController;

@@ -15,11 +15,10 @@ class MedicoController extends Controller
     {
         try {
             $medicos = Medico::with('user')->get();
-            
             return view('admin.medicos.index', compact('medicos'));
         } catch (\Exception $e) {
             \Log::error('Error en MedicoController@index: ' . $e->getMessage());
-            return back()->with('error', 'Error al cargar la lista de médicos');
+            return back()->with('error', 'Error al cargar la lista de médicos: ' . $e->getMessage());
         }
     }
 
