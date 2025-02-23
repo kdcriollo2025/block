@@ -52,8 +52,8 @@
                                    name="name" 
                                    id="name"
                                    class="form-control @error('name') is-invalid @enderror" 
-                                   value="{{ old('name', $medico->name ?? '') }}" 
-                                   required>
+                                   value="{{ old('name', isset($medico) ? $medico->user->name : '') }}"
+                                   {{ isset($medico) ? 'disabled' : 'required' }}>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -63,7 +63,7 @@
                                    name="email" 
                                    id="email"
                                    class="form-control @error('email') is-invalid @enderror" 
-                                   value="{{ old('email', $medico->email ?? '') }}" 
+                                   value="{{ old('email', isset($medico) ? $medico->user->email : '') }}" 
                                    required>
                         </div>
                     </div>
@@ -77,8 +77,8 @@
                                    name="cedula" 
                                    id="cedula"
                                    class="form-control @error('cedula') is-invalid @enderror" 
-                                   value="{{ old('cedula', $medico->cedula ?? '') }}" 
-                                   required>
+                                   value="{{ old('cedula', isset($medico) ? $medico->cedula : '') }}" 
+                                   {{ isset($medico) ? 'disabled' : 'required' }}>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -88,7 +88,7 @@
                                    name="specialty" 
                                    id="specialty"
                                    class="form-control @error('specialty') is-invalid @enderror" 
-                                   value="{{ old('specialty', $medico->specialty ?? '') }}" 
+                                   value="{{ old('specialty', isset($medico) ? $medico->specialty : '') }}" 
                                    required>
                         </div>
                     </div>
@@ -102,11 +102,14 @@
                                    name="phone_number" 
                                    id="phone_number"
                                    class="form-control @error('phone_number') is-invalid @enderror" 
-                                   value="{{ old('phone_number', $medico->phone_number ?? '') }}" 
+                                   value="{{ old('phone_number', isset($medico) ? $medico->phone_number : '') }}" 
                                    required>
                         </div>
                     </div>
-                    @if(!isset($medico))
+                </div>
+
+                @if(!isset($medico))
+                <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="password">Contraseña *</label>
@@ -117,9 +120,6 @@
                                    required>
                         </div>
                     </div>
-                </div>
-
-                <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="password_confirmation">Confirmar Contraseña *</label>
@@ -130,8 +130,45 @@
                                    required>
                         </div>
                     </div>
-                    @endif
                 </div>
+                @else
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Cambiar Contraseña</h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="password">Nueva Contraseña</label>
+                                            <input type="password" 
+                                                   name="password" 
+                                                   id="password"
+                                                   class="form-control @error('password') is-invalid @enderror">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="password_confirmation">Confirmar Nueva Contraseña</label>
+                                            <input type="password" 
+                                                   name="password_confirmation" 
+                                                   id="password_confirmation"
+                                                   class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <div class="d-flex justify-content-between mt-4">
                     <button type="submit" class="btn btn-primary">

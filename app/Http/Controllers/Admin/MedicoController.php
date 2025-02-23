@@ -102,22 +102,28 @@ class MedicoController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $medico->user_id,
-                'especialidad' => 'required|string',
-                'telefono' => 'required|string'
+                'specialty' => 'required|string',
+                'phone_number' => 'required|string',
+                'password' => 'nullable|min:8|confirmed'
             ]);
 
             // Actualizar usuario
-            $medico->user->update([
-                'name' => $validated['name'],
+            $userData = [
                 'email' => $validated['email']
-            ]);
+            ];
+
+            // Si se proporcionó una nueva contraseña, actualizarla
+            if (!empty($validated['password'])) {
+                $userData['password'] = Hash::make($validated['password']);
+            }
+
+            $medico->user->update($userData);
 
             // Actualizar médico
             $medico->update([
-                'specialty' => $validated['especialidad'],
-                'phone_number' => $validated['telefono']
+                'specialty' => $validated['specialty'],
+                'phone_number' => $validated['phone_number']
             ]);
 
             return redirect()
