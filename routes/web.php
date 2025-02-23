@@ -61,9 +61,9 @@ Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('
 
 // Rutas para administradores
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
-    Route::resource('medicos', \App\Http\Controllers\Admin\MedicoController::class);
-    Route::patch('medicos/{medico}/toggle-status', [\App\Http\Controllers\Admin\MedicoController::class, 'toggleStatus'])
-        ->name('medicos.toggle-status');
+    Route::resource('medicos', MedicoController::class);
+    Route::patch('medicos/{medico}/toggle-estado', [MedicoController::class, 'toggleEstado'])
+        ->name('medicos.toggle-estado');
 
     // Rutas de reportes
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');

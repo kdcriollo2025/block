@@ -4,6 +4,12 @@
 <div class="container-fluid">
     <h2 class="mb-4">Gestión de Médicos</h2>
 
+    @if(session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="form-group">
@@ -47,8 +53,6 @@
                     <th>Especialidad</th>
                     <th>Teléfono</th>
                     <th>Estado</th>
-                    <th>Pacientes</th>
-                    <th>Consultas</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -56,17 +60,15 @@
                 @foreach($medicos as $medico)
                 <tr>
                     <td>{{ $medico->id }}</td>
-                    <td>{{ $medico->name }}</td>
-                    <td>{{ $medico->email }}</td>
-                    <td>{{ $medico->especialidad }}</td>
-                    <td>{{ $medico->telefono }}</td>
+                    <td>{{ $medico->user->name }}</td>
+                    <td>{{ $medico->user->email }}</td>
+                    <td>{{ $medico->specialty }}</td>
+                    <td>{{ $medico->phone_number }}</td>
                     <td>
                         <span class="badge {{ $medico->estado ? 'badge-success' : 'badge-danger' }}">
                             {{ $medico->estado ? 'Activo' : 'Inactivo' }}
                         </span>
                     </td>
-                    <td>{{ $medico->pacientes_count ?? 0 }}</td>
-                    <td>{{ $medico->consultas_count ?? 0 }}</td>
                     <td>
                         <a href="{{ route('admin.medicos.edit', $medico->id) }}" class="btn btn-sm btn-warning">
                             <i class="fas fa-edit"></i>

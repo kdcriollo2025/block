@@ -14,21 +14,7 @@ class MedicoController extends Controller
     public function index()
     {
         try {
-            $medicos = Medico::with(['user'])
-                ->withCount(['pacientes', 'consultas'])
-                ->get()
-                ->map(function ($medico) {
-                    return [
-                        'id' => $medico->id,
-                        'name' => $medico->user->name,
-                        'email' => $medico->user->email,
-                        'especialidad' => $medico->specialty,
-                        'telefono' => $medico->phone_number,
-                        'estado' => $medico->estado,
-                        'pacientes_count' => $medico->pacientes_count,
-                        'consultas_count' => $medico->consultas_count
-                    ];
-                });
+            $medicos = Medico::with('user')->get();
             
             return view('admin.medicos.index', compact('medicos'));
         } catch (\Exception $e) {
