@@ -23,7 +23,6 @@ class MedicoController extends Controller
 
     public function store(Request $request)
     {
-        dd($request->all()); // Esto mostrará todos los datos que llegan
         try {
             // Validar los datos con los nombres exactos del formulario
             $validated = $request->validate([
@@ -34,6 +33,9 @@ class MedicoController extends Controller
                 'especialidad' => 'required|string',
                 'telefono' => 'required|string',
             ]);
+
+            // Para debuggear
+            dd($request->all());
 
             // Crear el usuario
             $user = User::create([
