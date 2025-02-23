@@ -14,7 +14,22 @@ class MedicoController extends Controller
     public function index()
     {
         try {
-            $medicos = Medico::with('user')->get();  // Eager loading de la relación user
+            $medicos = Medico::with(['user'])
+                ->withCount(['pacientes', 'consultas'])
+                ->get()
+                ->map(function ($medico) {
+                    return [
+                        'id' => $medico->id,
+                        'name' => $medico->user->name,
+                        'email' => $medico->user->email,
+                        'especialidad' => $medico->specialty,
+                        'telefono' => $medico->phone_number,
+                        'estado' => $medico->estado,
+                        'pacientes_count' => $medico->pacientes_count,
+                        'consultas_count' => $medico->consultas_count
+                    ];
+                });
+            
             return view('admin.medicos.index', compact('medicos'));
         } catch (\Exception $e) {
             \Log::error('Error en MedicoController@index: ' . $e->getMessage());
@@ -82,12 +97,49 @@ class MedicoController extends Controller
 
     public function edit(Medico $medico)
     {
-        // Implement the logic to retrieve and display the form for editing a medico
+        $medico->load('user');
+        $medicoData = [
+            'id' => $medico->id,
+            'name' => $medico->user->name,
+            'email' => $medico->user->email,
+            'especialidad' => $medico->specialty,
+            'telefono' => $medico->phone_number
+        ];
+        
+        return view('admin.medicos.form', ['medico' => (object)$medicoData]);
     }
 
     public function update(Request $request, Medico $medico)
     {
-        // Implement the logic to handle the form submission and update an existing medico
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $medico->user_id,
+                'especialidad' => 'required|string',
+                'telefono' => 'required|string'
+            ]);
+
+            // Actualizar usuario
+            $medico->user->update([
+                'name' => $validated['name'],
+                'email' => $validated['email']
+            ]);
+
+            // Actualizar médico
+            $medico->update([
+                'specialty' => $validated['especialidad'],
+                'phone_number' => $validated['telefono']
+            ]);
+
+            return redirect()
+                ->route('admin.medicos.index')
+                ->with('success', 'Médico actualizado exitosamente');
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar médico: ' . $e->getMessage());
+            return back()
+                ->withInput()
+                ->with('error', 'Error al actualizar el médico');
+        }
     }
 
     public function destroy(Medico $medico)

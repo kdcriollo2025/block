@@ -20,7 +20,7 @@ class Medico extends Model
     /**
      * Get the patients for the doctor.
      */
-    public function patients(): HasMany
+    public function pacientes()
     {
         return $this->hasMany(Patient::class, 'doctor_id');
     }
@@ -28,7 +28,7 @@ class Medico extends Model
     /**
      * Get the medical consultations for the doctor.
      */
-    public function medicalConsultations(): HasMany
+    public function consultas()
     {
         return $this->hasMany(MedicalConsultationRecord::class, 'doctor_id');
     }
