@@ -72,7 +72,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('/reports/common-diagnoses', [ReportController::class, 'commonDiagnoses'])->name('reports.common-diagnoses');
     Route::get('/reports/consultations-over-time', [ReportController::class, 'consultationsOverTime'])
         ->name('reports.consultations-over-time');
-    Route::get('/reports/patient-demographics', [ReportController::class, 'patientDemographics'])->name('reports.patient-demographics');
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/patient-demographics', [ReportController::class, 'patientDemographics'])
+            ->name('patient-demographics');
+    });
 });
 
 // Rutas para médicos

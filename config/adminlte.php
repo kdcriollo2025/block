@@ -362,7 +362,7 @@ return [
         [
             'text' => 'Reportes',
             'url'  => 'admin/reports',
-            'icon' => 'fas fa-chart-line',
+            'icon' => 'fas fa-chart-bar',
             'can'  => 'admin',
             'submenu' => [
                 [
