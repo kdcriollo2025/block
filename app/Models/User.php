@@ -74,6 +74,6 @@ class User extends Authenticatable
 
     public function medico()
     {
-        return $this->hasOne(Medico::class, 'email', 'email');
+        return $this->hasOne(Medico::class);
     }
 }

@@ -42,7 +42,7 @@ class Medico extends Model
     /**
      * Get the user associated with the doctor.
      */
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
