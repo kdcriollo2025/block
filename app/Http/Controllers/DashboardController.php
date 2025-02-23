@@ -22,23 +22,43 @@ class DashboardController extends Controller
 
     public function index()
     {
-        // 1. Verificar el usuario autenticado
-        $user = Auth::user();
-        if (!$user) {
-            dd('Usuario no autenticado');
+        try {
+            // 1. Verificar el usuario autenticado
+            $user = Auth::user();
+            if (!$user) {
+                return redirect()->route('login');
+            }
+
+            // 2. Verificar el tipo de usuario
+            if ($user->type !== 'medico') {
+                return redirect()->route('home');
+            }
+
+            // 3. Buscar el médico de diferentes formas
+            $medicoFromDB = DB::table('medicos')->where('user_id', $user->id)->first();
+            $medicoFromModel = Medico::where('user_id', $user->id)->first();
+            $medicoFromRelation = $user->medico;
+
+            // 4. Mostrar todos los datos para depuración
+            dd([
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'type' => $user->type,
+                    'cedula' => $user->cedula
+                ],
+                'medico_from_db' => $medicoFromDB,
+                'medico_from_model' => $medicoFromModel,
+                'medico_from_relation' => $medicoFromRelation,
+                'all_medicos' => Medico::all(['id', 'user_id', 'cedula'])->toArray(),
+                'all_users' => User::where('type', 'medico')->get(['id', 'name', 'cedula'])->toArray()
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error en dashboard: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            throw $e;
         }
-        
-        // 2. Verificar los datos del usuario
-        dd([
-            'user_id' => $user->id,
-            'user_type' => $user->type,
-            'user_name' => $user->name,
-            // 3. Buscar directamente en la tabla medicos
-            'medico' => Medico::where('user_id', $user->id)->first(),
-            // 4. Verificar la relación desde User
-            'medico_relation' => $user->medico,
-            // 5. Verificar todos los médicos
-            'all_medicos' => Medico::all()->toArray()
-        ]);
     }
 } 
