@@ -18,12 +18,15 @@ class MedicoController extends Controller
 
     public function create()
     {
-        return view('admin.medicos.create');
+        return view('medicos.form');
     }
 
     public function store(Request $request)
     {
         try {
+            // Agregar el dd aquí, antes de la validación
+            dd($request->all());
+
             // Validar los datos con los nombres exactos del formulario
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
@@ -33,9 +36,6 @@ class MedicoController extends Controller
                 'specialty' => 'required|string',
                 'phone_number' => 'required|string',
             ]);
-
-            // Para debuggear
-            dd($request->all());
 
             // Crear el usuario
             $user = User::create([
