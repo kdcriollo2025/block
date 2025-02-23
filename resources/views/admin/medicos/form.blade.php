@@ -47,7 +47,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="name">Nombre</label>
+                            <label for="name">Nombre *</label>
                             <input type="text" 
                                    name="name" 
                                    id="name"
@@ -58,7 +58,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="email">Email</label>
+                            <label for="email">Email *</label>
                             <input type="email" 
                                    name="email" 
                                    id="email"
@@ -72,29 +72,68 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="especialidad">Especialidad</label>
+                            <label for="cedula">Cédula *</label>
                             <input type="text" 
-                                   name="especialidad" 
-                                   id="especialidad"
-                                   class="form-control @error('especialidad') is-invalid @enderror" 
-                                   value="{{ old('especialidad', $medico->especialidad ?? '') }}" 
+                                   name="cedula" 
+                                   id="cedula"
+                                   class="form-control @error('cedula') is-invalid @enderror" 
+                                   value="{{ old('cedula', $medico->cedula ?? '') }}" 
                                    required>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="telefono">Teléfono</label>
+                            <label for="specialty">Especialidad *</label>
                             <input type="text" 
-                                   name="telefono" 
-                                   id="telefono"
-                                   class="form-control @error('telefono') is-invalid @enderror" 
-                                   value="{{ old('telefono', $medico->telefono ?? '') }}" 
+                                   name="specialty" 
+                                   id="specialty"
+                                   class="form-control @error('specialty') is-invalid @enderror" 
+                                   value="{{ old('specialty', $medico->specialty ?? '') }}" 
                                    required>
                         </div>
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="phone_number">Teléfono *</label>
+                            <input type="text" 
+                                   name="phone_number" 
+                                   id="phone_number"
+                                   class="form-control @error('phone_number') is-invalid @enderror" 
+                                   value="{{ old('phone_number', $medico->phone_number ?? '') }}" 
+                                   required>
+                        </div>
+                    </div>
+                    @if(!isset($medico))
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="password">Contraseña *</label>
+                            <input type="password" 
+                                   name="password" 
+                                   id="password"
+                                   class="form-control @error('password') is-invalid @enderror" 
+                                   required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="password_confirmation">Confirmar Contraseña *</label>
+                            <input type="password" 
+                                   name="password_confirmation" 
+                                   id="password_confirmation"
+                                   class="form-control" 
+                                   required>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
                     <button type="submit" class="btn btn-primary">
                         {{ isset($medico) ? 'Actualizar' : 'Crear' }}
                     </button>
@@ -109,4 +148,22 @@
 
 @section('css')
     <link rel="stylesheet" href="/css/admin_custom.css">
+@stop
+
+@section('js')
+<script>
+    // Validación de cédula ecuatoriana
+    document.getElementById('cedula').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/[^0-9]/g, '');
+        if (value.length > 10) value = value.slice(0, 10);
+        e.target.value = value;
+    });
+
+    // Validación de teléfono
+    document.getElementById('phone_number').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/[^0-9]/g, '');
+        if (value.length > 10) value = value.slice(0, 10);
+        e.target.value = value;
+    });
+</script>
 @stop 
