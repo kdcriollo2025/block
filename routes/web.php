@@ -79,11 +79,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 });
 
 // Rutas para médicos
-Route::middleware(['auth', \App\Http\Middleware\CheckUserType::class.':medico'])->prefix('medico')->name('medico.')->group(function () {
+Route::middleware(['auth', 'medico'])->prefix('medico')->name('medico.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // Rutas para pacientes
-    Route::resource('patients', PatientController::class);
+    
+    // Rutas para pacientes del médico
+    Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
+    Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
+    Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
+    Route::get('/patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
+    Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
+    Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
     
     // Rutas para historias médicas
     Route::get('medical_histories/{medicalHistory}/download-pdf', [MedicalHistoryController::class, 'downloadPdf'])

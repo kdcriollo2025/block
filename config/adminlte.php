@@ -306,7 +306,7 @@ return [
             'can'  => 'medico'
         ],
         [
-            'text' => 'Pacientes',
+            'text' => 'Mis Pacientes',
             'url'  => 'medico/patients',
             'icon' => 'fas fa-fw fa-users',
             'can'  => 'medico'

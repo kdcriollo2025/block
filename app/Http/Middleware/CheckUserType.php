@@ -7,10 +7,13 @@ use Illuminate\Http\Request;
 
 class CheckUserType
 {
-    public function handle(Request $request, Closure $next, string $type)
+    public function handle(Request $request, Closure $next, $type)
     {
         if ($request->user()->type !== $type) {
-            abort(403, 'No tienes permiso para acceder a esta sección.');
+            if ($request->user()->type === 'admin') {
+                return redirect()->route('admin.medicos.index');
+            }
+            return redirect()->route('medico.dashboard');
         }
 
         return $next($request);
