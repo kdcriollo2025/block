@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('surgery_records', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('medical_history_id');
-            $table->string('surgery_name');
+            $table->foreignId('medical_history_id')->constrained()->onDelete('cascade');
+            $table->string('surgery_type');
+            $table->dateTime('surgery_date');
             $table->string('surgeon');
-            $table->date('surgery_date');
-            $table->text('details')->nullable();
+            $table->string('hospital');
+            $table->text('description')->nullable();
+            $table->text('complications')->nullable();
             $table->timestamps();
         });
     }
