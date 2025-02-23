@@ -16,32 +16,38 @@ class InitialSeeder extends Seeder
     {
         $faker = Faker::create('es_EC');
 
-        // Crear usuario médico
-        $user = User::create([
-            'name' => 'Dr. Juan Carlos Morales',
-            'email' => 'jcmorales@empresa.com',
-            'password' => Hash::make('password'),
-            'cedula' => '1234567890',
-            'type' => 'medico',
-        ]);
+        // Crear usuario administrador
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@empresa.com'],
+            [
+                'name' => 'Admin Principal',
+                'password' => Hash::make('password123'),
+                'cedula' => '1716234578',
+                'type' => 'admin',
+                'first_login' => false,
+            ]
+        );
 
-        // Crear registro de médico
-        Medico::create([
-            'user_id' => $user->id,
-            'specialty' => 'Medicina General',
-            'phone' => '0987654321',
-            'cedula' => '1234567890',
-            'estado' => true
-        ]);
+        // Crear médico
+        $medicoUser = User::firstOrCreate(
+            ['email' => 'jcmorales@empresa.com'],
+            [
+                'name' => 'Dr. Juan Carlos Morales',
+                'password' => Hash::make('password123'),
+                'cedula' => '1715678234',
+                'type' => 'medico',
+                'first_login' => false,
+            ]
+        );
 
-        // Crear usuario admin
-        User::create([
-            'name' => 'Admin',
-            'email' => 'admin@empresa.com',
-            'password' => Hash::make('password'),
-            'cedula' => '0987654321',
-            'type' => 'admin',
-        ]);
+        $medico = Medico::firstOrCreate(
+            ['user_id' => $medicoUser->id],
+            [
+                'specialty' => 'Medicina Interna',
+                'phone' => '0991234567',
+                'cedula' => $medicoUser->cedula,
+            ]
+        );
 
         // Crear pacientes con datos ecuatorianos
         for ($i = 0; $i < 100; $i++) {
@@ -68,7 +74,7 @@ class InitialSeeder extends Seeder
 
             // Crear paciente
             $patient = Patient::create([
-                'doctor_id' => $user->medico->id,
+                'doctor_id' => $medico->id,
                 'name' => $firstName . ' ' . $lastName,
                 'email' => strtolower($firstName) . '.' . strtolower(explode(' ', $lastName)[0]) . '@gmail.com',
                 'cedula' => $cedula,
