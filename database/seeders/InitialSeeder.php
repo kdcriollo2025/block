@@ -46,7 +46,7 @@ class InitialSeeder extends Seeder
             ['user_id' => $medicoUser->id],
             [
                 'specialty' => 'Medicina Interna',
-                'phone_number' => '0991234567',
+                'phone' => '0991234567',
                 'cedula' => $medicoUser->cedula,
             ]
         );
