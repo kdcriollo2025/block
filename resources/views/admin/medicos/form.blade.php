@@ -52,7 +52,7 @@
                                    name="name" 
                                    id="name"
                                    class="form-control @error('name') is-invalid @enderror" 
-                                   value="{{ old('name', isset($medico) ? $medico->user->name : '') }}"
+                                   value="{{ old('name', $medico->user->name ?? '') }}"
                                    {{ isset($medico) ? 'disabled' : 'required' }}>
                         </div>
                     </div>
@@ -63,7 +63,7 @@
                                    name="email" 
                                    id="email"
                                    class="form-control @error('email') is-invalid @enderror" 
-                                   value="{{ old('email', isset($medico) ? $medico->user->email : '') }}" 
+                                   value="{{ old('email', $medico->user->email ?? '') }}" 
                                    required>
                         </div>
                     </div>
@@ -77,7 +77,7 @@
                                    name="cedula" 
                                    id="cedula"
                                    class="form-control @error('cedula') is-invalid @enderror" 
-                                   value="{{ old('cedula', isset($medico) ? $medico->cedula : '') }}" 
+                                   value="{{ old('cedula', $medico->cedula ?? '') }}" 
                                    {{ isset($medico) ? 'disabled' : 'required' }}>
                         </div>
                     </div>
@@ -88,7 +88,7 @@
                                    name="specialty" 
                                    id="specialty"
                                    class="form-control @error('specialty') is-invalid @enderror" 
-                                   value="{{ old('specialty', isset($medico) ? $medico->specialty : '') }}" 
+                                   value="{{ old('specialty', $medico->specialty ?? '') }}" 
                                    required>
                         </div>
                     </div>
@@ -102,7 +102,7 @@
                                    name="phone_number" 
                                    id="phone_number"
                                    class="form-control @error('phone_number') is-invalid @enderror" 
-                                   value="{{ old('phone_number', isset($medico) ? $medico->phone_number : '') }}" 
+                                   value="{{ old('phone_number', $medico->phone_number ?? '') }}" 
                                    required>
                         </div>
                     </div>

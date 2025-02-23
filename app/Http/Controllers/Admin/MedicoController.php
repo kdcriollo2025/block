@@ -86,16 +86,17 @@ class MedicoController extends Controller
 
     public function edit(Medico $medico)
     {
-        $medico->load('user');
-        $medicoData = [
-            'id' => $medico->id,
-            'name' => $medico->user->name,
-            'email' => $medico->user->email,
-            'especialidad' => $medico->specialty,
-            'telefono' => $medico->phone_number
-        ];
-        
-        return view('admin.medicos.form', ['medico' => (object)$medicoData]);
+        try {
+            $medico->load('user');  // Asegurarnos de cargar la relación user
+            
+            // No necesitamos crear un nuevo objeto, pasamos el modelo directamente
+            return view('admin.medicos.form', compact('medico'));
+            
+        } catch (\Exception $e) {
+            \Log::error('Error en MedicoController@edit: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            return back()->with('error', 'Error al cargar el formulario de edición');
+        }
     }
 
     public function update(Request $request, Medico $medico)
