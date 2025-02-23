@@ -92,15 +92,16 @@ class InitialSeeder extends Seeder
             $cedula .= $digitoVerificador;
 
             $patient = Patient::create([
+                'doctor_id' => $medico->id,
                 'name' => $firstName . ' ' . $lastName,
+                'email' => strtolower($firstName) . '.' . strtolower(explode(' ', $lastName)[0]) . '@gmail.com',
                 'cedula' => $cedula,
+                'phone' => '09' . $faker->numberBetween(80000000, 99999999),
+                'address' => $faker->address,
                 'birth_date' => $faker->dateTimeBetween('-70 years', '-18 years'),
                 'gender' => $gender == 'male' ? 'M' : 'F',
                 'blood_type' => $faker->randomElement(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']),
-                'address' => $faker->address,
-                'phone_number' => '09' . $faker->numberBetween(80000000, 99999999),
-                'email' => strtolower($firstName) . '.' . strtolower(explode(' ', $lastName)[0]) . '@gmail.com',
-                'doctor_id' => $medico->id
+                'allergies' => $faker->optional()->text
             ]);
 
             $history = MedicalHistory::create([

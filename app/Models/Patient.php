@@ -16,13 +16,13 @@ class Patient extends Model
         'doctor_id',
         'name',
         'email',
+        'cedula',
         'phone',
         'address',
         'birth_date',
         'gender',
         'blood_type',
-        'allergies',
-        'cedula'
+        'allergies'
     ];
 
     protected $casts = [
