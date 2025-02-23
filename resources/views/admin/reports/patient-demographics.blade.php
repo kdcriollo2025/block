@@ -14,7 +14,7 @@
                 <h3 class="card-title">Distribución por Género</h3>
             </div>
             <div class="card-body">
-                <canvas id="genderChart"></canvas>
+                <canvas id="genderChart" style="min-height: 250px;"></canvas>
             </div>
         </div>
     </div>
@@ -24,7 +24,7 @@
                 <h3 class="card-title">Distribución por Edad</h3>
             </div>
             <div class="card-body">
-                <canvas id="ageChart"></canvas>
+                <canvas id="ageChart" style="min-height: 250px;"></canvas>
             </div>
         </div>
     </div>
@@ -37,7 +37,7 @@
                 <h3 class="card-title">Tipos de Sangre</h3>
             </div>
             <div class="card-body">
-                <canvas id="bloodTypeChart"></canvas>
+                <canvas id="bloodTypeChart" style="min-height: 250px;"></canvas>
             </div>
         </div>
     </div>
@@ -47,7 +47,7 @@
                 <h3 class="card-title">Alergias Comunes</h3>
             </div>
             <div class="card-body">
-                <canvas id="allergiesChart"></canvas>
+                <canvas id="allergiesChart" style="min-height: 250px;"></canvas>
             </div>
         </div>
     </div>
@@ -59,11 +59,12 @@
 @stop
 
 @section('js')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Gráfico de Género
-    new Chart(document.getElementById('genderChart'), {
+    const genderCtx = document.getElementById('genderChart').getContext('2d');
+    new Chart(genderCtx, {
         type: 'pie',
         data: {
             labels: ['Masculino', 'Femenino'],
@@ -71,24 +72,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 data: [{{ $genderData['M'] ?? 0 }}, {{ $genderData['F'] ?? 0 }}],
                 backgroundColor: ['#36A2EB', '#FF6384']
             }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
         }
     });
 
     // Gráfico de Edad
-    new Chart(document.getElementById('ageChart'), {
+    const ageCtx = document.getElementById('ageChart').getContext('2d');
+    new Chart(ageCtx, {
         type: 'bar',
         data: {
             labels: ['0-18', '19-30', '31-50', '51-70', '70+'],
             datasets: [{
                 label: 'Pacientes por Rango de Edad',
-                data: {{ json_encode($ageData) }},
+                data: {{ json_encode(array_values($ageData)) }},
                 backgroundColor: '#4BC0C0'
             }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
         }
     });
 
     // Gráfico de Tipos de Sangre
-    new Chart(document.getElementById('bloodTypeChart'), {
+    const bloodTypeCtx = document.getElementById('bloodTypeChart').getContext('2d');
+    new Chart(bloodTypeCtx, {
         type: 'doughnut',
         data: {
             labels: {!! json_encode(array_keys($bloodTypeData)) !!},
@@ -99,12 +115,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     '#9966FF', '#FF9F40', '#FF6384', '#36A2EB'
                 ]
             }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
         }
     });
 
     // Gráfico de Alergias
-    new Chart(document.getElementById('allergiesChart'), {
-        type: 'horizontalBar',
+    const allergiesCtx = document.getElementById('allergiesChart').getContext('2d');
+    new Chart(allergiesCtx, {
+        type: 'bar',
         data: {
             labels: {!! json_encode(array_keys($allergiesData)) !!},
             datasets: [{
@@ -114,12 +135,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
             scales: {
-                xAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
+                x: {
+                    beginAtZero: true
+                }
             }
         }
     });
