@@ -26,6 +26,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'cedula',
         'type',
         'first_login',
     ];
