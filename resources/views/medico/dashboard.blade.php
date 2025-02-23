@@ -9,8 +9,7 @@
 @section('content')
     <div class="card">
         <div class="card-body">
-            <h5>Bienvenido, {{ $medico->user->name }}</h5>
-            <p>{{ $currentDate }} {{ $currentTime }}</p>
+            <h5>Bienvenido, {{ $name }}</h5>
         </div>
     </div>
 @stop

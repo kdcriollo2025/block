@@ -28,31 +28,19 @@ class DashboardController extends Controller
 
     public function index()
     {
-        try {
-            $user = Auth::user();
-            
-            // Verificar si el usuario es médico
-            if ($user->type !== 'medico') {
-                return redirect()->route('home')->with('error', 'Acceso no autorizado');
-            }
-
-            // Obtener el médico
-            $medico = Medico::where('user_id', $user->id)->first();
-            
-            if (!$medico) {
-                return redirect()->route('home')->with('error', 'No se encontró información del médico');
-            }
-
-            // Datos mínimos
-            return view('medico.dashboard', [
-                'medico' => $medico,
-                'currentDate' => date('l, d \d\e F \d\e Y'),
-                'currentTime' => date('h:i A'),
-                'totalPatients' => 0
-            ]);
-
-        } catch (\Exception $e) {
-            throw $e; // En desarrollo, mostrar el error completo
+        $user = Auth::user();
+        
+        // Cargar el médico con su relación user
+        $medico = Medico::with('user')->where('user_id', $user->id)->first();
+        
+        if (!$medico) {
+            dd('Médico no encontrado', $user->toArray());
         }
+
+        // Vista simplificada
+        return view('medico.dashboard', [
+            'medico' => $medico,
+            'name' => $medico->user->name
+        ]);
     }
 } 
