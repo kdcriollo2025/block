@@ -19,31 +19,37 @@ class InitialSeeder extends Seeder
         $faker = Faker::create('es_EC');
 
         // Crear usuario administrador
-        $admin = User::create([
-            'name' => 'Admin Principal',
-            'email' => 'admin@empresa.com',
-            'password' => Hash::make('password123'),
-            'cedula' => '1716234578',
-            'type' => 'admin',
-            'first_login' => false,
-        ]);
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@empresa.com'],
+            [
+                'name' => 'Admin Principal',
+                'password' => Hash::make('password123'),
+                'cedula' => '1716234578',
+                'type' => 'admin',
+                'first_login' => false,
+            ]
+        );
 
         // Crear médico
-        $medicoUser = User::create([
-            'name' => 'Dr. Juan Carlos Morales',
-            'email' => 'jcmorales@empresa.com',
-            'password' => Hash::make('password123'),
-            'cedula' => '1715678234',
-            'type' => 'medico',
-            'first_login' => false,
-        ]);
+        $medicoUser = User::firstOrCreate(
+            ['email' => 'jcmorales@empresa.com'],
+            [
+                'name' => 'Dr. Juan Carlos Morales',
+                'password' => Hash::make('password123'),
+                'cedula' => '1715678234',
+                'type' => 'medico',
+                'first_login' => false,
+            ]
+        );
 
-        $medico = Medico::create([
-            'user_id' => $medicoUser->id,
-            'specialty' => 'Medicina Interna',
-            'phone_number' => '0991234567',
-            'cedula' => $medicoUser->cedula,
-        ]);
+        $medico = Medico::firstOrCreate(
+            ['user_id' => $medicoUser->id],
+            [
+                'specialty' => 'Medicina Interna',
+                'phone_number' => '0991234567',
+                'cedula' => $medicoUser->cedula,
+            ]
+        );
 
         // Lista de alergias comunes
         $alergias = [
