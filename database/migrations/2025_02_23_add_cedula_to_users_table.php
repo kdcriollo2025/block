@@ -9,7 +9,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('cedula')->unique()->after('email');
+            $table->string('cedula', 20)->nullable();
+            $table->string('type')->default('user');
+            $table->boolean('first_login')->default(true);
         });
     }
 
@@ -17,6 +19,8 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('cedula');
+            $table->dropColumn('type');
+            $table->dropColumn('first_login');
         });
     }
 }; 
