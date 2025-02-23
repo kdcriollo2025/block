@@ -11,12 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('allergy_records', function (Blueprint $table) {
-            $table->foreign('medical_history_id')
-                ->references('id')
-                ->on('medical_histories')
-                ->onDelete('cascade');
-        });
+        // La llave foránea ya se agregó en la migración original
     }
 
     /**
@@ -24,8 +19,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('allergy_records', function (Blueprint $table) {
-            $table->dropForeign(['medical_history_id']);
-        });
+        // No es necesario hacer nada aquí
     }
 };
