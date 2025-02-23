@@ -94,4 +94,12 @@ class MedicoController extends Controller
     {
         // Implement the logic to delete a medico
     }
+
+    public function toggleEstado(Medico $medico)
+    {
+        $medico->estado = !$medico->estado;
+        $medico->save();
+
+        return response()->json(['success' => true]);
+    }
 } 

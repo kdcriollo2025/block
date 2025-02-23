@@ -1,78 +1,104 @@
-@extends('adminlte::page')
-
-@section('title', 'Médicos')
-
-@section('content_header')
-    <h1>Médicos</h1>
-@stop
+@extends('layouts.app')
 
 @section('content')
-    <div class="row">
-        <div class="col-12">
-            @if (session('error'))
-                <div class="alert alert-danger alert-dismissible fade show">
-                    {{ session('error') }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            @endif
+<div class="container-fluid">
+    <h2 class="mb-4">Gestión de Médicos</h2>
 
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Lista de Médicos</h3>
-                    <div class="card-tools">
-                        <a href="{{ route('admin.medicos.create') }}" class="btn btn-primary">
-                            Nuevo Médico
-                        </a>
-                    </div>
-                </div>
-                <div class="card-body">
-                    @if(isset($medicos) && $medicos->count() > 0)
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Cédula</th>
-                                    <th>Especialidad</th>
-                                    <th>Teléfono</th>
-                                    <th>Email</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($medicos as $medico)
-                                    <tr>
-                                        <td>{{ $medico->user->name ?? 'N/A' }}</td>
-                                        <td>{{ $medico->cedula }}</td>
-                                        <td>{{ $medico->specialty }}</td>
-                                        <td>{{ $medico->phone_number }}</td>
-                                        <td>{{ $medico->user->email ?? 'N/A' }}</td>
-                                        <td>
-                                            <a href="{{ route('admin.medicos.edit', $medico->id) }}" 
-                                               class="btn btn-sm btn-info">
-                                                Editar
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    @else
-                        <p>No hay médicos registrados.</p>
-                    @endif
-                </div>
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Filtrar por Especialidad</label>
+                <select class="form-control">
+                    <option>Todas las especialidades</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Filtrar por Estado</label>
+                <select class="form-control">
+                    <option>Todos los estados</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Filtrar por № de Pacientes</label>
+                <select class="form-control">
+                    <option>Todos</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Búsqueda General</label>
+                <input type="text" class="form-control" placeholder="Buscar...">
             </div>
         </div>
     </div>
-@stop
 
-@section('css')
-    <link rel="stylesheet" href="/css/admin_custom.css">
-@stop
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Especialidad</th>
+                    <th>Teléfono</th>
+                    <th>Estado</th>
+                    <th>Pacientes</th>
+                    <th>Consultas</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($medicos as $medico)
+                <tr>
+                    <td>{{ $medico->id }}</td>
+                    <td>{{ $medico->name }}</td>
+                    <td>{{ $medico->email }}</td>
+                    <td>{{ $medico->especialidad }}</td>
+                    <td>{{ $medico->telefono }}</td>
+                    <td>
+                        <span class="badge {{ $medico->estado ? 'badge-success' : 'badge-danger' }}">
+                            {{ $medico->estado ? 'Activo' : 'Inactivo' }}
+                        </span>
+                    </td>
+                    <td>{{ $medico->pacientes_count ?? 0 }}</td>
+                    <td>{{ $medico->consultas_count ?? 0 }}</td>
+                    <td>
+                        <a href="{{ route('admin.medicos.edit', $medico->id) }}" class="btn btn-sm btn-warning">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn btn-sm {{ $medico->estado ? 'btn-danger' : 'btn-success' }}" 
+                                onclick="toggleEstado({{ $medico->id }})">
+                            <i class="fas {{ $medico->estado ? 'fa-ban' : 'fa-check' }}"></i>
+                        </button>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
 
-@section('js')
-    <script>
-        // Cualquier JavaScript adicional que necesites
-    </script>
-@stop 
+@push('scripts')
+<script>
+function toggleEstado(id) {
+    if (confirm('¿Está seguro de cambiar el estado del médico?')) {
+        axios.patch(`/admin/medicos/${id}/toggle-estado`)
+            .then(response => {
+                if (response.data.success) {
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Hubo un error al cambiar el estado');
+            });
+    }
+}
+</script>
+@endpush
+@endsection 
