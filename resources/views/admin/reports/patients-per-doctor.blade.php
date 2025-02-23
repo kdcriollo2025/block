@@ -19,10 +19,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($data as $record)
+                            @foreach($data as $medico)
                                 <tr>
-                                    <td>{{ $record['doctor'] }}</td>
-                                    <td>{{ $record['total_pacientes'] }}</td>
+                                    <td>{{ $medico->user->name }}</td>
+                                    <td>{{ $medico->pacientes_count }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

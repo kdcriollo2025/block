@@ -23,29 +23,31 @@ class ReportController extends Controller
 
     public function index()
     {
-        return view('admin.reports.index');
+        try {
+            return view('admin.reports.index');
+        } catch (\Exception $e) {
+            \Log::error('Error en página de reportes: ' . $e->getMessage());
+            return back()->with('error', 'Error al cargar la página de reportes');
+        }
     }
 
     public function patientsPerDoctor()
     {
         try {
-            \Log::info('Iniciando reporte de pacientes por doctor');
-            
             $data = Medico::with('user')
                 ->withCount('pacientes')
                 ->get();
 
-            \Log::info('Reporte generado exitosamente. Total médicos: ' . $data->count());
-            
+            if ($data->isEmpty()) {
+                \Log::info('No hay médicos registrados');
+            } else {
+                \Log::info('Reporte generado. Total médicos: ' . $data->count());
+            }
+
             return view('admin.reports.patients-per-doctor', compact('data'));
         } catch (\Exception $e) {
             \Log::error('Error en reporte de pacientes por doctor: ' . $e->getMessage());
             \Log::error($e->getTraceAsString());
-            
-            if (app()->environment('local', 'development') || config('app.debug')) {
-                throw $e;
-            }
-            
             return back()->with('error', 'Error al generar el reporte: ' . $e->getMessage());
         }
     }
