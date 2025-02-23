@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Medico;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class MedicoController extends Controller
 {
@@ -32,7 +34,49 @@ class MedicoController extends Controller
 
     public function store(Request $request)
     {
-        // Implement the logic to handle the form submission and store a new medico
+        try {
+            // Validar los datos
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8|confirmed',
+                'cedula' => 'required|string|unique:users',
+                'especialidad' => 'required|string',
+                'telefono' => 'required|string',
+            ]);
+
+            // Crear el usuario
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'cedula' => $validated['cedula'],
+                'type' => 'medico',
+                'first_login' => true,
+            ]);
+
+            // Crear el registro en la tabla médicos si existe
+            if ($user) {
+                Medico::create([
+                    'user_id' => $user->id,
+                    'especialidad' => $validated['especialidad'],
+                    'telefono' => $validated['telefono'],
+                    'cedula' => $validated['cedula'],
+                ]);
+            }
+
+            // Redireccionar con mensaje de éxito
+            return redirect()
+                ->route('admin.medicos.index')
+                ->with('success', 'Médico registrado exitosamente');
+
+        } catch (\Exception $e) {
+            // En caso de error, regresar con mensaje de error
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Error al registrar el médico: ' . $e->getMessage());
+        }
     }
 
     public function show(Medico $medico)
