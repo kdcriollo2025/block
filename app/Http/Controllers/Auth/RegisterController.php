@@ -87,7 +87,7 @@ class RegisterController extends Controller
                     'name' => $data['name'],
                     'email' => $data['email'],
                     'specialty' => 'Por definir', // Valor por defecto
-                    'phone_number' => 'Por definir', // Valor por defecto
+                    'phone' => 'Por definir', // Valor por defecto
                 ]);
             }
 
