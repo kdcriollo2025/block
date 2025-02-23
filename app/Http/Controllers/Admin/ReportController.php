@@ -113,32 +113,46 @@ class ReportController extends Controller
 
     public function patientDemographics()
     {
-        try {
-            $data = [
-                'gender' => Patient::select('gender', DB::raw('COUNT(*) as total'))
-                    ->groupBy('gender')
-                    ->get(),
-                'age_groups' => Patient::select(
-                    DB::raw('
-                        CASE 
-                            WHEN age < 18 THEN "0-17"
-                            WHEN age BETWEEN 18 AND 30 THEN "18-30"
-                            WHEN age BETWEEN 31 AND 50 THEN "31-50"
-                            WHEN age BETWEEN 51 AND 70 THEN "51-70"
-                            ELSE "71+"
-                        END as age_group
-                    '),
-                    DB::raw('COUNT(*) as total')
-                )
-                    ->groupBy('age_group')
-                    ->orderBy('age_group')
-                    ->get()
-            ];
+        // Datos de género
+        $genderData = Patient::groupBy('gender')
+            ->selectRaw('gender, count(*) as total')
+            ->pluck('total', 'gender')
+            ->toArray();
 
-            return view('admin.reports.patient-demographics', compact('data'));
-        } catch (\Exception $e) {
-            \Log::error('Error en reporte demográfico: ' . $e->getMessage());
-            return back()->with('error', 'Error al generar el reporte');
-        }
+        // Datos de edad
+        $ageData = Patient::selectRaw('
+            CASE 
+                WHEN age(birth_date) < interval \'18 years\' THEN \'0-18\'
+                WHEN age(birth_date) < interval \'30 years\' THEN \'19-30\'
+                WHEN age(birth_date) < interval \'50 years\' THEN \'31-50\'
+                WHEN age(birth_date) < interval \'70 years\' THEN \'51-70\'
+                ELSE \'70+\'
+            END as age_range,
+            count(*) as total
+        ')
+        ->groupBy('age_range')
+        ->pluck('total', 'age_range')
+        ->toArray();
+
+        // Datos de tipo de sangre
+        $bloodTypeData = Patient::whereNotNull('blood_type')
+            ->groupBy('blood_type')
+            ->selectRaw('blood_type, count(*) as total')
+            ->pluck('total', 'blood_type')
+            ->toArray();
+
+        // Datos de alergias
+        $allergiesData = Patient::whereNotNull('allergies')
+            ->groupBy('allergies')
+            ->selectRaw('allergies, count(*) as total')
+            ->pluck('total', 'allergies')
+            ->toArray();
+
+        return view('admin.reports.patient-demographics', compact(
+            'genderData',
+            'ageData',
+            'bloodTypeData',
+            'allergiesData'
+        ));
     }
 } 
