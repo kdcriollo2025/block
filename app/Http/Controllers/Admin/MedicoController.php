@@ -35,15 +35,18 @@ class MedicoController extends Controller
     public function store(Request $request)
     {
         try {
-            // Validar los datos
+            // Validar los datos con los nombres correctos de los campos
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|confirmed',
                 'cedula' => 'required|string|unique:users',
-                'especialidad' => 'required|string',
-                'telefono' => 'required|string',
+                'especialidad' => 'required|string',  // Este es el nombre que usas en el formulario
+                'telefono' => 'required|string',      // Este es el nombre que usas en el formulario
             ]);
+
+            // Para debuggear, agrega esta línea temporalmente
+            dd($request->all());  // Esto mostrará todos los datos que llegan del formulario
 
             // Crear el usuario
             $user = User::create([
@@ -55,7 +58,7 @@ class MedicoController extends Controller
                 'first_login' => true,
             ]);
 
-            // Crear el registro en la tabla médicos si existe
+            // Crear el registro en la tabla médicos
             if ($user) {
                 Medico::create([
                     'user_id' => $user->id,
@@ -65,13 +68,11 @@ class MedicoController extends Controller
                 ]);
             }
 
-            // Redireccionar con mensaje de éxito
             return redirect()
                 ->route('admin.medicos.index')
                 ->with('success', 'Médico registrado exitosamente');
 
         } catch (\Exception $e) {
-            // En caso de error, regresar con mensaje de error
             return redirect()
                 ->back()
                 ->withInput()
