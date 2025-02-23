@@ -35,6 +35,14 @@
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>
+                        <div class="form-group">
+                        <label for="cedula">Cédula</label>
+                        <input type="text" name="cedula" class="form-control @error('cedula') is-invalid @enderror" 
+                               value="{{ old('cedula') }}" maxlength="10" required>
+                        @error('cedula')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
 
                         <div class="form-group">
                             <label for="specialty">Especialidad <span class="text-danger">*</span></label>
