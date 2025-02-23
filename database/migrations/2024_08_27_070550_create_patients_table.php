@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('cedula')->unique();
-            $table->string('phone')->nullable();
+            $table->string('phone')->nullable();  // Cambiado de phone_number a phone
             $table->string('address');
             $table->date('birth_date');
             $table->string('gender');
@@ -28,4 +28,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('patients');
     }
-}; 
+};
