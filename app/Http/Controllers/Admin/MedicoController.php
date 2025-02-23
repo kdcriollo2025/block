@@ -11,17 +11,6 @@ use App\Models\User;
 
 class MedicoController extends Controller
 {
-    protected function validator(array $data)
-    {
-        return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:medicos'],
-            'cedula' => ['required', 'string', 'size:10', 'unique:medicos'],
-            'specialty' => ['required', 'string', 'max:100'],
-            'phone_number' => ['required', 'string', 'max:15'],
-        ]);
-    }
-
     public function index()
     {
         // Implement the logic to retrieve and display a list of medicos
@@ -29,24 +18,21 @@ class MedicoController extends Controller
 
     public function create()
     {
-        // Implement the logic to display the form for creating a new medico
+        return view('medicos.form');
     }
 
     public function store(Request $request)
     {
         try {
-            // Validar los datos con los nombres correctos de los campos
+            // Validar los datos con los nombres exactos del formulario
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|confirmed',
                 'cedula' => 'required|string|unique:users',
-                'especialidad' => 'required|string',  // Este es el nombre que usas en el formulario
-                'telefono' => 'required|string',      // Este es el nombre que usas en el formulario
+                'especialidad' => 'required|string',
+                'telefono' => 'required|string',
             ]);
-
-            // Para debuggear, agrega esta línea temporalmente
-            dd($request->all());  // Esto mostrará todos los datos que llegan del formulario
 
             // Crear el usuario
             $user = User::create([

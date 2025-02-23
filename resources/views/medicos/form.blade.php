@@ -67,14 +67,14 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="especialidad">Especialidad *</label>
-                                    <input type="text" class="form-control" id="especialidad" name="especialidad" value="{{ old('especialidad', $medico->especialidad ?? '') }}" required>
+                                    <input type="text" class="form-control" id="especialidad" name="especialidad" value="{{ old('especialidad') }}" required>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="telefono">Teléfono *</label>
-                                    <input type="text" class="form-control" id="telefono" name="telefono" value="{{ old('telefono', $medico->telefono ?? '') }}" required>
+                                    <input type="text" class="form-control" id="telefono" name="telefono" value="{{ old('telefono') }}" required>
                                 </div>
                             </div>
                         </div>
