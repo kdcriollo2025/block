@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('allergy_records', function (Blueprint $table) {
-            $table->foreignId('medical_history_id')
-                ->constrained('medical_histories')
+            $table->foreign('medical_history_id')
+                ->references('id')
+                ->on('medical_histories')
                 ->onDelete('cascade');
         });
     }
@@ -25,7 +26,6 @@ return new class extends Migration
     {
         Schema::table('allergy_records', function (Blueprint $table) {
             $table->dropForeign(['medical_history_id']);
-            $table->dropColumn('medical_history_id');
         });
     }
 };

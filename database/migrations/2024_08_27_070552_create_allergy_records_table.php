@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('allergy_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('medical_history_id')->constrained()->onDelete('cascade');
-            $table->string('allergy_type');
-            $table->string('severity');
-            $table->dateTime('diagnosis_date');
+            $table->unsignedBigInteger('medical_history_id');
+            $table->string('allergy_name');
+            $table->text('reaction')->nullable();
+            $table->date('diagnosis_date')->nullable();
             $table->text('treatment')->nullable();
             $table->timestamps();
         });
