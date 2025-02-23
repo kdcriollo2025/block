@@ -13,8 +13,6 @@ return new class extends Migration
             $table->foreignId('patient_id')->constrained()->onDelete('cascade');
             $table->text('family_history')->nullable();
             $table->text('personal_history')->nullable();
-            $table->text('current_medications')->nullable();
-            $table->text('surgical_history')->nullable();
             $table->timestamps();
         });
     }
