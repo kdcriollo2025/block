@@ -20,6 +20,13 @@
     @endif
 
     <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-end">
+                <a href="{{ route('admin.medicos.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nuevo Médico
+                </a>
+            </div>
+        </div>
         <div class="card-body">
             <div class="row mb-3">
                 <div class="col-md-3">

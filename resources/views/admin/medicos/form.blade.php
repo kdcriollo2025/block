@@ -1,11 +1,13 @@
-@extends('layouts.app')
+@extends('adminlte::page')
+
+@section('title', isset($medico) ? 'Editar Médico' : 'Nuevo Médico')
+
+@section('content_header')
+    <h1>{{ isset($medico) ? 'Editar Médico' : 'Nuevo Médico' }}</h1>
+@stop
 
 @section('content')
-<div class="container-fluid">
     <div class="card">
-        <div class="card-header">
-            <h3>{{ isset($medico) ? 'Editar Médico' : 'Nuevo Médico' }}</h3>
-        </div>
         <div class="card-body">
             @if (session('error'))
                 <div class="alert alert-danger alert-dismissible fade show">
@@ -25,10 +27,9 @@
                 </div>
             @endif
 
-            <!-- Agregar también mensajes de validación generales -->
             @if ($errors->any())
                 <div class="alert alert-danger">
-                    <ul>
+                    <ul class="mb-0">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -46,16 +47,24 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label>Nombre</label>
-                            <input type="text" name="name" class="form-control" 
-                                   value="{{ old('name', $medico->name ?? '') }}" required>
+                            <label for="name">Nombre</label>
+                            <input type="text" 
+                                   name="name" 
+                                   id="name"
+                                   class="form-control @error('name') is-invalid @enderror" 
+                                   value="{{ old('name', $medico->name ?? '') }}" 
+                                   required>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" name="email" class="form-control" 
-                                   value="{{ old('email', $medico->email ?? '') }}" required>
+                            <label for="email">Email</label>
+                            <input type="email" 
+                                   name="email" 
+                                   id="email"
+                                   class="form-control @error('email') is-invalid @enderror" 
+                                   value="{{ old('email', $medico->email ?? '') }}" 
+                                   required>
                         </div>
                     </div>
                 </div>
@@ -63,28 +72,41 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label>Especialidad</label>
-                            <input type="text" name="especialidad" class="form-control" 
-                                   value="{{ old('especialidad', $medico->especialidad ?? '') }}" required>
+                            <label for="especialidad">Especialidad</label>
+                            <input type="text" 
+                                   name="especialidad" 
+                                   id="especialidad"
+                                   class="form-control @error('especialidad') is-invalid @enderror" 
+                                   value="{{ old('especialidad', $medico->especialidad ?? '') }}" 
+                                   required>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label>Teléfono</label>
-                            <input type="text" name="telefono" class="form-control" 
-                                   value="{{ old('telefono', $medico->telefono ?? '') }}" required>
+                            <label for="telefono">Teléfono</label>
+                            <input type="text" 
+                                   name="telefono" 
+                                   id="telefono"
+                                   class="form-control @error('telefono') is-invalid @enderror" 
+                                   value="{{ old('telefono', $medico->telefono ?? '') }}" 
+                                   required>
                         </div>
                     </div>
                 </div>
 
-                <div class="form-group mt-3">
+                <div class="d-flex justify-content-between">
                     <button type="submit" class="btn btn-primary">
                         {{ isset($medico) ? 'Actualizar' : 'Crear' }}
                     </button>
-                    <a href="{{ route('admin.medicos.index') }}" class="btn btn-secondary">Cancelar</a>
+                    <a href="{{ route('admin.medicos.index') }}" class="btn btn-secondary">
+                        Cancelar
+                    </a>
                 </div>
             </form>
         </div>
     </div>
-</div>
-@endsection 
+@stop
+
+@section('css')
+    <link rel="stylesheet" href="/css/admin_custom.css">
+@stop 
