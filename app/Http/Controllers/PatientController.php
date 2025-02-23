@@ -38,7 +38,7 @@ class PatientController extends Controller
             'gender' => 'required|string|in:Masculino,Femenino,Otro',
             'address' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'phone_number' => 'required|string|max:20',
+            'phone' => 'required|string|max:20',
             'blood_type' => 'required|string|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
         ]);
 
@@ -81,7 +81,7 @@ class PatientController extends Controller
             'gender' => 'required|string|in:Masculino,Femenino,Otro',
             'address' => 'required|string|max:255',
             'email' => 'required|email|unique:patients,email,' . $patient->id,
-            'phone_number' => 'required|string|max:20',
+            'phone' => 'required|string|max:20',
             'blood_type' => 'required|string|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
         ]);
 

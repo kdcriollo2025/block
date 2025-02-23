@@ -41,7 +41,7 @@ class MedicoController extends Controller
                 'password' => 'required|string|min:8|confirmed',
                 'cedula' => 'required|string|unique:users',
                 'specialty' => 'required|string',
-                'phone_number' => 'required|string',
+                'phone' => 'required|string',
             ]);
 
             // Crear el usuario
@@ -59,7 +59,7 @@ class MedicoController extends Controller
                 Medico::create([
                     'user_id' => $user->id,
                     'specialty' => $validated['specialty'],
-                    'phone_number' => $validated['phone_number'],
+                    'phone' => $validated['phone'],
                     'cedula' => $validated['cedula'],
                 ]);
             }
@@ -105,7 +105,7 @@ class MedicoController extends Controller
             $validated = $request->validate([
                 'email' => 'required|email|unique:users,email,' . $medico->user_id,
                 'specialty' => 'required|string',
-                'phone_number' => 'required|string',
+                'phone' => 'required|string',
                 'password' => 'nullable|min:8|confirmed'
             ]);
 
@@ -124,7 +124,7 @@ class MedicoController extends Controller
             // Actualizar médico
             $medico->update([
                 'specialty' => $validated['specialty'],
-                'phone_number' => $validated['phone_number']
+                'phone' => $validated['phone']
             ]);
 
             return redirect()

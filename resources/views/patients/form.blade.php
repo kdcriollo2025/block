@@ -82,9 +82,11 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="phone_number">Teléfono <span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control @error('phone_number') is-invalid @enderror" id="phone_number" name="phone_number" value="{{ old('phone_number', $patient->phone_number ?? '') }}" required>
-                            @error('phone_number')
+                            <label for="phone">Teléfono <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control @error('phone') is-invalid @enderror" 
+                                   id="phone" name="phone" 
+                                   value="{{ old('phone', $patient->phone ?? '') }}" required>
+                            @error('phone')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>

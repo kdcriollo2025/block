@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('specialty');
-            $table->string('phone_number');
+            $table->string('phone');
             $table->string('cedula');
             $table->boolean('estado')->default(true);
             $table->timestamps();

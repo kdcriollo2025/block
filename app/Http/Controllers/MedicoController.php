@@ -48,7 +48,7 @@ class MedicoController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'specialty' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:20',
+            'phone' => 'required|string|max:20',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
@@ -66,7 +66,7 @@ class MedicoController extends Controller
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'specialty' => $validated['specialty'],
-                'phone_number' => $validated['phone_number'],
+                'phone' => $validated['phone'],
                 'is_active' => true,
             ]);
 
@@ -96,7 +96,7 @@ class MedicoController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $medico->user->id,
             'specialty' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:20',
+            'phone' => 'required|string|max:20',
         ]);
 
         DB::transaction(function () use ($request, $medico) {
@@ -107,7 +107,7 @@ class MedicoController extends Controller
 
             $medico->update([
                 'specialty' => $request->specialty,
-                'phone_number' => $request->phone_number,
+                'phone' => $request->phone,
             ]);
         });
 
@@ -129,7 +129,7 @@ class MedicoController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:patients'],
             'cedula' => ['required', 'string', 'size:10', 'unique:patients'],
-            'phone_number' => ['required', 'string', 'max:20'],
+            'phone' => ['required', 'string', 'max:20'],
         
         ]);
     }
