@@ -66,19 +66,20 @@ class InitialSeeder extends Seeder
             $firstName = $faker->firstName($gender);
             $lastName = $faker->lastName . ' ' . $faker->lastName;
 
-            // Generar una cédula ecuatoriana válida
-            $provincia = $faker->numberBetween(1, 24);
+            // Generar una cédula ecuatoriana válida de 10 dígitos
+            $provincia = str_pad($faker->numberBetween(1, 24), 2, '0', STR_PAD_LEFT);
             $tercerDigito = $faker->numberBetween(0, 5);
-            $cedula = sprintf("%02d%d%07d", $provincia, $tercerDigito, $faker->numberBetween(0, 9999999));
-            $digitoVerificador = 0;
+            $numeroSecuencial = str_pad($faker->numberBetween(0, 9999), 4, '0', STR_PAD_LEFT);
+            $cedula = $provincia . $tercerDigito . $numeroSecuencial;
+
+            // Calcular dígito verificador
+            $coeficientes = [2,1,2,1,2,1,2,1,2];
+            $suma = 0;
             for ($j = 0; $j < 9; $j++) {
-                $multiplicador = ($j % 2 == 0) ? 2 : 1;
-                $resultado = intval($cedula[$j]) * $multiplicador;
-                if ($resultado >= 10) $resultado -= 9;
-                $digitoVerificador += $resultado;
+                $valor = intval($cedula[$j]) * $coeficientes[$j];
+                $suma += ($valor >= 10) ? $valor - 9 : $valor;
             }
-            $digitoVerificador = 10 - ($digitoVerificador % 10);
-            if ($digitoVerificador == 10) $digitoVerificador = 0;
+            $digitoVerificador = ($suma % 10 === 0) ? 0 : 10 - ($suma % 10);
             $cedula .= $digitoVerificador;
 
             $patient = Patient::create([
