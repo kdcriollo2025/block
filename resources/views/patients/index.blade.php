@@ -79,7 +79,7 @@
                                 <td>{{ $patient->id }}</td>
                                 <td>{{ $patient->name }}</td>
                                 <td>{{ $patient->email }}</td>
-                                <td>{{ $patient->phone_number }}</td>
+                                <td>{{ $patient->phone }}</td>
                                 <td>{{ $patient->gender }}</td>
                                 <td>{{ $patient->birth_date ? $patient->birth_date->format('d/m/Y') : 'N/A' }}</td>
                                 <td>{{ $patient->blood_type ?? 'N/A' }}</td>

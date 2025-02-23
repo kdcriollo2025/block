@@ -97,12 +97,12 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="phone_number">Teléfono *</label>
+                            <label for="phone">Teléfono *</label>
                             <input type="text" 
-                                   name="phone_number" 
-                                   id="phone_number"
-                                   class="form-control @error('phone_number') is-invalid @enderror" 
-                                   value="{{ old('phone_number', $medico->phone_number ?? '') }}" 
+                                   name="phone" 
+                                   id="phone"
+                                   class="form-control @error('phone') is-invalid @enderror" 
+                                   value="{{ old('phone', $medico->phone ?? '') }}" 
                                    required>
                         </div>
                     </div>
@@ -197,7 +197,7 @@
     });
 
     // Validación de teléfono
-    document.getElementById('phone_number').addEventListener('input', function(e) {
+    document.getElementById('phone').addEventListener('input', function(e) {
         let value = e.target.value.replace(/[^0-9]/g, '');
         if (value.length > 10) value = value.slice(0, 10);
         e.target.value = value;

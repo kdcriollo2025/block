@@ -81,7 +81,7 @@
                                 <td>{{ $medico->user->name ?? 'N/A' }}</td>
                                 <td>{{ $medico->user->email ?? 'N/A' }}</td>
                                 <td>{{ $medico->specialty }}</td>
-                                <td>{{ $medico->phone_number }}</td>
+                                <td>{{ $medico->phone }}</td>
                                 <td>
                                     <span class="badge {{ $medico->estado ? 'badge-success' : 'badge-danger' }}">
                                         {{ $medico->estado ? 'Activo' : 'Inactivo' }}

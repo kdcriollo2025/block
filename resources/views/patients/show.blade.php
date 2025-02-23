@@ -31,7 +31,7 @@
                     </div>
                     <div class="form-group">
                         <label class="font-weight-bold">Teléfono:</label>
-                        <p>{{ $patient->phone_number }}</p>
+                        <p>{{ $patient->phone }}</p>
                     </div>
                     <div class="form-group">
                         <label class="font-weight-bold">Fecha de Nacimiento:</label>
