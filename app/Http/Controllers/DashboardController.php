@@ -28,9 +28,15 @@ class DashboardController extends Controller
     public function index()
     {
         try {
-            $medico = Auth::user()->medico;
+            $user = Auth::user();
+            \Log::info('Usuario autenticado:', ['id' => $user->id, 'type' => $user->type]);
+
+            // Cargar la relación médico con usuario
+            $medico = $user->medico()->with('user')->first();
+            \Log::info('Datos del médico:', ['medico' => $medico]);
+
             if (!$medico) {
-                \Log::error('Médico no encontrado para el usuario: ' . Auth::id());
+                \Log::error('Médico no encontrado para el usuario: ' . $user->id);
                 return redirect()->route('home')->with('error', 'No se encontró información del médico');
             }
 
