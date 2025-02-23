@@ -14,11 +14,15 @@ class MedicoController extends Controller
     public function index()
     {
         try {
-            $medicos = Medico::with('user')->get();
+            $medicos = Medico::with('user')
+                ->select('medicos.*') // Selecciona explícitamente las columnas
+                ->get();
+
             return view('admin.medicos.index', compact('medicos'));
         } catch (\Exception $e) {
             \Log::error('Error en MedicoController@index: ' . $e->getMessage());
-            return back()->with('error', 'Error al cargar la lista de médicos: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            return back()->with('error', 'Error al cargar la lista de médicos');
         }
     }
 
