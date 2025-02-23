@@ -34,8 +34,8 @@
     <!-- Estadísticas Rápidas -->
     <div class="row">
         <!-- Total de Pacientes -->
-        <div class="col-lg-6 col-12">
-            <div class="small-box bg-success">
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
                 <div class="inner">
                     <h3>{{ $totalPatients }}</h3>
                     <p>Pacientes Totales</p>
@@ -44,13 +44,13 @@
                     <i class="fas fa-users"></i>
                 </div>
                 <a href="{{ route('medico.patients.index') }}" class="small-box-footer">
-                    Ver pacientes <i class="fas fa-arrow-circle-right"></i>
+                    Más información <i class="fas fa-arrow-circle-right"></i>
                 </a>
             </div>
         </div>
 
         <!-- Total de Consultas -->
-        <div class="col-lg-6 col-12">
+        <div class="col-lg-3 col-6">
             <div class="small-box bg-warning">
                 <div class="inner">
                     <h3>{{ $totalConsultations }}</h3>
@@ -75,6 +75,42 @@
                 </div>
                 <div class="card-body">
                     <canvas id="consultationsChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Consultas Recientes</h3>
+                </div>
+                <div class="card-body">
+                    @if($recentConsultations->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Paciente</th>
+                                        <th>Diagnóstico</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($recentConsultations as $consultation)
+                                        <tr>
+                                            <td>{{ $consultation->consultation_date->format('d/m/Y') }}</td>
+                                            <td>{{ $consultation->patient->name }}</td>
+                                            <td>{{ $consultation->diagnosis }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <p>No hay consultas recientes</p>
+                    @endif
                 </div>
             </div>
         </div>
