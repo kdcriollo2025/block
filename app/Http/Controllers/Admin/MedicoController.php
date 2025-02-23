@@ -30,8 +30,8 @@ class MedicoController extends Controller
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|confirmed',
                 'cedula' => 'required|string|unique:users',
-                'especialidad' => 'required|string',
-                'telefono' => 'required|string',
+                'specialty' => 'required|string',
+                'phone_number' => 'required|string',
             ]);
 
             // Para debuggear
@@ -51,8 +51,8 @@ class MedicoController extends Controller
             if ($user) {
                 Medico::create([
                     'user_id' => $user->id,
-                    'especialidad' => $validated['especialidad'],
-                    'telefono' => $validated['telefono'],
+                    'specialty' => $validated['specialty'],
+                    'phone_number' => $validated['phone_number'],
                     'cedula' => $validated['cedula'],
                 ]);
             }
