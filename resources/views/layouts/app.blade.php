@@ -69,7 +69,16 @@
         </nav>
 
         <main class="py-4">
-            @yield('content')
+            <div class="container">
+                @if(session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                @endif
+                
+                {{-- Asegúrate de que solo haya una sección de contenido --}}
+                @yield('content')
+            </div>
         </main>
     </div>
 

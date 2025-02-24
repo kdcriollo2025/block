@@ -18,10 +18,15 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, $role)
     {
-        if (!Auth::check() || Auth::user()->type !== $role) {
-            abort(403, 'No tienes permiso para acceder a esta sección.');
+        if (auth()->check() && auth()->user()->role === $role) {
+            return $next($request);
+        }
+        
+        // Si es médico, redirigir a su dashboard específico
+        if ($role === 'medico' && auth()->user()->role === 'medico') {
+            return redirect()->route('medico.dashboard');
         }
 
-        return $next($request);
+        return redirect('/')->with('error', 'No tienes permiso para acceder a esta área');
     }
 } 

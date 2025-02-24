@@ -78,39 +78,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 });
 
 // Rutas para médicos
-Route::middleware(['auth', 'medico'])->prefix('medicos')->name('medicos.')->group(function () {
-    Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
-    Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
-    Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
-    Route::get('/patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
-    Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
-    Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
-    Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');   
+Route::middleware(['auth', 'role:medico'])->group(function () {
+    Route::get('/medico/dashboard', function () {
+        return view('medico.dashboard');
+    })->name('medico.dashboard');
     
-    // Rutas para historias médicas
-    Route::get('medical_histories/{medicalHistory}/download-pdf', [MedicalHistoryController::class, 'downloadPdf'])
-        ->name('medical_histories.download-pdf');
-    Route::resource('medical_histories', MedicalHistoryController::class);
-    
-    // Rutas para alergias
-    Route::resource('allergy_records', AllergyRecordController::class);
-    
-    // Rutas para cirugías
-    Route::resource('surgery_records', SurgeryRecordController::class);
-    
-    // Rutas para consultas médicas
-    Route::get('medical-consultation-records', [MedicalConsultationRecordController::class, 'index'])
-        ->name('medical_consultation_records.index');
-    Route::get('medical-histories/{medicalHistory}/consultations/create', [MedicalConsultationRecordController::class, 'create'])
-        ->name('medical_consultation_records.create');
-    Route::post('medical-consultation-records', [MedicalConsultationRecordController::class, 'store'])
-        ->name('medical_consultation_records.store');
-    
-    // Rutas para terapias
-    Route::resource('therapy_records', TherapyRecordController::class);
-    
-    // Rutas para vacunas
-    Route::resource('vaccination_records', VaccinationRecordController::class);
+    // Otras rutas específicas para médicos
 });
 
 // Rutas para cambio de contraseña
