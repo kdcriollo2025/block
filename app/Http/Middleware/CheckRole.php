@@ -19,17 +19,30 @@ class CheckRole
     public function handle(Request $request, Closure $next, $role)
     {
         if (!auth()->check()) {
-            return redirect('login');
+            return redirect()->route('login');
         }
 
-        if (auth()->user()->type === $role) {
-            if ($role === 'medico' && !auth()->user()->medico) {
-                \Log::error('Usuario médico sin registro en tabla medicos: ' . auth()->id());
-                return redirect('/')->with('error', 'Tu cuenta no está correctamente configurada');
+        $user = auth()->user();
+
+        // Verificar el tipo de usuario y redirigir según corresponda
+        if ($user->type !== $role) {
+            if ($user->type === 'admin') {
+                return redirect()->route('admin.medicos.index')
+                    ->with('error', 'No tienes permiso para acceder a esa sección');
+            } elseif ($user->type === 'medico') {
+                return redirect()->route('medicos.dashboard')
+                    ->with('error', 'No tienes permiso para acceder a esa sección');
             }
-            return $next($request);
+            return redirect()->route('login');
         }
 
-        return redirect('/')->with('error', 'No tienes permiso para acceder a esta área');
+        // Verificación adicional para médicos
+        if ($role === 'medico' && !$user->medico) {
+            \Log::error('Usuario médico sin registro en tabla medicos: ' . $user->id);
+            return redirect()->route('login')
+                ->with('error', 'Tu cuenta no está correctamente configurada');
+        }
+
+        return $next($request);
     }
 } 

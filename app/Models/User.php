@@ -79,11 +79,12 @@ class User extends Authenticatable
 
     public function can($ability, $arguments = [])
     {
-        if ($ability === 'admin') {
-            return $this->type === 'admin';
+        // Verificar permisos específicos según el tipo de usuario
+        if ($ability === 'access-admin' && $this->type !== 'admin') {
+            return false;
         }
-        if ($ability === 'medico') {
-            return $this->type === 'medico';
+        if ($ability === 'access-medico' && $this->type !== 'medico') {
+            return false;
         }
         return parent::can($ability, $arguments);
     }

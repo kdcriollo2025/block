@@ -29,16 +29,17 @@ use App\Http\Controllers\BlockchainNFT;
 | be assigned to the "web" middleware group. Make something great!
 */
 
-// Rutas públicas
+// Ruta principal con redirección según el tipo de usuario
 Route::get('/', function () {
     if (auth()->check()) {
         if (auth()->user()->type === 'admin') {
             return redirect()->route('admin.medicos.index');
+        } elseif (auth()->user()->type === 'medico') {
+            return redirect()->route('medicos.dashboard');
         }
-        return redirect()->route('medico.dashboard');
     }
     return redirect()->route('login');
-});
+})->name('home');
 
 // Rutas de autenticación
 Route::middleware('guest')->group(function () {
@@ -59,7 +60,7 @@ Route::get('password/reset/{token}', [ResetPasswordController::class, 'showReset
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 // Rutas para administradores
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('medicos', MedicoController::class);
     Route::patch('medicos/{medico}/toggle-estado', [MedicoController::class, 'toggleEstado'])
         ->name('medicos.toggle-estado');
