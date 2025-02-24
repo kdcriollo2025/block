@@ -20,7 +20,7 @@ class CheckUserType
             if ($user->type === 'admin') {
                 return redirect()->route('admin.medicos.index');
             } elseif ($user->type === 'medico') {
-                return redirect()->route('medico.dashboard');
+                return redirect()->route('medicos.index');
             }
             return redirect()->route('login');
         }
