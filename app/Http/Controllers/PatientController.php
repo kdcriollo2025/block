@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Patient;
+use App\Models\Medico;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -18,23 +19,26 @@ class PatientController extends Controller
     public function index()
     {
         try {
-            // Obtener el médico autenticado
+            // Obtener el usuario autenticado
             $user = Auth::user();
-            if (!$user || !$user->medico) {
-                \Log::error('Usuario sin registro de médico: ' . ($user ? $user->id : 'no auth'));
-                return redirect()->route('login')->with('error', 'Acceso no autorizado');
+            
+            // Obtener el registro de médico asociado al usuario
+            $medico = $user->medico;
+            
+            if (!$medico) {
+                \Log::error('Médico no encontrado para el usuario: ' . $user->id);
+                return redirect()->back()->with('error', 'No se encontró el registro de médico');
             }
 
             // Obtener los pacientes del médico
-            $patients = Patient::where('medico_id', $user->medico->id)
-                ->orderBy('created_at', 'desc')
+            $patients = $medico->pacientes()
+                ->orderBy('name')
                 ->paginate(10);
 
             return view('medico.patients.index', compact('patients'));
         } catch (\Exception $e) {
             \Log::error('Error en PatientController@index: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString());
-            return redirect()->back()->with('error', 'Hubo un error al cargar los pacientes.');
+            return redirect()->back()->with('error', 'Ocurrió un error al cargar los pacientes');
         }
     }
 

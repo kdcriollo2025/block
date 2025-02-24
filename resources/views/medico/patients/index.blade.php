@@ -1,18 +1,15 @@
 @extends('adminlte::page')
 
-@section('title', 'Pacientes')
+@section('title', 'Lista de Pacientes')
 
 @section('content_header')
     <h1>Lista de Pacientes</h1>
 @stop
 
 @section('content')
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            {{ session('success') }}
-            <button type="button" class="close" data-dismiss="alert">
-                <span aria-hidden="true">&times;</span>
-            </button>
+    @if(session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
         </div>
     @endif
 
@@ -26,60 +23,56 @@
             </div>
         </div>
         <div class="card-body">
-            @if($patients->isEmpty())
-                <div class="alert alert-info">No hay pacientes registrados.</div>
-            @else
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Cédula</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($patients as $patient)
                             <tr>
-                                <th>Nombre</th>
-                                <th>Cédula</th>
-                                <th>Email</th>
-                                <th>Acciones</th>
+                                <td>{{ $patient->name }}</td>
+                                <td>{{ $patient->cedula }}</td>
+                                <td>{{ $patient->email }}</td>
+                                <td>{{ $patient->phone }}</td>
+                                <td>
+                                    <a href="{{ route('medicos.patients.show', $patient) }}" 
+                                       class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('medicos.patients.edit', $patient) }}" 
+                                       class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($patients as $patient)
-                                <tr>
-                                    <td>{{ $patient->name }}</td>
-                                    <td>{{ $patient->cedula }}</td>
-                                    <td>{{ $patient->email }}</td>
-                                    <td>
-                                        <a href="{{ route('medicos.patients.show', $patient) }}" 
-                                           class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('medicos.patients.edit', $patient) }}" 
-                                           class="btn btn-sm btn-warning">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                {{ $patients->links() }}
-            @endif
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center">No hay pacientes registrados</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            {{ $patients->links() }}
         </div>
     </div>
 @stop
 
 @section('css')
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="/css/admin_custom.css">
 @stop
 
 @section('js')
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap4.min.js"></script>
     <script>
-        $(document).ready(function() {
-            $('#patients-table').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
-                }
-            });
-        });
+        console.log('Hi!');
     </script>
 @stop 

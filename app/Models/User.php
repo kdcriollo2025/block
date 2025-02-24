@@ -72,6 +72,9 @@ class User extends Authenticatable
         return $this->type === self::TYPE_MEDICO;
     }
 
+    /**
+     * Get the medico record associated with the user.
+     */
     public function medico()
     {
         return $this->hasOne(Medico::class);
