@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Patient;
+use App\Models\Medico;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -11,26 +12,33 @@ class PatientController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(function ($request, $next) {
-            if (Auth::user()->type !== 'medico') {
-                return redirect()->route('home');
-            }
-            return $next($request);
-        });
+        $this->middleware('auth');
+        $this->middleware('medico');
     }
     
     public function index()
     {
         try {
+            // Obtener el médico actual
             $medico = Auth::user()->medico;
-            $patients = Patient::where('doctor_id', $medico->id)
-                ->with(['medicalHistory', 'medicalConsultations'])
+            
+            if (!$medico) {
+                Log::error('Médico no encontrado para el usuario: ' . Auth::id());
+                return back()->with('error', 'Error de configuración de cuenta médica');
+            }
+
+            // Obtener los médicos para la vista
+            $medicos = Medico::with(['user', 'pacientes'])
+                ->select('medicos.*')
                 ->get();
 
-            return view('medicos.index', compact('patients'));
+            // Retornar la vista que está en la carpeta medicos
+            return view('medicos.index', compact('medicos'));
+
         } catch (\Exception $e) {
             Log::error('Error en PatientController@index: ' . $e->getMessage());
-            return back()->with('error', 'Error al cargar la lista de pacientes');
+            Log::error($e->getTraceAsString());
+            return back()->with('error', 'Error al cargar la lista de médicos');
         }
     }
 
