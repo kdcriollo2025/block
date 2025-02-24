@@ -79,7 +79,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 });
 
 // Rutas para médicos
-Route::middleware(['auth', 'medico'])->prefix('medico')->name('medico.')->group(function () {
+Route::middleware(['auth', 'type:medico'])->prefix('medico')->name('medico.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
     Route::get('/medical-consultation-records', [MedicalConsultationRecordController::class, 'index'])
