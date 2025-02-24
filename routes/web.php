@@ -18,7 +18,6 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\Admin\ReportController;
-// use App\Http\Controllers\BlockchainNFT;
 use App\Http\Controllers\Admin\AdminController;
 
 /*
@@ -110,12 +109,4 @@ Route::middleware(['auth', 'role:medico'])->prefix('medicos')->group(function ()
 Route::middleware(['auth'])->group(function () {
     Route::get('change-password', [ChangePasswordController::class, 'showChangePasswordForm'])->name('password.change.form');
     Route::post('change-password', [ChangePasswordController::class, 'changePassword'])->name('password.change');
-});
-
-// Rutas para NFTs
-Route::prefix('blockchain')->group(function () {
-    Route::post('/nft', [BlockchainNFT::class, 'createNFT'])->name('nft.create');
-    Route::get('/nfts', [BlockchainNFT::class, 'getNFTs'])->name('nft.all');
-    Route::get('/nft/{assetId}', [BlockchainNFT::class, 'getNFTByAssetId'])->name('nft.get');
-    Route::post('/nft/transfer', [BlockchainNFT::class, 'transferNFT'])->name('nft.transfer');
 });

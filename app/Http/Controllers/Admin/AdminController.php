@@ -16,7 +16,12 @@ class AdminController extends Controller
 
     public function medicos()
     {
-        $medicos = Medico::with('user')->get();
-        return view('admin.medicos.index', compact('medicos'));
+        try {
+            $medicos = Medico::with('user')->get();
+            return view('admin.medicos.index', compact('medicos'));
+        } catch (\Exception $e) {
+            \Log::error('Error en AdminController@medicos: ' . $e->getMessage());
+            return back()->with('error', 'Ocurrió un error al cargar la lista de médicos.');
+        }
     }
 } 
