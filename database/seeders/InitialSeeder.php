@@ -45,7 +45,7 @@ class InitialSeeder extends Seeder
             $medico = Medico::firstOrCreate(
                 ['user_id' => $medicoUser->id],
                 [
-                    'specialty' => 'Medicina Interna',
+                    'especialidad' => 'Medicina Interna',
                     'phone' => '0991234567',
                     'cedula' => $medicoUser->cedula,
                 ]

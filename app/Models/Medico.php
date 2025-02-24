@@ -13,10 +13,10 @@ class Medico extends Model
 
     protected $fillable = [
         'user_id',
-        'especialidad',
-        'estado',
+        'specialty',
         'phone',
-        'cedula'
+        'cedula',
+        'estado'
     ];
 
     protected $casts = [
