@@ -12,50 +12,17 @@ class DashboardController extends Controller
     public function index()
     {
         try {
-            $user = Auth::user();
-            
-            // Debug información del usuario
-            Log::info('Dashboard access attempt', [
-                'user_id' => $user->id,
-                'user_type' => $user->type,
-                'user_email' => $user->email
+            // Vista de prueba simple
+            return view('medico.dashboard', [
+                'test_message' => 'Esta es una prueba del dashboard médico',
+                'currentDate' => now()->format('Y-m-d'),
+                'currentTime' => now()->format('H:i:s'),
+                'medico' => [
+                    'specialty' => 'Test Specialty',
+                    'phone' => 'Test Phone',
+                    'cedula' => 'Test Cedula'
+                ]
             ]);
-
-            // Verificar si la vista existe
-            if (!View::exists('medico.dashboard')) {
-                Log::error('Vista no encontrada', [
-                    'view' => 'medico.dashboard',
-                    'views_path' => resource_path('views/medico')
-                ]);
-                throw new \Exception('Vista del dashboard no encontrada');
-            }
-
-            $medico = Medico::where('user_id', $user->id)->first();
-            
-            // Debug información del médico
-            Log::info('Médico encontrado', [
-                'medico_id' => $medico->id ?? null,
-                'specialty' => $medico->specialty ?? null,
-                'estado' => $medico->estado ?? null
-            ]);
-
-            if (!$medico) {
-                Log::error('Médico no encontrado', ['user_id' => $user->id]);
-                return redirect()->route('home')->with('error', 'Información de médico no encontrada');
-            }
-
-            $data = [
-                'medico' => $medico,
-                'totalPatients' => $medico->patients()->count(),
-                'totalConsultations' => $medico->consultations()->count(),
-                'currentDate' => now()->locale('es')->format('l, d \d\e F \d\e Y'),
-                'currentTime' => now()->format('h:i A')
-            ];
-
-            // Debug datos enviados a la vista
-            Log::info('Datos para la vista', $data);
-
-            return view('medico.dashboard', $data);
 
         } catch (\Exception $e) {
             Log::error('Error en dashboard', [
@@ -65,12 +32,11 @@ class DashboardController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
             
-            if (app()->environment('local')) {
-                throw $e;
-            }
-            
-            return redirect()->route('home')
-                ->with('error', 'Error al cargar el dashboard');
+            return response()->json([
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
         }
     }
 } 
