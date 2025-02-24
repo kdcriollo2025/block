@@ -26,7 +26,7 @@ class Medico extends Model
     /**
      * Get the patients for the doctor.
      */
-    public function pacientes()
+    public function patients(): HasMany
     {
         return $this->hasMany(Patient::class, 'doctor_id');
     }
@@ -34,7 +34,7 @@ class Medico extends Model
     /**
      * Get the medical consultations for the doctor.
      */
-    public function consultas(): HasMany
+    public function consultations(): HasMany
     {
         return $this->hasMany(MedicalConsultationRecord::class, 'doctor_id');
     }
@@ -42,7 +42,7 @@ class Medico extends Model
     /**
      * Get the user associated with the doctor.
      */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
