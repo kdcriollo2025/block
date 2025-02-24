@@ -90,31 +90,31 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($medicos as $medico)
+                        @forelse ($patients as $patient)
                             <tr>
-                                <td>{{ $medico->id }}</td>
-                                <td>{{ $medico->name }}</td>
-                                <td>{{ $medico->email }}</td>
-                                <td>{{ $medico->specialty }}</td>
-                                <td>{{ $medico->phone_number }}</td>
+                                <td>{{ $patient->id }}</td>
+                                <td>{{ $patient->name }}</td>
+                                <td>{{ $patient->email }}</td>
+                                <td>{{ $patient->specialty }}</td>
+                                <td>{{ $patient->phone_number }}</td>
                                 <td>
-                                    <span class="badge badge-{{ $medico->is_active ? 'success' : 'danger' }}">
-                                        {{ $medico->is_active ? 'Activo' : 'Inactivo' }}
+                                    <span class="badge badge-{{ $patient->is_active ? 'success' : 'danger' }}">
+                                        {{ $patient->is_active ? 'Activo' : 'Inactivo' }}
                                     </span>
                                 </td>
-                                <td>{{ $medico->patients->count() }}</td>
-                                <td>{{ $medico->medicalConsultations->count() }}</td>
+                                <td>{{ $patient->patients->count() }}</td>
+                                <td>{{ $patient->medicalConsultations->count() }}</td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <a href="{{ route('admin.medicos.edit', $medico->id) }}" class="btn btn-warning btn-sm" title="Editar">
+                                        <a href="{{ route('admin.medicos.edit', $patient->id) }}" class="btn btn-warning btn-sm" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('admin.medicos.toggle-status', $medico->id) }}" method="POST" class="d-inline">
+                                        <form action="{{ route('admin.medicos.toggle-status', $patient->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('PATCH')
-                                            <button type="submit" class="btn btn-{{ $medico->is_active ? 'danger' : 'success' }} btn-sm" 
-                                                    title="{{ $medico->is_active ? 'Desactivar' : 'Activar' }}">
-                                                <i class="fas fa-{{ $medico->is_active ? 'times' : 'check' }}"></i>
+                                            <button type="submit" class="btn btn-{{ $patient->is_active ? 'danger' : 'success' }} btn-sm" 
+                                                    title="{{ $patient->is_active ? 'Desactivar' : 'Activar' }}">
+                                                <i class="fas fa-{{ $patient->is_active ? 'times' : 'check' }}"></i>
                                             </button>
                                         </form>
                                     </div>

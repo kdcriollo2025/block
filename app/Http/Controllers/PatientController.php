@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Patient;
-use App\Models\Medico;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -27,18 +26,18 @@ class PatientController extends Controller
                 return back()->with('error', 'Error de configuración de cuenta médica');
             }
 
-            // Obtener los médicos para la vista
-            $medicos = Medico::with(['user', 'pacientes'])
-                ->select('medicos.*')
+            // Obtener los pacientes del médico actual
+            $patients = Patient::where('doctor_id', $medico->id)
+                ->with(['medicalHistory'])
                 ->get();
 
-            // Retornar la vista que está en la carpeta medicos
-            return view('medicos.index', compact('medicos'));
+            // Retornar la vista con los pacientes
+            return view('medicos.index', compact('patients'));
 
         } catch (\Exception $e) {
             Log::error('Error en PatientController@index: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
-            return back()->with('error', 'Error al cargar la lista de médicos');
+            return back()->with('error', 'Error al cargar la lista de pacientes');
         }
     }
 
