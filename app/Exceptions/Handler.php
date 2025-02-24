@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Illuminate\Support\Facades\Log;
 
 class Handler extends ExceptionHandler
 {
@@ -33,7 +34,12 @@ class Handler extends ExceptionHandler
     public function register(): void
     {
         $this->reportable(function (Throwable $e) {
-            //
+            Log::error('Error en la aplicación:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
         });
     }
 
@@ -46,14 +52,23 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $e)
     {
+        // Si es una petición AJAX o espera JSON
+        if ($request->expectsJson()) {
+            return response()->json([
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
+
+        // En modo debug, mostrar errores detallados
         if (config('app.debug')) {
             return parent::render($request, $e);
         }
 
-        // Log the error
-        \Log::error($e->getMessage());
-        \Log::error($e->getTraceAsString());
-
-        return response()->view('errors.500', [], 500);
+        // En producción, mostrar vista de error personalizada
+        return response()->view('errors.500', [
+            'exception' => $e
+        ], 500);
     }
 } 

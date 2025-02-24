@@ -129,3 +129,19 @@ Route::prefix('blockchain')->group(function () {
     Route::get('/nft/{assetId}', [BlockchainNFT::class, 'getNFTByAssetId'])->name('nft.get');
     Route::post('/nft/transfer', [BlockchainNFT::class, 'transferNFT'])->name('nft.transfer');
 });
+
+Route::middleware(['auth', 'type:medico'])->group(function () {
+    Route::get('/medico/dashboard', [DashboardController::class, 'index'])->name('medico.dashboard');
+});
+
+// Ruta temporal para debug
+Route::get('/debug-user', function() {
+    if (Auth::check()) {
+        return response()->json([
+            'user' => Auth::user(),
+            'type' => Auth::user()->type,
+            'medico' => Auth::user()->medico
+        ]);
+    }
+    return 'No autenticado';
+});
