@@ -76,4 +76,15 @@ class User extends Authenticatable
     {
         return $this->hasOne(Medico::class);
     }
+
+    public function can($ability, $arguments = [])
+    {
+        if ($ability === 'admin') {
+            return $this->type === 'admin';
+        }
+        if ($ability === 'medico') {
+            return $this->type === 'medico';
+        }
+        return parent::can($ability, $arguments);
+    }
 }
