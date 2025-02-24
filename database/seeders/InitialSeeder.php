@@ -45,7 +45,7 @@ class InitialSeeder extends Seeder
             );
 
             // Crear el registro en la tabla médicos
-            Medico::firstOrCreate(
+            $medicoRecord = Medico::firstOrCreate(
                 ['user_id' => $medico->id],
                 [
                     'specialty' => 'General',
@@ -84,9 +84,9 @@ class InitialSeeder extends Seeder
                 $digitoVerificador = ($suma % 10 === 0) ? 0 : 10 - ($suma % 10);
                 $cedula .= $digitoVerificador;
 
-                // Crear paciente
+                // Crear paciente usando el ID del registro de médico
                 $patient = Patient::create([
-                    'doctor_id' => $medico->id,
+                    'doctor_id' => $medicoRecord->id,
                     'name' => $firstName . ' ' . $lastName,
                     'email' => strtolower($firstName) . '.' . strtolower(explode(' ', $lastName)[0]) . '@gmail.com',
                     'cedula' => $cedula,
