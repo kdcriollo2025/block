@@ -14,88 +14,100 @@ class InitialSeeder extends Seeder
 {
     public function run()
     {
-        $faker = Faker::create('es_EC');
+        try {
+            $faker = Faker::create('es_EC');
 
-        // Crear usuario administrador
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@empresa.com'],
-            [
-                'name' => 'Admin Principal',
-                'password' => Hash::make('password123'),
-                'cedula' => '1716234578',
-                'type' => 'admin',
-                'first_login' => false,
-            ]
-        );
+            // Crear usuario administrador
+            $admin = User::firstOrCreate(
+                ['email' => 'admin@empresa.com'],
+                [
+                    'name' => 'Admin Principal',
+                    'password' => Hash::make('password123'),
+                    'cedula' => '1716234578',
+                    'type' => 'admin',
+                    'first_login' => false,
+                ]
+            );
 
-        // Crear médico
-        $medicoUser = User::firstOrCreate(
-            ['email' => 'jcmorales@empresa.com'],
-            [
-                'name' => 'Dr. Juan Carlos Morales',
-                'password' => Hash::make('password123'),
-                'cedula' => '1715678234',
-                'type' => 'medico',
-                'first_login' => false,
-            ]
-        );
+            // Crear médico de prueba
+            $medicoUser = User::firstOrCreate(
+                ['email' => 'medico@empresa.com'],
+                [
+                    'name' => 'Dr. Juan Carlos Morales',
+                    'password' => Hash::make('password123'),
+                    'cedula' => '1715678234',
+                    'type' => 'medico',
+                    'first_login' => false,
+                ]
+            );
 
-        $medico = Medico::firstOrCreate(
-            ['user_id' => $medicoUser->id],
-            [
-                'specialty' => 'Medicina Interna',
-                'phone' => '0991234567',
-                'cedula' => $medicoUser->cedula,
-            ]
-        );
+            // Crear el registro en la tabla médicos
+            $medico = Medico::firstOrCreate(
+                ['user_id' => $medicoUser->id],
+                [
+                    'specialty' => 'Medicina General',
+                    'phone' => '0991234567',
+                    'cedula' => $medicoUser->cedula,
+                    'estado' => true
+                ]
+            );
 
-        // Crear pacientes con datos ecuatorianos
-        for ($i = 0; $i < 100; $i++) {
-            $gender = $faker->randomElement(['male', 'female']);
-            $firstName = $faker->firstName($gender);
-            $lastName = $faker->lastName . ' ' . $faker->lastName;
+            \Log::info('Seeder ejecutado correctamente');
+            \Log::info('Admin creado: ' . $admin->email);
+            \Log::info('Médico creado: ' . $medicoUser->email);
 
-            // Generar una cédula ecuatoriana válida
-            $provincia = str_pad($faker->numberBetween(1, 24), 2, '0', STR_PAD_LEFT);
-            $tercerDigito = $faker->numberBetween(0, 5);
-            $numeroSecuencial = str_pad($faker->numberBetween(0, 9999), 4, '0', STR_PAD_LEFT);
-            $cedula = $provincia . $tercerDigito . $numeroSecuencial;
-            $cedula = str_pad($cedula, 9, '0');
+            // Crear pacientes con datos ecuatorianos
+            for ($i = 0; $i < 100; $i++) {
+                $gender = $faker->randomElement(['male', 'female']);
+                $firstName = $faker->firstName($gender);
+                $lastName = $faker->lastName . ' ' . $faker->lastName;
 
-            // Calcular dígito verificador
-            $suma = 0;
-            for ($j = 0; $j < 9; $j++) {
-                $multiplicador = ($j % 2 == 0) ? 2 : 1;
-                $valor = intval($cedula[$j]) * $multiplicador;
-                $suma += ($valor >= 10) ? $valor - 9 : $valor;
+                // Generar una cédula ecuatoriana válida
+                $provincia = str_pad($faker->numberBetween(1, 24), 2, '0', STR_PAD_LEFT);
+                $tercerDigito = $faker->numberBetween(0, 5);
+                $numeroSecuencial = str_pad($faker->numberBetween(0, 9999), 4, '0', STR_PAD_LEFT);
+                $cedula = $provincia . $tercerDigito . $numeroSecuencial;
+                $cedula = str_pad($cedula, 9, '0');
+
+                // Calcular dígito verificador
+                $suma = 0;
+                for ($j = 0; $j < 9; $j++) {
+                    $multiplicador = ($j % 2 == 0) ? 2 : 1;
+                    $valor = intval($cedula[$j]) * $multiplicador;
+                    $suma += ($valor >= 10) ? $valor - 9 : $valor;
+                }
+                $digitoVerificador = ($suma % 10 === 0) ? 0 : 10 - ($suma % 10);
+                $cedula .= $digitoVerificador;
+
+                // Crear paciente
+                $patient = Patient::create([
+                    'doctor_id' => $medico->id,
+                    'name' => $firstName . ' ' . $lastName,
+                    'email' => strtolower($firstName) . '.' . strtolower(explode(' ', $lastName)[0]) . '@gmail.com',
+                    'cedula' => $cedula,
+                    'phone' => '09' . $faker->numberBetween(80000000, 99999999),
+                    'address' => $faker->streetAddress . ', ' . $faker->randomElement([
+                        'La Carolina', 'El Condado', 'La Mariscal', 'Quitumbe', 
+                        'Cumbayá', 'El Batán', 'La González Suárez', 'San Carlos'
+                    ]) . ', Quito',
+                    'birth_date' => $faker->dateTimeBetween('-70 years', '-18 years'),
+                    'gender' => $gender == 'male' ? 'M' : 'F',
+                    'blood_type' => $faker->randomElement(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']),
+                    'allergies' => $faker->optional()->randomElement([
+                        'Penicilina', 'Aspirina', 'Polen', 'Mariscos', 
+                        'Nueces', 'Látex', 'Ninguna conocida'
+                    ])
+                ]);
+
+                // Crear historial médico
+                if ($patient) {
+                    $this->createMedicalHistory($patient, $faker);
+                }
             }
-            $digitoVerificador = ($suma % 10 === 0) ? 0 : 10 - ($suma % 10);
-            $cedula .= $digitoVerificador;
 
-            // Crear paciente
-            $patient = Patient::create([
-                'doctor_id' => $medico->id,
-                'name' => $firstName . ' ' . $lastName,
-                'email' => strtolower($firstName) . '.' . strtolower(explode(' ', $lastName)[0]) . '@gmail.com',
-                'cedula' => $cedula,
-                'phone' => '09' . $faker->numberBetween(80000000, 99999999),
-                'address' => $faker->streetAddress . ', ' . $faker->randomElement([
-                    'La Carolina', 'El Condado', 'La Mariscal', 'Quitumbe', 
-                    'Cumbayá', 'El Batán', 'La González Suárez', 'San Carlos'
-                ]) . ', Quito',
-                'birth_date' => $faker->dateTimeBetween('-70 years', '-18 years'),
-                'gender' => $gender == 'male' ? 'M' : 'F',
-                'blood_type' => $faker->randomElement(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']),
-                'allergies' => $faker->optional()->randomElement([
-                    'Penicilina', 'Aspirina', 'Polen', 'Mariscos', 
-                    'Nueces', 'Látex', 'Ninguna conocida'
-                ])
-            ]);
-
-            // Crear historial médico
-            if ($patient) {
-                $this->createMedicalHistory($patient, $faker);
-            }
+        } catch (\Exception $e) {
+            \Log::error('Error en seeder: ' . $e->getMessage());
+            throw $e;
         }
     }
 

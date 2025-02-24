@@ -68,16 +68,4 @@ class Kernel extends HttpKernel
         'medico' => \App\Http\Middleware\CheckUserType::class . ':medico',
         'admin' => \App\Http\Middleware\CheckUserType::class . ':admin',
     ];
-
-    /**
-     * The application's route middleware.
-     *
-     * These middleware may be assigned to groups or used individually.
-     *
-     * @var array<string, class-string|string>
-     */
-    protected $routeMiddleware = [
-        // ... otros middlewares
-        'type' => \App\Http\Middleware\CheckUserType::class,
-    ];
 }

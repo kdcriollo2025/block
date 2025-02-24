@@ -10,29 +10,34 @@ class MedicalConsultationRecord extends Model
 {
     use HasFactory;
 
-    protected $table = 'medical_consultation_records';
-
     protected $fillable = [
         'medical_history_id',
-        'doctor_id',
         'consultation_date',
         'reason',
         'symptoms',
         'diagnosis',
         'treatment',
-        'observations'
+        'next_appointment',
+        'doctor_id'
     ];
 
     protected $casts = [
-        'consultation_date' => 'datetime'
+        'consultation_date' => 'date',
+        'next_appointment' => 'date'
+    ];
+
+    protected $dates = [
+        'consultation_date',
+        'created_at',
+        'updated_at'
     ];
 
     /**
-     * Get the medical history that owns the consultation.
+     * Get the medical history that owns the consultation record.
      */
     public function medicalHistory(): BelongsTo
     {
-        return $this->belongsTo(MedicalHistory::class, 'medical_history_id');
+        return $this->belongsTo(MedicalHistory::class);
     }
 
     /**
@@ -40,14 +45,6 @@ class MedicalConsultationRecord extends Model
      */
     public function doctor(): BelongsTo
     {
-        return $this->belongsTo(Medico::class, 'doctor_id');
-    }
-
-    /**
-     * Get the patient through medical history.
-     */
-    public function patient()
-    {
-        return $this->medicalHistory->patient;
+        return $this->belongsTo(Medico::class);
     }
 }

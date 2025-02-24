@@ -13,14 +13,13 @@ return new class extends Migration
     {
         Schema::create('medical_consultation_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('medical_history_id')->constrained()->onDelete('cascade');
-            $table->foreignId('doctor_id')->constrained('medicos')->onDelete('cascade');
-            $table->dateTime('consultation_date');
-            $table->text('reason');
-            $table->text('symptoms');
-            $table->text('diagnosis');
-            $table->text('treatment');
-            $table->text('observations')->nullable();
+            $table->unsignedBigInteger('medical_history_id');
+            $table->date('consultation_date');
+            $table->string('reason', 255)->nullable(); // <-- Agregamos reason
+            $table->string('symptoms', 255);
+            $table->string('diagnosis', 255);
+            $table->string('treatment', 255);
+            $table->date('next_appointment')->nullable();
             $table->timestamps();
         });
     }

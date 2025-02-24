@@ -29,16 +29,38 @@ use App\Http\Controllers\BlockchainNFT;
 | be assigned to the "web" middleware group. Make something great!
 */
 
-// Rutas de autenticación
-Auth::routes();
-
-// Ruta principal
+// Rutas públicas
 Route::get('/', function () {
-    return view('welcome');
+    if (auth()->check()) {
+        if (auth()->user()->type === 'admin') {
+            return redirect()->route('admin.medicos.index');
+        }
+        return redirect()->route('medico.dashboard');
+    }
+    return redirect()->route('login');
 });
 
-// Rutas para administrador
-Route::middleware(['auth', 'type:admin'])->prefix('admin')->name('admin.')->group(function () {
+// Rutas de autenticación
+Route::middleware('guest')->group(function () {
+    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [LoginController::class, 'login']);
+    Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+});
+
+Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+
+// Rutas de registro
+Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('register', [RegisterController::class, 'register']);
+
+// Rutas para restablecimiento de contraseña
+Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+// Rutas para administradores
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/medicos', [MedicoController::class, 'index'])->name('medicos.index');
     Route::resource('medicos', MedicoController::class);
     Route::patch('medicos/{medico}/toggle-estado', [MedicoController::class, 'toggleEstado'])
         ->name('medicos.toggle-estado');
@@ -57,16 +79,16 @@ Route::middleware(['auth', 'type:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 // Rutas para médicos
-Route::middleware(['auth', 'type:medico'])->prefix('medico')->name('medico.')->group(function () {
-    // Dashboard
+Route::middleware(['auth', 'medico'])->prefix('medico')->name('medico.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
-    // Pacientes
-    Route::resource('patients', PatientController::class);
-    
-    // Consultas médicas
-    Route::get('/medical-consultation-records', [MedicalConsultationRecordController::class, 'index'])
-        ->name('medical_consultation_records.index');
+    // Rutas para pacientes del médico
+    Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
+    Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
+    Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
+    Route::get('/patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
+    Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
+    Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
     
     // Rutas para historias médicas
     Route::get('medical_histories/{medicalHistory}/download-pdf', [MedicalHistoryController::class, 'downloadPdf'])
@@ -80,6 +102,8 @@ Route::middleware(['auth', 'type:medico'])->prefix('medico')->name('medico.')->g
     Route::resource('surgery_records', SurgeryRecordController::class);
     
     // Rutas para consultas médicas
+    Route::get('medical-consultation-records', [MedicalConsultationRecordController::class, 'index'])
+        ->name('medical_consultation_records.index');
     Route::get('medical-histories/{medicalHistory}/consultations/create', [MedicalConsultationRecordController::class, 'create'])
         ->name('medical_consultation_records.create');
     Route::post('medical-consultation-records', [MedicalConsultationRecordController::class, 'store'])
@@ -104,26 +128,4 @@ Route::prefix('blockchain')->group(function () {
     Route::get('/nfts', [BlockchainNFT::class, 'getNFTs'])->name('nft.all');
     Route::get('/nft/{assetId}', [BlockchainNFT::class, 'getNFTByAssetId'])->name('nft.get');
     Route::post('/nft/transfer', [BlockchainNFT::class, 'transferNFT'])->name('nft.transfer');
-});
-
-// Ruta de debug (temporal)
-Route::get('/debug-user', function() {
-    if (Auth::check()) {
-        $user = Auth::user();
-        return response()->json([
-            'authenticated' => true,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'type' => $user->type
-            ],
-            'medico' => $user->medico,
-            'session' => [
-                'id' => session()->getId(),
-                'token' => csrf_token()
-            ]
-        ]);
-    }
-    return response()->json(['authenticated' => false]);
 });

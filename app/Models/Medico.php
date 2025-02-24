@@ -11,8 +11,6 @@ class Medico extends Model
 {
     use HasFactory;
 
-    protected $table = 'medicos';
-
     protected $fillable = [
         'user_id',
         'specialty',
@@ -28,23 +26,23 @@ class Medico extends Model
     /**
      * Get the patients for the doctor.
      */
-    public function patients(): HasMany
+    public function pacientes()
     {
-        return $this->hasMany(Patient::class, 'doctor_id', 'id');
+        return $this->hasMany(Patient::class, 'doctor_id');
     }
 
     /**
      * Get the medical consultations for the doctor.
      */
-    public function consultations(): HasMany
+    public function consultas(): HasMany
     {
-        return $this->hasMany(MedicalConsultationRecord::class, 'doctor_id', 'id');
+        return $this->hasMany(MedicalConsultationRecord::class, 'doctor_id');
     }
 
     /**
      * Get the user associated with the doctor.
      */
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
