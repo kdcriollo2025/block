@@ -48,6 +48,17 @@
             </div>
         </div>
     </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Información del Médico</h3>
+        </div>
+        <div class="card-body">
+            <p><strong>Especialidad:</strong> {{ $medico->specialty }}</p>
+            <p><strong>Teléfono:</strong> {{ $medico->phone }}</p>
+            <p><strong>Cédula:</strong> {{ $medico->cedula }}</p>
+        </div>
+    </div>
 @stop
 
 @section('css')
