@@ -26,13 +26,20 @@ class DashboardController extends Controller
             $user = Auth::user();
             \Log::info('Usuario autenticado:', ['id' => $user->id, 'type' => $user->type]);
             
+            if (!$user) {
+                throw new \Exception('Usuario no autenticado');
+            }
+            
             // Verificar el médico asociado
             $medico = $user->medico;
-            \Log::info('Información del médico:', ['medico' => $medico]);
+            \Log::info('Información del médico:', ['medico' => $medico ? $medico->toArray() : null]);
             
+            if (!$medico) {
+                throw new \Exception('Usuario no tiene registro de médico asociado');
+            }
+
             // Obtener la fecha y hora actual
             $now = Carbon::now();
-            \Log::info('Fecha y hora actual:', ['date' => $now->format('d/m/Y'), 'time' => $now->format('H:i:s')]);
             
             $data = [
                 'currentDate' => $now->format('d/m/Y'),
@@ -44,7 +51,7 @@ class DashboardController extends Controller
         } catch (\Exception $e) {
             \Log::error('Error en DashboardController@index: ' . $e->getMessage());
             \Log::error('Stack trace: ' . $e->getTraceAsString());
-            throw $e; // Esto mostrará el error en el navegador cuando APP_DEBUG=true
+            throw $e;
         }
     }
 }

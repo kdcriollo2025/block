@@ -33,7 +33,6 @@ class CheckRole
                         return redirect()->route('login')
                             ->with('error', 'Tu cuenta no está correctamente configurada');
                     }
-                    return $next($request);
                 }
                 return $next($request);
             }
