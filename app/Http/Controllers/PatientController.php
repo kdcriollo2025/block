@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PatientController extends Controller
 {
@@ -20,8 +21,17 @@ class PatientController extends Controller
     
     public function index()
     {
-        $patients = Patient::where('doctor_id', Auth::user()->medico->id)->get();
-        return view('patients.index', compact('patients'));
+        try {
+            $medico = Auth::user()->medico;
+            $patients = Patient::where('doctor_id', $medico->id)
+                ->with(['medicalHistory', 'medicalConsultations'])
+                ->get();
+
+            return view('medicos.index', compact('patients'));
+        } catch (\Exception $e) {
+            Log::error('Error en PatientController@index: ' . $e->getMessage());
+            return back()->with('error', 'Error al cargar la lista de pacientes');
+        }
     }
 
     public function create()
