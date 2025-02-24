@@ -29,38 +29,16 @@ use App\Http\Controllers\BlockchainNFT;
 | be assigned to the "web" middleware group. Make something great!
 */
 
-// Rutas públicas
-Route::get('/', function () {
-    if (Auth::check()) {
-        if (Auth::user()->type === 'admin') {
-            return redirect('/admin/medicos');
-        } else {
-            return redirect('/medico/dashboard');
-        }
-    }
-    return redirect('/login');
-});
-
 // Rutas de autenticación
-Route::middleware('guest')->group(function () {
-    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [LoginController::class, 'login']);
-    Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-    Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Auth::routes();
+
+// Ruta principal
+Route::get('/', function () {
+    return view('welcome');
 });
 
-Route::post('logout', [LoginController::class, 'logout'])->name('logout');
-
-// Rutas de registro
-Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('register', [RegisterController::class, 'register']);
-
-// Rutas para restablecimiento de contraseña
-Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
-
-// Rutas para administradores
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+// Rutas para administrador
+Route::middleware(['auth', 'type:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('medicos', MedicoController::class);
     Route::patch('medicos/{medico}/toggle-estado', [MedicoController::class, 'toggleEstado'])
         ->name('medicos.toggle-estado');
@@ -80,17 +58,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
 // Rutas para médicos
 Route::middleware(['auth', 'type:medico'])->prefix('medico')->name('medico.')->group(function () {
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
+    
+    // Pacientes
+    Route::resource('patients', PatientController::class);
+    
+    // Consultas médicas
     Route::get('/medical-consultation-records', [MedicalConsultationRecordController::class, 'index'])
         ->name('medical_consultation_records.index');
-    
-    // Rutas para pacientes del médico
-    Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
-    Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
-    Route::get('/patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
-    Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
-    Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
     
     // Rutas para historias médicas
     Route::get('medical_histories/{medicalHistory}/download-pdf', [MedicalHistoryController::class, 'downloadPdf'])
@@ -130,18 +106,24 @@ Route::prefix('blockchain')->group(function () {
     Route::post('/nft/transfer', [BlockchainNFT::class, 'transferNFT'])->name('nft.transfer');
 });
 
-Route::middleware(['auth', 'type:medico'])->group(function () {
-    Route::get('/medico/dashboard', [DashboardController::class, 'index'])->name('medico.dashboard');
-});
-
-// Ruta temporal para debug
+// Ruta de debug (temporal)
 Route::get('/debug-user', function() {
     if (Auth::check()) {
+        $user = Auth::user();
         return response()->json([
-            'user' => Auth::user(),
-            'type' => Auth::user()->type,
-            'medico' => Auth::user()->medico
+            'authenticated' => true,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'type' => $user->type
+            ],
+            'medico' => $user->medico,
+            'session' => [
+                'id' => session()->getId(),
+                'token' => csrf_token()
+            ]
         ]);
     }
-    return 'No autenticado';
+    return response()->json(['authenticated' => false]);
 });

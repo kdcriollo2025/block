@@ -12,33 +12,50 @@ class CheckUserType
     {
         try {
             $user = $request->user();
-            
-            // Log para debugging
-            Log::info('CheckUserType middleware', [
+
+            if (!$user) {
+                Log::warning('Usuario no autenticado intentando acceder a ruta protegida');
+                return redirect()->route('login');
+            }
+
+            Log::info('Verificando tipo de usuario', [
+                'user_id' => $user->id,
+                'current_type' => $user->type,
                 'required_type' => $type,
-                'user_type' => $user->type,
-                'user_id' => $user->id
+                'route' => $request->route()->getName()
             ]);
 
-            if (!$user || $user->type !== $type) {
-                Log::warning('Acceso no autorizado', [
-                    'user_id' => $user->id ?? 'no auth',
-                    'user_type' => $user->type ?? 'no type',
+            if ($user->type !== $type) {
+                Log::warning('Usuario con tipo incorrecto intentando acceder', [
+                    'user_id' => $user->id,
+                    'current_type' => $user->type,
                     'required_type' => $type
                 ]);
-                
-                return redirect()->route('home')->with('error', 'Acceso no autorizado');
+
+                if ($request->expectsJson()) {
+                    return response()->json(['error' => 'No autorizado'], 403);
+                }
+
+                return redirect()
+                    ->route('home')
+                    ->with('error', 'No tiene permiso para acceder a esta sección');
             }
 
             return $next($request);
-            
+
         } catch (\Exception $e) {
             Log::error('Error en middleware CheckUserType', [
-                'message' => $e->getMessage(),
+                'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
-            return redirect()->route('home')->with('error', 'Error de autenticación');
+
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Error de autenticación'], 500);
+            }
+
+            return redirect()
+                ->route('home')
+                ->with('error', 'Error de autenticación');
         }
     }
 } 
