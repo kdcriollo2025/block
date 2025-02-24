@@ -16,11 +16,19 @@
 @stop
 
 @section('content')
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h5><i class="icon fas fa-ban"></i> Error!</h5>
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-lg-3 col-6">
             <div class="small-box bg-info">
                 <div class="inner">
-                    <h3>{{ $medico->patients()->count() }}</h3>
+                    <h3>{{ $medico->patients()->count() ?? 0 }}</h3>
                     <p>Pacientes</p>
                 </div>
                 <div class="icon">
@@ -35,7 +43,7 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-success">
                 <div class="inner">
-                    <h3>{{ $medico->consultations()->count() }}</h3>
+                    <h3>{{ $medico->consultations()->count() ?? 0 }}</h3>
                     <p>Consultas</p>
                 </div>
                 <div class="icon">
@@ -87,25 +95,26 @@
                     </h3>
                 </div>
                 <div class="card-body">
-                    <p>Últimas consultas registradas</p>
-                    @if($medico->consultations()->count() > 0)
+                    @if($medico->consultations->isNotEmpty())
                         <ul class="timeline">
-                            @foreach($medico->consultations()->latest()->take(5)->get() as $consulta)
+                            @foreach($medico->consultations as $consulta)
                                 <li>
                                     <i class="fas fa-clock bg-info"></i>
                                     <div class="timeline-item">
                                         <span class="time">
                                             <i class="fas fa-calendar"></i> 
-                                            {{ $consulta->created_at->format('d/m/Y H:i') }}
+                                            {{ $consulta->consultation_date->format('d/m/Y H:i') }}
                                         </span>
-                                        <h3 class="timeline-header">Consulta con {{ $consulta->patient->name }}</h3>
+                                        <h3 class="timeline-header">
+                                            Consulta con {{ optional($consulta->medicalHistory->patient)->name ?? 'Paciente' }}
+                                        </h3>
                                     </div>
                                 </li>
                             @endforeach
                         </ul>
                     @else
                         <div class="alert alert-info">
-                            No hay consultas registradas aún.
+                            <i class="icon fas fa-info-circle"></i> No hay consultas registradas aún.
                         </div>
                     @endif
                 </div>

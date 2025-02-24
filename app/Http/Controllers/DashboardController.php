@@ -38,13 +38,16 @@ class DashboardController extends Controller
                 abort(403, 'No autorizado');
             }
 
-            // Buscar información del médico
-            $medico = Medico::where('user_id', $user->id)->first();
+            // Buscar información del médico con consultas
+            $medico = Medico::with(['consultations' => function($query) {
+                $query->latest()->take(5);
+            }])->where('user_id', $user->id)->first();
             
             // Log para debugging
             Log::info('Búsqueda de médico:', [
                 'user_id' => $user->id,
-                'medico_encontrado' => $medico ? 'sí' : 'no'
+                'medico_encontrado' => $medico ? 'sí' : 'no',
+                'consultas_count' => $medico ? $medico->consultations()->count() : 0
             ]);
 
             if (!$medico) {
@@ -52,12 +55,6 @@ class DashboardController extends Controller
                     'user_id' => $user->id
                 ]);
                 throw new \Exception('No se encontró la información del médico');
-            }
-
-            // Verificar si el médico tiene la relación con consultations
-            if (!method_exists($medico, 'consultations')) {
-                Log::error('Método consultations no existe en modelo Medico');
-                throw new \Exception('Error en la configuración del modelo Médico');
             }
 
             return view('medico.dashboard', [
