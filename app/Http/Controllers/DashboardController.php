@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\Patient;
-use App\Models\Medico;
 use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
@@ -18,18 +17,21 @@ class DashboardController extends Controller
     public function index()
     {
         try {
-            // Obtener todos los médicos con sus relaciones
-            $medicos = Medico::with('user')
-                ->select('medicos.*')
+            // Obtener el médico actual
+            $medico = Auth::user()->medico;
+
+            // Obtener los pacientes del médico actual con sus historiales médicos
+            $patients = Patient::where('doctor_id', $medico->id)
+                ->with(['medicalHistory', 'medicalConsultations'])
                 ->get();
 
-            // Retornar la vista con los datos necesarios
-            return view('medicos.index', compact('medicos'));
+            // Retornar la vista con la lista de pacientes
+            return view('medicos.index', compact('patients'));
 
         } catch (\Exception $e) {
             Log::error('Error en dashboard médico: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
-            return back()->with('error', 'Error al cargar la lista de médicos');
+            return back()->with('error', 'Error al cargar la lista de pacientes');
         }
     }
 }
