@@ -15,10 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('cedula')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('type')->default('user');
+            $table->string('cedula')->unique();
+            $table->enum('type', ['admin', 'medico']);
             $table->boolean('first_login')->default(true);
             $table->rememberToken();
             $table->timestamps();
