@@ -16,39 +16,26 @@ class DashboardController extends Controller
         // Establecer la zona horaria para Quito
         date_default_timezone_set('America/Guayaquil');
         Carbon::setLocale('es');
-        
-        $this->middleware(function ($request, $next) {
-            if (Auth::user()->type !== 'medico') {
-                return redirect()->route('home');
-            }
-            return $next($request);
-        });
     }
 
     public function index()
     {
         try {
-            $user = auth()->user();
+            $medico = Auth::user()->medico;
             
-            if ($user->type !== 'medico') {
-                return redirect()->route('admin.medicos.index');
-            }
+            // Obtener estadísticas básicas
+            $totalPatients = Patient::where('doctor_id', $medico->id)->count();
 
-            $medico = $user->medico;
-            
-            if (!$medico) {
-                \Log::error('Médico no encontrado para el usuario: ' . $user->id);
-                return redirect()->route('login')->with('error', 'No se encontró información del médico');
-            }
+            // Obtener fecha y hora actual
+            $currentDate = Carbon::now()->locale('es')->isoFormat('dddd, D [de] MMMM [de] YYYY');
+            $currentTime = Carbon::now()->format('h:i A');
 
-            $data = [
-                'medico' => $medico,
-                'totalPatients' => Patient::where('doctor_id', $medico->id)->count(),
-                'currentDate' => now()->locale('es')->isoFormat('dddd, D [de] MMMM [de] YYYY'),
-                'currentTime' => now()->format('h:i A'),
-            ];
-
-            return view('medico.dashboard', $data);
+            return view('medico.dashboard', compact(
+                'medico',
+                'totalPatients',
+                'currentDate',
+                'currentTime'
+            ));
 
         } catch (\Exception $e) {
             \Log::error('Error en dashboard: ' . $e->getMessage());

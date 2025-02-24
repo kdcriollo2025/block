@@ -29,9 +29,9 @@ class InitialSeeder extends Seeder
                 ]
             );
 
-            // Crear médico de prueba
+            // Crear médico
             $medicoUser = User::firstOrCreate(
-                ['email' => 'medico@empresa.com'],
+                ['email' => 'jcmorales@empresa.com'],
                 [
                     'name' => 'Dr. Juan Carlos Morales',
                     'password' => Hash::make('password123'),
@@ -45,10 +45,9 @@ class InitialSeeder extends Seeder
             $medico = Medico::firstOrCreate(
                 ['user_id' => $medicoUser->id],
                 [
-                    'specialty' => 'Medicina General',
+                    'specialty' => 'Medicina Interna',
                     'phone' => '0991234567',
                     'cedula' => $medicoUser->cedula,
-                    'estado' => true
                 ]
             );
 

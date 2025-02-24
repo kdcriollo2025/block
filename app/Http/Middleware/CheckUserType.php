@@ -4,17 +4,22 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CheckUserType
 {
     public function handle(Request $request, Closure $next, $type)
     {
-        $user = $request->user();
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $user = Auth::user();
         
-        if (!$user || $user->type !== $type) {
-            if ($user && $user->type === 'admin') {
+        if ($user->type !== $type) {
+            if ($user->type === 'admin') {
                 return redirect()->route('admin.medicos.index');
-            } elseif ($user && $user->type === 'medico') {
+            } elseif ($user->type === 'medico') {
                 return redirect()->route('medico.dashboard');
             }
             return redirect()->route('login');
