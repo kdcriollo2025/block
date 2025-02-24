@@ -1,22 +1,25 @@
 @extends('adminlte::page')
 
-@section('title', 'Test Dashboard')
+@section('title', 'Dashboard de Prueba')
 
 @section('content_header')
-    <h1>Test Dashboard</h1>
+    <h1>Dashboard de Prueba</h1>
 @stop
 
 @section('content')
+    <div class="alert alert-info">
+        <h4>Información de Prueba</h4>
+        <p>{{ $test_message }}</p>
+    </div>
+
     <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Datos Básicos</h3>
+        </div>
         <div class="card-body">
-            <h3>Vista de Prueba</h3>
-            <p>{{ $test_message }}</p>
             <p>Fecha: {{ $currentDate }}</p>
             <p>Hora: {{ $currentTime }}</p>
-            
             <hr>
-            
-            <h4>Datos de Prueba:</h4>
             <p>Especialidad: {{ $medico['specialty'] }}</p>
             <p>Teléfono: {{ $medico['phone'] }}</p>
             <p>Cédula: {{ $medico['cedula'] }}</p>
