@@ -2,67 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Patient;
-use App\Models\MedicalConsultationRecord;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use App\Models\Medico;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(function ($request, $next) {
-            if (Auth::user()->type !== 'medico') {
-            return redirect()->route('home');
-            }
-             return $next($request);
-            });
-            
+        $this->middleware('auth');
+        $this->middleware('medico');
     }
 
     public function index()
     {
-         // Obtener el médico actual
-        $medico = Auth::user()->medico;
+        try {
+            // Obtener todos los médicos con sus relaciones
+            $medicos = Medico::with('user')
+                ->select('medicos.*')
+                ->get();
 
-        // Obtener el total de pacientes
-        $totalPatients = Patient::where('doctor_id', $medico->id)->count();
+            // Retornar la vista con los datos necesarios
+            return view('medicos.index', compact('medicos'));
 
-        // Obtener el total de consultas médicas
-        $totalConsultations = MedicalConsultationRecord::whereHas('medicalHistory.patient', function($query) use ($medico) {
-            $query->where('doctor_id', $medico->id);
-        })->count();
-
-        // Obtener la fecha actual en formato español
-        $currentDate = Carbon::now()->locale('es')->isoFormat('dddd, D [de] MMMM [de] YYYY');
-        $currentTime = Carbon::now()->format('h:i A');
-
-        // Obtener consultas por mes (últimos 6 meses)
-        $consultationsByMonth = DB::table('medical_consultation_records')
-            ->join('medical_histories', 'medical_consultation_records.medical_history_id', '=', 'medical_histories.id')
-            ->join('patients', 'medical_histories.patient_id', '=', 'patients.id')
-            ->where('patients.doctor_id', $medico->id)
-            ->where('consultation_date', '>=', now()->subMonths(6))
-            ->select(DB::raw('DATE_TRUNC(\'month\', consultation_date) as month'), DB::raw('COUNT(*) as total'))
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->map(function($item) {
-                return [
-                    'month' => Carbon::parse($item->month)->locale('es')->isoFormat('MMMM YYYY'),
-                    'total' => $item->total
-                ];
-            });
-
-        return view('medico.dashboard', compact(
-            'medico',
-            'totalPatients',
-            'totalConsultations',
-            'consultationsByMonth',
-            'currentDate',
-            'currentTime'
-        ));
+        } catch (\Exception $e) {
+            Log::error('Error en dashboard médico: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            return back()->with('error', 'Error al cargar la lista de médicos');
+        }
     }
 }
