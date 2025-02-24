@@ -18,14 +18,22 @@ class PatientController extends Controller
     public function index()
     {
         try {
-            $medico = Auth::user()->medico;
-            $patients = Patient::where('medico_id', $medico->id)
+            // Obtener el médico autenticado
+            $user = Auth::user();
+            if (!$user || !$user->medico) {
+                \Log::error('Usuario sin registro de médico: ' . ($user ? $user->id : 'no auth'));
+                return redirect()->route('login')->with('error', 'Acceso no autorizado');
+            }
+
+            // Obtener los pacientes del médico
+            $patients = Patient::where('medico_id', $user->medico->id)
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
 
             return view('medico.patients.index', compact('patients'));
         } catch (\Exception $e) {
             \Log::error('Error en PatientController@index: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
             return redirect()->back()->with('error', 'Hubo un error al cargar los pacientes.');
         }
     }
@@ -48,7 +56,7 @@ class PatientController extends Controller
             'blood_type' => 'required|string|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
         ]);
 
-        $validated['doctor_id'] = Auth::user()->medico->id;
+        $validated['medico_id'] = Auth::user()->medico->id;
         
         Patient::create($validated);
 

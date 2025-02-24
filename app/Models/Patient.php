@@ -14,16 +14,15 @@ class Patient extends Model
     use HasFactory;
 
     protected $fillable = [
-        'doctor_id',
         'name',
-        'email',
         'cedula',
-        'phone',
-        'address',
         'birth_date',
         'gender',
+        'address',
+        'email',
+        'phone',
         'blood_type',
-        'allergies'
+        'medico_id'
     ];
 
     protected $casts = [
@@ -41,9 +40,9 @@ class Patient extends Model
     /**
      * Get the doctor that owns the patient.
      */
-    public function doctor(): BelongsTo
+    public function medico(): BelongsTo
     {
-        return $this->belongsTo(Medico::class, 'doctor_id');
+        return $this->belongsTo(Medico::class);
     }
 
     /**

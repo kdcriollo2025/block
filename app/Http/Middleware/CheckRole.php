@@ -23,6 +23,10 @@ class CheckRole
         }
 
         if (auth()->user()->type === $role) {
+            if ($role === 'medico' && !auth()->user()->medico) {
+                \Log::error('Usuario médico sin registro en tabla medicos: ' . auth()->id());
+                return redirect('/')->with('error', 'Tu cuenta no está correctamente configurada');
+            }
             return $next($request);
         }
 
