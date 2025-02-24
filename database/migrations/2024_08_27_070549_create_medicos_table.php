@@ -15,12 +15,17 @@ return new class extends Migration
         
         Schema::create('medicos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
             $table->string('specialty')->nullable();
             $table->string('phone')->nullable();
             $table->string('cedula')->nullable();
             $table->boolean('estado')->default(true);
             $table->timestamps();
+
+            $table->foreign('user_id')
+                  ->references('id')
+                  ->on('users')
+                  ->onDelete('cascade');
         });
     }
 
