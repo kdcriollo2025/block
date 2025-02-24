@@ -31,8 +31,8 @@ class PatientController extends Controller
                 ->with(['medicalHistory'])
                 ->get();
 
-            // Retornar la vista con los pacientes
-            return view('medicos.index', compact('patients'));
+            // Retornar la vista correcta
+            return view('medico.patients.index', compact('patients'));
 
         } catch (\Exception $e) {
             Log::error('Error en PatientController@index: ' . $e->getMessage());
@@ -63,14 +63,14 @@ class PatientController extends Controller
         
         Patient::create($validated);
 
-        return redirect()->route('medico.patients.index')
+        return redirect()->route('medicos.patients.index')
             ->with('success', 'Paciente creado exitosamente.');
     }
 
     public function show(Patient $patient)
     {
         if ($patient->doctor_id !== Auth::user()->medico->id) {
-            return redirect()->route('medico.patients.index');
+            return redirect()->route('medicos.patients.index');
         }
 
         return view('patients.show', compact('patient'));
