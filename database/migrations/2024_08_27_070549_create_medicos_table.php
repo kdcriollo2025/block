@@ -15,14 +15,11 @@ return new class extends Migration
         
         Schema::create('medicos', function (Blueprint $table) {
             $table->id();
-<<<<<<< HEAD
             $table->unsignedBigInteger('user_id');
             $table->string('specialty')->nullable();
             $table->string('phone')->nullable();
             $table->string('cedula')->nullable();
             $table->boolean('estado')->default(true);
-=======
->>>>>>> 6fbd697 (Update medicos migration and model)
             $table->timestamps();
 
             $table->foreign('user_id')
