@@ -27,10 +27,13 @@ class CheckRole
         foreach($roles as $role) {
             if($user->type === $role) {
                 // Si es médico, verificar que tenga registro en la tabla medicos
-                if ($role === 'medico' && !$user->medico) {
-                    \Log::error('Usuario médico sin registro en tabla medicos: ' . $user->id);
-                    return redirect()->route('login')
-                        ->with('error', 'Tu cuenta no está correctamente configurada');
+                if ($role === 'medico') {
+                    if (!$user->medico) {
+                        \Log::error('Usuario médico sin registro en tabla medicos: ' . $user->id);
+                        return redirect()->route('login')
+                            ->with('error', 'Tu cuenta no está correctamente configurada');
+                    }
+                    return $next($request);
                 }
                 return $next($request);
             }

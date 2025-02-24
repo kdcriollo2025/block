@@ -83,9 +83,7 @@ Route::middleware(['auth', 'check.role:admin'])->group(function () {
 // Rutas para médicos
 Route::middleware(['auth', 'check.role:medico'])->group(function () {
     Route::prefix('medicos')->name('medicos.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('medico.dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         
         Route::resource('patients', PatientController::class);
         
