@@ -24,33 +24,34 @@ class InitialSeeder extends Seeder
             $admin = User::firstOrCreate(
                 ['email' => 'admin@empresa.com'],
                 [
-                    'name' => 'Admin Principal',
-                    'password' => Hash::make('password123'),
-                    'cedula' => '1716234578',
+                    'name' => 'Admin',
+                    'password' => Hash::make('password'),
+                    'cedula' => '1234567890',
                     'type' => 'admin',
-                    'first_login' => false,
+                    'first_login' => false
                 ]
             );
 
             // Crear médico
-            $medicoUser = User::firstOrCreate(
+            $medico = User::firstOrCreate(
                 ['email' => 'medico@empresa.com'],
                 [
-                    'name' => 'Dr. Juan Carlos Morales',
-                    'password' => Hash::make('password123'),
-                    'cedula' => '1715678234',
+                    'name' => 'Médico',
+                    'password' => Hash::make('password'),
+                    'cedula' => '0987654321',
                     'type' => 'medico',
-                    'first_login' => false,
+                    'first_login' => true
                 ]
             );
 
             // Crear el registro en la tabla médicos
-            $medico = Medico::firstOrCreate(
-                ['user_id' => $medicoUser->id],
+            Medico::firstOrCreate(
+                ['user_id' => $medico->id],
                 [
-                    'specialty' => 'Medicina Interna',
-                    'phone' => '0991234567',
-                    'cedula' => $medicoUser->cedula,
+                    'specialty' => 'General',
+                    'phone' => '1234567890',
+                    'cedula' => $medico->cedula,
+                    'estado' => true
                 ]
             );
 
@@ -58,7 +59,7 @@ class InitialSeeder extends Seeder
 
             \Log::info('Seeder ejecutado correctamente');
             \Log::info('Admin creado: ' . $admin->email);
-            \Log::info('Médico creado: ' . $medicoUser->email);
+            \Log::info('Médico creado: ' . $medico->email);
 
             // Crear pacientes con datos ecuatorianos
             for ($i = 0; $i < 100; $i++) {
