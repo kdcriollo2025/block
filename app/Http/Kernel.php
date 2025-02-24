@@ -68,10 +68,6 @@ class Kernel extends HttpKernel
         'type' => \App\Http\Middleware\CheckUserType::class,
         'medico' => \App\Http\Middleware\MedicoMiddleware::class,
         'admin' => \App\Http\Middleware\CheckUserType::class . ':admin',
-    ];
-
-    protected $routeMiddleware = [
-        // ... otros middlewares ...
         'role' => \App\Http\Middleware\CheckRole::class,
     ];
 }
