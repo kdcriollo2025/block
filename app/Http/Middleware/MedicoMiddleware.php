@@ -5,22 +5,32 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class MedicoMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        // Verificar si el usuario está autenticado y es médico
-        if (!Auth::check() || Auth::user()->type !== 'medico') {
+        try {
+            if (!Auth::check()) {
+                Log::warning('Usuario no autenticado intentando acceder a ruta de médico');
+                return redirect()->route('login');
+            }
+
+            $user = Auth::user();
+            if ($user->type !== 'medico' || !$user->medico) {
+                Log::warning('Usuario no médico o sin registro de médico intentando acceder', [
+                    'user_id' => $user->id,
+                    'type' => $user->type
+                ]);
+                return redirect()->route('login')
+                    ->with('error', 'No tienes acceso a esta sección');
+            }
+
+            return $next($request);
+        } catch (\Exception $e) {
+            Log::error('Error en MedicoMiddleware: ' . $e->getMessage());
             return redirect()->route('login');
         }
-
-        // Verificar si tiene registro en la tabla médicos
-        if (!Auth::user()->medico) {
-            return redirect()->route('login')
-                ->with('error', 'Cuenta de médico no configurada correctamente');
-        }
-
-        return $next($request);
     }
 } 

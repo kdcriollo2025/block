@@ -18,26 +18,42 @@ class PatientController extends Controller
     public function index()
     {
         try {
-            // Obtener el médico actual
-            $medico = Auth::user()->medico;
+            Log::info('Iniciando PatientController@index');
             
-            if (!$medico) {
-                Log::error('Médico no encontrado para el usuario: ' . Auth::id());
-                return back()->with('error', 'Error de configuración de cuenta médica');
+            // Verificar usuario autenticado
+            if (!Auth::check()) {
+                Log::warning('Usuario no autenticado intentando acceder a patients.index');
+                return redirect()->route('login');
             }
 
-            // Obtener los pacientes del médico actual
-            $patients = Patient::where('doctor_id', $medico->id)
+            // Verificar que el usuario es médico
+            $user = Auth::user();
+            if (!$user->medico) {
+                Log::error('Usuario sin registro de médico intentando acceder: ' . $user->id);
+                return redirect()->route('login')
+                    ->with('error', 'No tienes acceso a esta sección');
+            }
+
+            // Obtener pacientes con eager loading
+            $patients = Patient::where('doctor_id', $user->medico->id)
                 ->with(['medicalHistory'])
                 ->get();
 
-            // Retornar la vista correcta
+            Log::info('Pacientes obtenidos exitosamente', ['count' => $patients->count()]);
+
             return view('medico.patients.index', compact('patients'));
 
         } catch (\Exception $e) {
             Log::error('Error en PatientController@index: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
-            return back()->with('error', 'Error al cargar la lista de pacientes');
+            
+            // En producción, mostrar un mensaje genérico
+            if (app()->environment('production')) {
+                return back()->with('error', 'Ocurrió un error al cargar los pacientes');
+            }
+            
+            // En desarrollo, mostrar el error específico
+            throw $e;
         }
     }
 
