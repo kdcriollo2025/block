@@ -13,10 +13,10 @@ class Medico extends Model
 
     protected $fillable = [
         'user_id',
-        'specialty',
+        'especialidad',
+        'estado',
         'phone',
-        'cedula',
-        'estado'
+        'cedula'
     ];
 
     protected $casts = [
@@ -28,7 +28,7 @@ class Medico extends Model
      */
     public function pacientes()
     {
-        return $this->hasMany(Patient::class, 'doctor_id');
+        return $this->hasMany(Patient::class);
     }
 
     /**

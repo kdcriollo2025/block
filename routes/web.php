@@ -79,26 +79,20 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
 // Rutas para médicos
 Route::middleware(['auth', 'role:medico'])->prefix('medicos')->name('medicos.')->group(function () {
-    // Dashboard del médico
     Route::get('/dashboard', function () {
         return view('medico.dashboard');
     })->name('dashboard');
 
-    // Rutas para pacientes
     Route::resource('patients', PatientController::class);
     
-    // Rutas para historias médicas
     Route::get('medical_histories/{medicalHistory}/download-pdf', [MedicalHistoryController::class, 'downloadPdf'])
         ->name('medical_histories.download-pdf');
     Route::resource('medical_histories', MedicalHistoryController::class);
     
-    // Rutas para alergias
     Route::resource('allergy_records', AllergyRecordController::class);
     
-    // Rutas para cirugías
     Route::resource('surgery_records', SurgeryRecordController::class);
     
-    // Rutas para consultas médicas
     Route::get('medical-consultation-records', [MedicalConsultationRecordController::class, 'index'])
         ->name('medical_consultation_records.index');
     Route::get('medical-histories/{medicalHistory}/consultations/create', [MedicalConsultationRecordController::class, 'create'])
@@ -106,10 +100,8 @@ Route::middleware(['auth', 'role:medico'])->prefix('medicos')->name('medicos.')-
     Route::post('medical-consultation-records', [MedicalConsultationRecordController::class, 'store'])
         ->name('medical_consultation_records.store');
     
-    // Rutas para terapias
     Route::resource('therapy_records', TherapyRecordController::class);
     
-    // Rutas para vacunas
     Route::resource('vaccination_records', VaccinationRecordController::class);
 });
 

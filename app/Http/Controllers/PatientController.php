@@ -18,42 +18,15 @@ class PatientController extends Controller
     public function index()
     {
         try {
-            Log::info('Iniciando PatientController@index');
-            
-            // Verificar usuario autenticado
-            if (!Auth::check()) {
-                Log::warning('Usuario no autenticado intentando acceder a patients.index');
-                return redirect()->route('login');
-            }
-
-            // Verificar que el usuario es médico
-            $user = Auth::user();
-            if (!$user->medico) {
-                Log::error('Usuario sin registro de médico intentando acceder: ' . $user->id);
-                return redirect()->route('login')
-                    ->with('error', 'No tienes acceso a esta sección');
-            }
-
-            // Obtener pacientes con eager loading
-            $patients = Patient::where('doctor_id', $user->medico->id)
-                ->with(['medicalHistory'])
-                ->get();
-
-            Log::info('Pacientes obtenidos exitosamente', ['count' => $patients->count()]);
+            $medico = Auth::user()->medico;
+            $patients = Patient::where('medico_id', $medico->id)
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
 
             return view('medico.patients.index', compact('patients'));
-
         } catch (\Exception $e) {
-            Log::error('Error en PatientController@index: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
-            
-            // En producción, mostrar un mensaje genérico
-            if (app()->environment('production')) {
-                return back()->with('error', 'Ocurrió un error al cargar los pacientes');
-            }
-            
-            // En desarrollo, mostrar el error específico
-            throw $e;
+            \Log::error('Error en PatientController@index: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Hubo un error al cargar los pacientes.');
         }
     }
 
