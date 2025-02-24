@@ -41,7 +41,7 @@ class Patient extends Model
     /**
      * Get the doctor that owns the patient.
      */
-    public function doctor(): BelongsTo
+    public function doctor()
     {
         return $this->belongsTo(Medico::class, 'doctor_id');
     }
