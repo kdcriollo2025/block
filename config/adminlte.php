@@ -297,7 +297,7 @@ return [
         // Menú para médicos
         [
             'text' => 'Pacientes',
-            'url'  => 'medico/patients',
+            'url'  => 'medicos/patients',
             'icon' => 'fas fa-users',
             'can'  => 'medico'
         ],

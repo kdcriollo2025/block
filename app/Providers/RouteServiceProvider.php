@@ -18,7 +18,7 @@ class RouteServiceProvider extends ServiceProvider
      * @var string
      */
     public const HOME = '/admin/medicos';
-    public const HOME_MEDICO = '/medico/patients';
+    public const HOME_MEDICO = '/medicos/patients';
 
     /**
      * Define your route model bindings, pattern filters, and other route configuration.
@@ -42,7 +42,7 @@ class RouteServiceProvider extends ServiceProvider
     protected function authenticated($request, $user)
     {
         if ($user->type === 'medico') {
-            return redirect()->route('medico.patients.index');
+            return redirect()->route('medicos.patients.index');
         }
         return redirect('/home');
     }
