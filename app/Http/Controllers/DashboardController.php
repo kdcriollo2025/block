@@ -7,6 +7,7 @@ use App\Models\Patient;
 use App\Models\MedicalConsultationRecord;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -20,56 +21,69 @@ class DashboardController extends Controller
     {
         try {
             $user = Auth::user();
-            
-            // Debug paso 1: Verificar usuario
-            \Log::info('Usuario autenticado:', [
-                'id' => $user->id,
-                'type' => $user->type,
-                'name' => $user->name
+            Log::info('1. Usuario autenticado', ['user' => $user->toArray()]);
+
+            // Verificar si el usuario existe en la tabla médicos
+            $medicoQuery = DB::select("
+                SELECT m.*, u.name as doctor_name 
+                FROM medicos m 
+                JOIN users u ON u.id = m.user_id 
+                WHERE m.user_id = ?
+            ", [$user->id]);
+
+            Log::info('2. Query médico', [
+                'sql' => "SELECT m.*, u.name FROM medicos m JOIN users u ON u.id = m.user_id WHERE m.user_id = {$user->id}",
+                'result' => $medicoQuery
             ]);
 
-            // Debug paso 2: Verificar relación médico
-            $medico = DB::table('medicos')
-                ->select('medicos.*', 'users.name as user_name')
-                ->join('users', 'users.id', '=', 'medicos.user_id')
-                ->where('medicos.user_id', $user->id)
-                ->first();
-
-            \Log::info('Datos del médico desde DB:', ['medico' => $medico]);
-
-            if (!$medico) {
-                \Log::error('Médico no encontrado para usuario: ' . $user->id);
+            if (empty($medicoQuery)) {
+                Log::error('3. Médico no encontrado', ['user_id' => $user->id]);
                 return redirect()->route('home')->with('error', 'No se encontró información del médico');
             }
 
-            // Debug paso 3: Verificar conteos
-            $totalPatients = DB::table('patients')
-                ->where('doctor_id', $medico->id)
-                ->count();
+            $medico = $medicoQuery[0];
+            
+            // Contar pacientes
+            $totalPatients = DB::select("
+                SELECT COUNT(*) as total 
+                FROM patients 
+                WHERE doctor_id = ?
+            ", [$medico->id])[0]->total;
 
-            $totalConsultations = DB::table('medical_consultation_records')
-                ->join('medical_histories', 'medical_consultation_records.medical_history_id', '=', 'medical_histories.id')
-                ->join('patients', 'medical_histories.patient_id', '=', 'patients.id')
-                ->where('patients.doctor_id', $medico->id)
-                ->count();
+            Log::info('4. Total pacientes', ['total' => $totalPatients]);
 
-            \Log::info('Conteos:', [
-                'patients' => $totalPatients,
-                'consultations' => $totalConsultations
-            ]);
+            // Contar consultas
+            $totalConsultations = DB::select("
+                SELECT COUNT(*) as total 
+                FROM medical_consultation_records mcr
+                JOIN medical_histories mh ON mh.id = mcr.medical_history_id
+                JOIN patients p ON p.id = mh.patient_id
+                WHERE p.doctor_id = ?
+            ", [$medico->id])[0]->total;
 
-            return view('medico.dashboard', [
+            Log::info('5. Total consultas', ['total' => $totalConsultations]);
+
+            // Preparar datos para la vista
+            $data = [
                 'medico' => $medico,
                 'totalPatients' => $totalPatients,
                 'totalConsultations' => $totalConsultations,
                 'currentDate' => Carbon::now()->locale('es')->isoFormat('dddd, D [de] MMMM [de] YYYY'),
                 'currentTime' => Carbon::now()->format('h:i A')
-            ]);
+            ];
+
+            Log::info('6. Datos para la vista', $data);
+
+            return view('medico.dashboard', $data);
 
         } catch (\Exception $e) {
-            \Log::error('Error en dashboard: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
-            throw $e; // En desarrollo, mostrar el error completo
+            Log::error('Error en dashboard', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
         }
     }
 } 
