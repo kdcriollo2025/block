@@ -19,6 +19,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\BlockchainNFT;
+use App\Http\Controllers\Admin\AdminController;
 
 /*
 |-------------------------------------------------------------------------- 
@@ -60,52 +61,49 @@ Route::get('password/reset/{token}', [ResetPasswordController::class, 'showReset
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 // Rutas para administrador
-Route::middleware(['auth', 'check.role:admin'])->group(function () {
-    Route::prefix('admin')->name('admin.')->group(function () {
-        Route::resource('medicos', MedicoController::class);
-        Route::patch('medicos/{medico}/toggle-estado', [MedicoController::class, 'toggleEstado'])
-            ->name('medicos.toggle-estado');
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/medicos', [AdminController::class, 'medicos'])->name('admin.medicos');
+    Route::resource('medicos', MedicoController::class);
+    Route::patch('medicos/{medico}/toggle-estado', [MedicoController::class, 'toggleEstado'])
+        ->name('medicos.toggle-estado');
 
-        // Rutas de reportes
-        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-        Route::get('/reports/patients-per-doctor', [ReportController::class, 'patientsPerDoctor'])
-            ->name('reports.patients-per-doctor');
-        Route::get('/reports/common-diagnoses', [ReportController::class, 'commonDiagnoses'])->name('reports.common-diagnoses');
-        Route::get('/reports/consultations-over-time', [ReportController::class, 'consultationsOverTime'])
-            ->name('reports.consultations-over-time');
-        Route::prefix('reports')->name('reports.')->group(function () {
-            Route::get('/patient-demographics', [ReportController::class, 'patientDemographics'])
-                ->name('patient-demographics');
-        });
+    // Rutas de reportes
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/patients-per-doctor', [ReportController::class, 'patientsPerDoctor'])
+        ->name('reports.patients-per-doctor');
+    Route::get('/reports/common-diagnoses', [ReportController::class, 'commonDiagnoses'])->name('reports.common-diagnoses');
+    Route::get('/reports/consultations-over-time', [ReportController::class, 'consultationsOverTime'])
+        ->name('reports.consultations-over-time');
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/patient-demographics', [ReportController::class, 'patientDemographics'])
+            ->name('patient-demographics');
     });
 });
 
 // Rutas para médicos
-Route::middleware(['auth', 'check.role:medico'])->group(function () {
-    Route::prefix('medicos')->name('medicos.')->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        
-        Route::resource('patients', PatientController::class);
-        
-        Route::get('medical_histories/{medicalHistory}/download-pdf', [MedicalHistoryController::class, 'downloadPdf'])
-            ->name('medical_histories.download-pdf');
-        Route::resource('medical_histories', MedicalHistoryController::class);
-        
-        Route::resource('allergy_records', AllergyRecordController::class);
-        
-        Route::resource('surgery_records', SurgeryRecordController::class);
-        
-        Route::get('medical-consultation-records', [MedicalConsultationRecordController::class, 'index'])
-            ->name('medical_consultation_records.index');
-        Route::get('medical-histories/{medicalHistory}/consultations/create', [MedicalConsultationRecordController::class, 'create'])
-            ->name('medical_consultation_records.create');
-        Route::post('medical-consultation-records', [MedicalConsultationRecordController::class, 'store'])
-            ->name('medical_consultation_records.store');
-        
-        Route::resource('therapy_records', TherapyRecordController::class);
-        
-        Route::resource('vaccination_records', VaccinationRecordController::class);
-    });
+Route::middleware(['auth', 'role:medico'])->prefix('medicos')->group(function () {
+    Route::get('/dashboard', [MedicoController::class, 'dashboard'])->name('medico.dashboard');
+    Route::resource('patients', PatientController::class);
+    
+    Route::get('medical_histories/{medicalHistory}/download-pdf', [MedicalHistoryController::class, 'downloadPdf'])
+        ->name('medical_histories.download-pdf');
+    Route::resource('medical_histories', MedicalHistoryController::class);
+    
+    Route::resource('allergy_records', AllergyRecordController::class);
+    
+    Route::resource('surgery_records', SurgeryRecordController::class);
+    
+    Route::get('medical-consultation-records', [MedicalConsultationRecordController::class, 'index'])
+        ->name('medical_consultation_records.index');
+    Route::get('medical-histories/{medicalHistory}/consultations/create', [MedicalConsultationRecordController::class, 'create'])
+        ->name('medical_consultation_records.create');
+    Route::post('medical-consultation-records', [MedicalConsultationRecordController::class, 'store'])
+        ->name('medical_consultation_records.store');
+    
+    Route::resource('therapy_records', TherapyRecordController::class);
+    
+    Route::resource('vaccination_records', VaccinationRecordController::class);
 });
 
 // Rutas para cambio de contraseña

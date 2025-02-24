@@ -68,12 +68,12 @@ class Kernel extends HttpKernel
         'type' => \App\Http\Middleware\CheckUserType::class,
         'medico' => \App\Http\Middleware\MedicoMiddleware::class,
         'admin' => \App\Http\Middleware\CheckUserType::class . ':admin',
-        'role' => \App\Http\Middleware\CheckRole::class,
+        'role' => \App\Http\Middleware\CheckUserRole::class,
         'check.role' => \App\Http\Middleware\CheckRole::class,
     ];
 
-    // Eliminar o comentar esta sección si existe
-    // protected $routeMiddleware = [
-    //     'check.role' => \App\Http\Middleware\CheckRole::class,
-    // ];
+    protected $routeMiddleware = [
+        // ... otros middlewares
+        'role' => \App\Http\Middleware\CheckUserRole::class,
+    ];
 }
