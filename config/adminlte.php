@@ -296,15 +296,9 @@ return [
     'menu' => [
         // Menú para médicos
         [
-            'text' => 'Dashboard',
-            'url'  => 'medico/dashboard',
-            'icon' => 'fas fa-fw fa-home',
-            'can'  => 'medico'
-        ],
-        [
             'text' => 'Pacientes',
             'url'  => 'medico/patients',
-            'icon' => 'fas fa-fw fa-users',
+            'icon' => 'fas fa-users',
             'can'  => 'medico'
         ],
         [

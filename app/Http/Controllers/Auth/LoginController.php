@@ -81,7 +81,7 @@ class LoginController extends Controller
             return redirect('/admin/medicos');
         }
 
-        return redirect('/medico/dashboard');
+        return redirect('/home');
     }
 
     protected function loggedOut(Request $request)
