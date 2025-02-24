@@ -107,123 +107,120 @@
     array (
       0 => 
       array (
-        'header' => 'MENÚ MÉDICO',
-        'can' => 'medico',
+        'type' => 'navbar-search',
+        'text' => 'search',
+        'topnav_right' => true,
       ),
       1 => 
       array (
-        'text' => 'Dashboard',
-        'url' => 'medico/dashboard',
-        'icon' => 'fas fa-fw fa-home',
-        'can' => 'medico',
+        'type' => 'fullscreen-widget',
+        'topnav_right' => true,
       ),
       2 => 
       array (
-        'text' => 'Pacientes',
-        'url' => 'medico/patients',
-        'icon' => 'fas fa-fw fa-users',
-        'can' => 'medico',
+        'type' => 'sidebar-menu-search',
+        'text' => 'search',
       ),
       3 => 
       array (
-        'text' => 'Historias Médicas',
-        'url' => 'medico/medical_histories',
-        'icon' => 'fas fa-fw fa-file-medical',
-        'can' => 'medico',
+        'text' => 'blog',
+        'url' => 'admin/blog',
+        'can' => 'manage-blog',
       ),
       4 => 
       array (
-        'text' => 'Alergias',
-        'url' => 'medico/allergy_records',
-        'icon' => 'fas fa-fw fa-allergies',
-        'can' => 'medico',
+        'text' => 'pages',
+        'url' => 'admin/pages',
+        'icon' => 'far fa-fw fa-file',
+        'label' => 4,
+        'label_color' => 'success',
       ),
       5 => 
       array (
-        'text' => 'Cirugías',
-        'url' => 'medico/surgery_records',
-        'icon' => 'fas fa-fw fa-procedures',
-        'can' => 'medico',
+        'header' => 'account_settings',
       ),
       6 => 
       array (
-        'text' => 'Consultas Médicas',
-        'url' => 'medico/medical-consultation-records',
-        'icon' => 'fas fa-fw fa-stethoscope',
-        'can' => 'medico',
+        'text' => 'profile',
+        'url' => 'admin/settings',
+        'icon' => 'fas fa-fw fa-user',
       ),
       7 => 
       array (
-        'text' => 'Terapias',
-        'url' => 'medico/therapy_records',
-        'icon' => 'fas fa-fw fa-hand-holding-medical',
-        'can' => 'medico',
+        'text' => 'change_password',
+        'url' => 'admin/settings',
+        'icon' => 'fas fa-fw fa-lock',
       ),
       8 => 
       array (
-        'text' => 'Vacunas',
-        'url' => 'medico/vaccination_records',
-        'icon' => 'fas fa-fw fa-syringe',
-        'can' => 'medico',
-      ),
-      9 => 
-      array (
-        'header' => 'ADMINISTRACIÓN',
-        'can' => 'admin',
-      ),
-      10 => 
-      array (
-        'text' => 'Médicos',
-        'url' => 'admin/medicos',
-        'icon' => 'fas fa-user-md',
-        'can' => 'admin',
-      ),
-      11 => 
-      array (
-        'text' => 'Reportes',
-        'url' => 'admin/reports',
-        'icon' => 'fas fa-chart-line',
-        'can' => 'admin',
+        'text' => 'multilevel',
+        'icon' => 'fas fa-fw fa-share',
         'submenu' => 
         array (
           0 => 
           array (
-            'text' => 'Vista General',
-            'url' => 'admin/reports',
-            'icon' => 'fas fa-home',
+            'text' => 'level_one',
+            'url' => '#',
           ),
           1 => 
           array (
-            'text' => 'Pacientes por Médico',
-            'url' => 'admin/reports/patients-per-doctor',
-            'icon' => 'fas fa-user-md',
+            'text' => 'level_one',
+            'url' => '#',
+            'submenu' => 
+            array (
+              0 => 
+              array (
+                'text' => 'level_two',
+                'url' => '#',
+              ),
+              1 => 
+              array (
+                'text' => 'level_two',
+                'url' => '#',
+                'submenu' => 
+                array (
+                  0 => 
+                  array (
+                    'text' => 'level_three',
+                    'url' => '#',
+                  ),
+                  1 => 
+                  array (
+                    'text' => 'level_three',
+                    'url' => '#',
+                  ),
+                ),
+              ),
+            ),
           ),
           2 => 
           array (
-            'text' => 'Diagnósticos Frecuentes',
-            'url' => 'admin/reports/common-diagnoses',
-            'icon' => 'fas fa-stethoscope',
-          ),
-          3 => 
-          array (
-            'text' => 'Consultas en el Tiempo',
-            'url' => 'admin/reports/consultations-over-time',
-            'icon' => 'fas fa-chart-area',
-          ),
-          4 => 
-          array (
-            'text' => 'Demografía de Pacientes',
-            'url' => 'admin/reports/patient-demographics',
-            'icon' => 'fas fa-users',
+            'text' => 'level_one',
+            'url' => '#',
           ),
         ),
       ),
+      9 => 
+      array (
+        'header' => 'labels',
+      ),
+      10 => 
+      array (
+        'text' => 'important',
+        'icon_color' => 'red',
+        'url' => '#',
+      ),
+      11 => 
+      array (
+        'text' => 'warning',
+        'icon_color' => 'yellow',
+        'url' => '#',
+      ),
       12 => 
       array (
-        'text' => 'Cambiar Contraseña',
-        'url' => 'change-password',
-        'icon' => 'fas fa-key',
-        'topnav_right' => true,
+        'text' => 'information',
+        'icon_color' => 'cyan',
+        'url' => '#',
       ),
     ),
     'filters' => 
@@ -352,11 +349,6 @@
       ),
     ),
     'livewire' => false,
-    'enabled_laravel_mix' => false,
-    'laravel_mix_css_path' => 'css/app.css',
-    'laravel_mix_js_path' => 'js/app.js',
-    'login_message' => 'Inicio de sesión',
-    'remember_me_enabled' => false,
   ),
   'app' => 
   array (
