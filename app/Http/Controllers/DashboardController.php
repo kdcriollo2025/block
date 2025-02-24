@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Patient;
 use App\Models\Medico;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -19,7 +20,15 @@ class DashboardController extends Controller
     public function index()
     {
         try {
-            return view('medico.dashboard');
+            // Obtener la fecha y hora actual
+            $now = Carbon::now();
+            
+            $data = [
+                'currentDate' => $now->format('d/m/Y'),
+                'currentTime' => $now->format('H:i:s'),
+            ];
+
+            return view('medico.dashboard', $data);
         } catch (\Exception $e) {
             \Log::error('Error en DashboardController@index: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error al cargar el dashboard');
