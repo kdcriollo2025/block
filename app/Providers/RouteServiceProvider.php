@@ -26,7 +26,10 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->configureRateLimiting();
+        // Configurar el rate limiting para la API
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
 
         $this->routes(function () {
             Route::middleware('web')
@@ -38,6 +41,19 @@ class RouteServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * Configure the rate limiters for the application.
+     */
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+    }
+
+    /**
+     * Handle the authenticated user redirection.
+     */
     protected function authenticated($request, $user)
     {
         if ($user->type === 'medico') {
