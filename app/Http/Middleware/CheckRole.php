@@ -16,23 +16,24 @@ class CheckRole
      * @param  string  $role
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, $role)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
         if (!Auth::check()) {
-            return redirect()->route('login');
+            return redirect('login');
         }
 
         $user = Auth::user();
-
-        // Verificar el tipo de usuario
-        if ($user->type === $role) {
-            // Si es médico, verificar que tenga registro en la tabla medicos
-            if ($role === 'medico' && !$user->medico) {
-                \Log::error('Usuario médico sin registro en tabla medicos: ' . $user->id);
-                return redirect()->route('login')
-                    ->with('error', 'Tu cuenta no está correctamente configurada');
+        
+        foreach($roles as $role) {
+            if($user->type === $role) {
+                // Si es médico, verificar que tenga registro en la tabla medicos
+                if ($role === 'medico' && !$user->medico) {
+                    \Log::error('Usuario médico sin registro en tabla medicos: ' . $user->id);
+                    return redirect()->route('login')
+                        ->with('error', 'Tu cuenta no está correctamente configurada');
+                }
+                return $next($request);
             }
-            return $next($request);
         }
 
         // Redirigir según el tipo de usuario
@@ -44,7 +45,6 @@ class CheckRole
             return redirect()->route('medicos.dashboard');
         }
 
-        return redirect()->route('login')
-            ->with('error', 'No tienes permiso para acceder a esta sección');
+        abort(403, 'Unauthorized action.');
     }
 } 

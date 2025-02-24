@@ -59,8 +59,8 @@ Route::post('register', [RegisterController::class, 'register']);
 Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
-// Rutas para administradores
-Route::middleware(['auth', 'role:admin'])->group(function () {
+// Rutas para administrador
+Route::middleware(['auth', 'check.role:admin'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('medicos', MedicoController::class);
         Route::patch('medicos/{medico}/toggle-estado', [MedicoController::class, 'toggleEstado'])
@@ -81,7 +81,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 // Rutas para médicos
-Route::middleware(['auth', 'role:medico'])->group(function () {
+Route::middleware(['auth', 'check.role:medico'])->group(function () {
     Route::prefix('medicos')->name('medicos.')->group(function () {
         Route::get('/dashboard', function () {
             return view('medico.dashboard');
