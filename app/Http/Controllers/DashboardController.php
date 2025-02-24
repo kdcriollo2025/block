@@ -13,33 +13,29 @@ class DashboardController extends Controller
 {
     public function __construct()
     {
-        // Establecer la zona horaria para Quito
-        date_default_timezone_set('America/Guayaquil');
-        Carbon::setLocale('es');
+        $this->middleware('auth');
+        $this->middleware('medico');
     }
 
     public function index()
     {
         try {
+            if (!Auth::user()->medico) {
+                \Log::error('Usuario médico sin registro en tabla medicos');
+                return redirect()->route('login')->with('error', 'Error de configuración de cuenta');
+            }
+
+            // Obtener datos necesarios para la vista
             $medico = Auth::user()->medico;
-            
-            // Obtener estadísticas básicas
-            $totalPatients = Patient::where('doctor_id', $medico->id)->count();
+            $patients = Patient::where('doctor_id', $medico->id)->get();
 
-            // Obtener fecha y hora actual
-            $currentDate = Carbon::now()->locale('es')->isoFormat('dddd, D [de] MMMM [de] YYYY');
-            $currentTime = Carbon::now()->format('h:i A');
-
-            return view('medico.dashboard', compact(
-                'medico',
-                'totalPatients',
-                'currentDate',
-                'currentTime'
-            ));
+            // Retornar la vista correcta
+            return view('medicos.index', compact('patients'));
 
         } catch (\Exception $e) {
             \Log::error('Error en dashboard: ' . $e->getMessage());
-            return back()->with('error', 'Error al cargar el dashboard');
+            \Log::error($e->getTraceAsString());
+            return redirect()->route('login')->with('error', 'Error al cargar el dashboard');
         }
     }
-} 
+}
