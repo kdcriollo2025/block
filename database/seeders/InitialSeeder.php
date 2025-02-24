@@ -9,12 +9,15 @@ use App\Models\Patient;
 use App\Models\MedicalHistory;
 use Illuminate\Support\Facades\Hash;
 use Faker\Factory as Faker;
+use Illuminate\Support\Facades\DB;
 
 class InitialSeeder extends Seeder
 {
     public function run()
     {
         try {
+            DB::beginTransaction();
+
             $faker = Faker::create('es_EC');
 
             // Crear usuario administrador
@@ -50,6 +53,8 @@ class InitialSeeder extends Seeder
                     'cedula' => $medicoUser->cedula,
                 ]
             );
+
+            DB::commit();
 
             \Log::info('Seeder ejecutado correctamente');
             \Log::info('Admin creado: ' . $admin->email);
@@ -105,6 +110,7 @@ class InitialSeeder extends Seeder
             }
 
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::error('Error en seeder: ' . $e->getMessage());
             throw $e;
         }
