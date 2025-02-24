@@ -31,23 +31,23 @@ class DashboardController extends Controller
                 'type' => $user->type
             ]);
 
-            // 3. Verificar que la vista existe
+            // 3. Verificar que es médico
+            if ($user->type !== 'medico') {
+                throw new \Exception("Usuario no autorizado. Tipo: {$user->type}");
+            }
+
+            // 4. Obtener datos del médico
+            $medico = Medico::where('user_id', $user->id)->first();
+            if (!$medico) {
+                throw new \Exception("No se encontró información del médico para el usuario ID: {$user->id}");
+            }
+
+            // 5. Verificar que la vista existe
             if (!View::exists('medico.dashboard')) {
                 throw new \Exception('Vista no encontrada: medico.dashboard');
             }
 
-            // 4. Verificar que es médico
-            if ($user->type !== 'medico') {
-                throw new \Exception('Usuario no es médico');
-            }
-
-            // 5. Obtener datos del médico
-            $medico = Medico::where('user_id', $user->id)->first();
-            if (!$medico) {
-                throw new \Exception('Información de médico no encontrada');
-            }
-
-            // 6. Retornar vista con datos básicos
+            // 6. Retornar vista
             return view('medico.dashboard', [
                 'nombre' => $user->name,
                 'email' => $user->email,
@@ -56,31 +56,15 @@ class DashboardController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Error en dashboard', [
+            Log::error('Error en dashboard médico', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id() ?? 'no-auth'
+                'user_id' => Auth::id() ?? 'no-auth',
+                'trace' => $e->getTraceAsString()
             ]);
 
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'error' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine()
-                ], 500);
-            }
-
-            // En desarrollo, mostrar error detallado
-            if (config('app.debug')) {
-                throw $e;
-            }
-
-            // En producción, redirigir con mensaje
-            return redirect()
-                ->route('home')
-                ->with('error', 'Error al cargar el dashboard: ' . $e->getMessage());
+            throw $e; // En modo debug, esto mostrará el error detallado
         }
     }
 } 
