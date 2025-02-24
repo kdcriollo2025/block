@@ -17,7 +17,7 @@
             <div class="icon">
                 <i class="fas fa-users"></i>
             </div>
-            <a href="{{ route('medico.patients.index') }}" class="small-box-footer">
+            <a href="{{ route('medicos.patients.index') }}" class="small-box-footer">
                 Ver más <i class="fas fa-arrow-circle-right"></i>
             </a>
         </div>
