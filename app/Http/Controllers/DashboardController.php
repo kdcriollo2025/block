@@ -5,43 +5,49 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\Medico;
+use Illuminate\Support\Facades\View;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     public function __construct()
     {
-        // Verificamos que el usuario esté autenticado y sea médico
-        $this->middleware(['auth', 'type:medico']);
+        $this->middleware('auth');
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
+            // 1. Verificar autenticación
+            if (!Auth::check()) {
+                throw new \Exception('Usuario no autenticado');
+            }
+
+            // 2. Obtener usuario
             $user = Auth::user();
-
-            // Verificar tipo de usuario
-            if ($user->type !== 'medico') {
-                Log::warning('Intento de acceso no autorizado al dashboard médico', [
-                    'user_id' => $user->id,
-                    'user_type' => $user->type
-                ]);
-                throw new \Exception("Acceso no autorizado. Tipo de usuario: {$user->type}");
-            }
-
-            // Obtener información del médico
-            $medico = Medico::where('user_id', $user->id)->first();
-            if (!$medico) {
-                Log::error('Médico no encontrado para usuario', [
-                    'user_id' => $user->id
-                ]);
-                throw new \Exception('No se encontró la información del médico');
-            }
-
-            Log::info('Acceso exitoso al dashboard', [
-                'user_id' => $user->id,
-                'medico_id' => $medico->id
+            Log::info('Usuario intentando acceder al dashboard', [
+                'id' => $user->id,
+                'email' => $user->email,
+                'type' => $user->type
             ]);
 
+            // 3. Verificar que la vista existe
+            if (!View::exists('medico.dashboard')) {
+                throw new \Exception('Vista no encontrada: medico.dashboard');
+            }
+
+            // 4. Verificar que es médico
+            if ($user->type !== 'medico') {
+                throw new \Exception('Usuario no es médico');
+            }
+
+            // 5. Obtener datos del médico
+            $medico = Medico::where('user_id', $user->id)->first();
+            if (!$medico) {
+                throw new \Exception('Información de médico no encontrada');
+            }
+
+            // 6. Retornar vista con datos básicos
             return view('medico.dashboard', [
                 'nombre' => $user->name,
                 'email' => $user->email,
@@ -50,21 +56,30 @@ class DashboardController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Error en dashboard médico', [
+            Log::error('Error en dashboard', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'user_id' => Auth::id() ?? 'no-auth',
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::id() ?? 'no-auth'
             ]);
 
-            if (request()->expectsJson()) {
+            if ($request->expectsJson()) {
                 return response()->json([
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
                 ], 500);
             }
 
-            return back()
+            // En desarrollo, mostrar error detallado
+            if (config('app.debug')) {
+                throw $e;
+            }
+
+            // En producción, redirigir con mensaje
+            return redirect()
+                ->route('home')
                 ->with('error', 'Error al cargar el dashboard: ' . $e->getMessage());
         }
     }
