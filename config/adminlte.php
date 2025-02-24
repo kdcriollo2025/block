@@ -294,58 +294,54 @@ return [
     */
 
     'menu' => [
-        // Navbar items:
-        
         // Menú para médicos
         [
             'text' => 'Dashboard',
-            'route'  => 'medico.dashboard',
+            'url'  => 'medico/dashboard',
             'icon' => 'fas fa-fw fa-home',
             'can'  => 'medico'
         ],
         [
             'text' => 'Pacientes',
-            'route'  => 'medico.patients.index',
+            'url'  => 'medico/patients',
             'icon' => 'fas fa-fw fa-users',
             'can'  => 'medico'
         ],
         [
             'text' => 'Historias Médicas',
-            'route'  => 'medico.medical_histories.index',
+            'url'  => 'medico/medical_histories',
             'icon' => 'fas fa-fw fa-file-medical',
             'can'  => 'medico'
         ],
         [
-            'text'    => 'Registros Médicos',
-            'icon'    => 'fas fa-fw fa-notes-medical',
-            'can'     => 'medico',
-            'submenu' => [
-                [
-                    'text' => 'Alergias',
-                    'route'  => 'medico.allergy_records.index',
-                    'icon' => 'fas fa-fw fa-allergies',
-                ],
-                [
-                    'text' => 'Cirugías',
-                    'route'  => 'medico.surgery_records.index',
-                    'icon' => 'fas fa-fw fa-procedures',
-                ],
-                [
-                    'text' => 'Consultas',
-                    'route'  => 'medico.medical_consultation_records.index',
-                    'icon' => 'fas fa-fw fa-stethoscope',
-                ],
-                [
-                    'text' => 'Terapias',
-                    'route'  => 'medico.therapy_records.index',
-                    'icon' => 'fas fa-fw fa-hand-holding-medical',
-                ],
-                [
-                    'text' => 'Vacunas',
-                    'route'  => 'medico.vaccination_records.index',
-                    'icon' => 'fas fa-fw fa-syringe',
-                ],
-            ],
+            'text' => 'Alergias',
+            'url'  => 'medico/allergy_records',
+            'icon' => 'fas fa-fw fa-allergies',
+            'can'  => 'medico'
+        ],
+        [
+            'text' => 'Cirugías',
+            'url'  => 'medico/surgery_records',
+            'icon' => 'fas fa-fw fa-procedures',
+            'can'  => 'medico'
+        ],
+        [
+            'text' => 'Consultas Médicas',
+            'url'  => 'medico/medical-consultation-records',
+            'icon' => 'fas fa-fw fa-stethoscope',
+            'can'  => 'medico'
+        ],
+        [
+            'text' => 'Terapias',
+            'url'  => 'medico/therapy_records',
+            'icon' => 'fas fa-fw fa-hand-holding-medical',
+            'can'  => 'medico'
+        ],
+        [
+            'text' => 'Vacunas',
+            'url'  => 'medico/vaccination_records',
+            'icon' => 'fas fa-fw fa-syringe',
+            'can'  => 'medico'
         ],
 
         // Menú para administradores
@@ -355,33 +351,34 @@ return [
         ],
         [
             'text' => 'Médicos',
-            'route'  => 'admin.medicos.index',
+            'url'  => 'admin/medicos',
             'icon' => 'fas fa-user-md',
             'can'  => 'admin',
         ],
         [
             'text' => 'Reportes',
+            'url'  => 'admin/reports',
             'icon' => 'fas fa-chart-bar',
             'can'  => 'admin',
             'submenu' => [
                 [
                     'text' => 'Pacientes por Médico',
-                    'route'  => 'admin.reports.patients-per-doctor',
+                    'url'  => 'admin/reports/patients-per-doctor',
                     'icon' => 'fas fa-user-md',
                 ],
                 [
                     'text' => 'Diagnósticos Frecuentes',
-                    'route'  => 'admin.reports.common-diagnoses',
+                    'url'  => 'admin/reports/common-diagnoses',
                     'icon' => 'fas fa-stethoscope',
                 ],
                 [
                     'text' => 'Consultas en el Tiempo',
-                    'route'  => 'admin.reports.consultations-over-time',
-                    'icon' => 'fas fa-chart-line',
+                    'url'  => 'admin/reports/consultations-over-time',
+                    'icon' => 'fas fa-chart-area',
                 ],
                 [
                     'text' => 'Demografía de Pacientes',
-                    'route'  => 'admin.reports.patient-demographics',
+                    'url'  => 'admin/reports/patient-demographics',
                     'icon' => 'fas fa-users',
                 ],
             ],
