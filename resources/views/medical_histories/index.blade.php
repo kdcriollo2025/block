@@ -30,21 +30,23 @@
                             </a>
                             <button type="button" 
                                     class="btn btn-primary btn-sm" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#nftModal{{ $history->id }}">
+                                    data-toggle="modal" 
+                                    data-target="#nftModal{{ $history->id }}">
                                 <i class="fas fa-certificate"></i> NFT
                             </button>
                         </div>
 
                         <!-- Modal NFT -->
-                        <div class="modal fade" id="nftModal{{ $history->id }}" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
+                        <div class="modal fade" id="nftModal{{ $history->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
                                 <div class="modal-content">
-                                    <div class="modal-header bg-primary text-white">
-                                        <h5 class="modal-title">
+                                    <div class="modal-header bg-primary">
+                                        <h5 class="modal-title text-white">
                                             <i class="fas fa-certificate"></i> NFT del Historial Médico
                                         </h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
                                     </div>
                                     <div class="modal-body text-center">
                                         <div class="nft-card p-4 mb-3 border rounded shadow-sm">
@@ -70,7 +72,7 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                                     </div>
                                 </div>
                             </div>
@@ -107,14 +109,14 @@
 @stop
 
 @section('js')
-    <script>
-        $(document).ready(function() {
-            $('.dataTable').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
-                },
-                "order": [[1, "desc"]]
-            });
+<script>
+    $(document).ready(function() {
+        $('.dataTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
+            },
+            "order": [[1, "desc"]]
         });
-    </script>
+    });
+</script>
 @stop
