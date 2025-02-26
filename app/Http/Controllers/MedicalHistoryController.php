@@ -151,6 +151,18 @@ class MedicalHistoryController extends Controller
                 return redirect()->back()->with('error', 'No tiene permiso para acceder a esta historia médica');
             }
 
+            // Generar el código QR primero
+            $nftData = [
+                'type' => 'Medical History NFT',
+                'patient' => $medicalHistory->patient->name,
+                'doctor' => Auth::user()->name,
+                'timestamp' => $medicalHistory->created_at->format('Y-m-d H:i:s'),
+                'hash' => $medicalHistory->hash
+            ];
+            
+            // Generar el QR como una imagen base64
+            $qrCode = base64_encode(QrCode::format('png')->size(100)->generate(json_encode($nftData)));
+
             // Crear nueva instancia de TCPDF
             $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
@@ -174,16 +186,6 @@ class MedicalHistoryController extends Controller
 
             // Establecer fuente
             $pdf->SetFont('helvetica', '', 10);
-
-            // Generar datos del NFT
-            $nftData = [
-                'id' => $medicalHistory->id,
-                'patient' => $medicalHistory->patient->name,
-                'hash' => $medicalHistory->hash,
-                'created_at' => $medicalHistory->created_at->format('Y-m-d H:i:s')
-            ];
-            
-            $qrCode = QrCode::size(200)->generate(json_encode($nftData));
 
             // Preparar datos para la vista
             $data = [
