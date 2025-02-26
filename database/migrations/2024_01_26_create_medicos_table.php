@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('specialty', 100);
             $table->string('phone_number', 15);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
