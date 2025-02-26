@@ -28,10 +28,7 @@ class InitialDataSeeder extends Seeder
             'email' => 'admin@gmail.com',
             'password' => Hash::make('12345678'),
             'type' => 'admin',
-            'first_login' => false,
         ]);
-
-        
 
         // Crear usuario médico
         $medicoUser = User::create([
@@ -39,7 +36,6 @@ class InitialDataSeeder extends Seeder
             'email' => 'medico1@gmail.com',
             'password' => Hash::make('12345678'),
             'type' => 'medico',
-            'first_login' => false,
         ]);
 
         // Crear perfil del médico
