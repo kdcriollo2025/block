@@ -36,35 +36,41 @@
                             </button>
                         </div>
 
-                        <!-- Modal NFT para cada historial -->
+                        <!-- Modal NFT -->
                         <div class="modal fade" id="nftModal{{ $history->id }}" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">NFT del Historial Médico</h5>
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title">
+                                            <i class="fas fa-certificate"></i> NFT del Historial Médico
+                                        </h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body text-center">
-                                        <div class="mb-3">
-                                            <h6>Paciente: {{ $history->patient->name }}</h6>
-                                            <p class="text-muted">ID: {{ $history->id }}</p>
-                                            <p class="text-muted small">Hash: {{ $history->hash }}</p>
-                                        </div>
-                                        <div class="qr-code p-3 bg-light rounded">
-                                            {!! QrCode::size(200)->generate(json_encode([
-                                                'id' => $history->id,
-                                                'patient' => $history->patient->name,
-                                                'hash' => $history->hash,
-                                                'created_at' => $history->created_at->format('Y-m-d H:i:s')
-                                            ])) !!}
+                                        <div class="nft-card p-4 mb-3 border rounded shadow-sm">
+                                            <h6 class="text-primary">Certificado Digital NFT</h6>
+                                            <div class="patient-info mb-3">
+                                                <h5>{{ $history->patient->name }}</h5>
+                                                <small class="text-muted">ID: {{ $history->id }}</small>
+                                            </div>
+                                            <div class="qr-container bg-light p-4 rounded-3 mb-3">
+                                                {!! QrCode::size(200)->generate(json_encode([
+                                                    'type' => 'Medical History NFT',
+                                                    'patient' => $history->patient->name,
+                                                    'doctor' => Auth::user()->name,
+                                                    'timestamp' => $history->created_at->format('Y-m-d H:i:s'),
+                                                    'hash' => $history->hash
+                                                ])) !!}
+                                            </div>
+                                            <div class="nft-details text-start">
+                                                <p class="mb-1"><strong>Médico:</strong> {{ Auth::user()->name }}</p>
+                                                <p class="mb-1"><strong>Fecha:</strong> {{ $history->created_at->format('d/m/Y H:i:s') }}</p>
+                                                <p class="mb-1"><small class="text-muted">Hash: {{ substr($history->hash, 0, 20) }}...</small></p>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                                        <a href="{{ route('medico.medical_histories.download_pdf', $history) }}" 
-                                           class="btn btn-primary">
-                                            Descargar PDF con NFT
-                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -78,7 +84,26 @@
 @stop
 
 @section('css')
-    <link rel="stylesheet" href="/css/admin_custom.css">
+<style>
+    .nft-card {
+        background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    }
+    .qr-container {
+        display: inline-block;
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .patient-info {
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    .nft-details {
+        font-size: 0.9em;
+    }
+</style>
 @stop
 
 @section('js')
