@@ -83,7 +83,13 @@
         <div class="nft-title">Certificado Digital NFT</div>
         <div class="nft-content">
             <div class="qr-container">
-                <img src="data:image/png;base64,{{ $qrCode }}" style="width: 100px; height: 100px;">
+                {!! QrCode::size(100)->generate(json_encode([
+                    'type' => 'Medical History NFT',
+                    'patient' => $patient->name,
+                    'doctor' => Auth::user()->name,
+                    'timestamp' => $medicalHistory->created_at->format('Y-m-d H:i:s'),
+                    'hash' => $medicalHistory->hash
+                ])) !!}
             </div>
             <div class="nft-details">
                 <p><strong>ID:</strong> {{ $medicalHistory->id }}</p>
