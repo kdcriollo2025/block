@@ -34,6 +34,10 @@
                                     data-target="#nftModal{{ $history->id }}">
                                 <i class="fas fa-certificate"></i> NFT
                             </button>
+                            <a href="{{ route('medico.medical_histories.pdf', $history) }}" 
+                               class="btn btn-danger btn-sm">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </a>
                         </div>
 
                         <!-- Modal NFT -->

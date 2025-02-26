@@ -209,7 +209,7 @@ class MedicalHistoryController extends Controller
             $fileName = 'historia_medica_' . str_replace(' ', '_', $medicalHistory->patient->name) . '_' . date('Y-m-d') . '.pdf';
 
             // Descargar el PDF
-            return $pdf->Output($fileName, 'D');
+            return $pdf->Output($fileName, 'I');  // Cambiado de 'D' a 'I' para mostrar en el navegador
 
         } catch (\Exception $e) {
             \Log::error('Error al generar PDF: ' . $e->getMessage());
