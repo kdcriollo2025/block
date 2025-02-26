@@ -175,6 +175,16 @@ class MedicalHistoryController extends Controller
             // Establecer fuente
             $pdf->SetFont('helvetica', '', 10);
 
+            // Generar datos del NFT
+            $nftData = [
+                'id' => $medicalHistory->id,
+                'patient' => $medicalHistory->patient->name,
+                'hash' => $medicalHistory->hash,
+                'created_at' => $medicalHistory->created_at->format('Y-m-d H:i:s')
+            ];
+            
+            $qrCode = QrCode::size(200)->generate(json_encode($nftData));
+
             // Preparar datos para la vista
             $data = [
                 'medicalHistory' => $medicalHistory,
@@ -184,6 +194,7 @@ class MedicalHistoryController extends Controller
                 'surgeries' => $medicalHistory->surgeryRecords,
                 'vaccinations' => $medicalHistory->vaccinationRecords,
                 'therapies' => $medicalHistory->therapyRecords,
+                'qrCode' => $qrCode
             ];
 
             // Generar el HTML
