@@ -5,22 +5,25 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            font-size: 12px;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         .patient-info {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            margin-bottom: 15px;
+            font-size: 11px;
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 6px;
             text-align: left;
         }
         th {
@@ -28,26 +31,38 @@
         }
         .nft-section {
             text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
         }
         .nft-title {
             color: #2196F3;
-            font-size: 18px;
-            margin-bottom: 15px;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .nft-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .qr-container {
-            margin: 20px auto;
-            padding: 15px;
-            background: #fff;
             display: inline-block;
+            padding: 5px;
+            background: white;
         }
         .nft-details {
-            font-size: 12px;
+            font-size: 10px;
             color: #666;
-            margin-top: 15px;
+            text-align: left;
+            margin-left: 10px;
+        }
+        .nft-details p {
+            margin: 2px 0;
+        }
+        h4 {
+            margin: 10px 0;
+            color: #333;
         }
     </style>
 </head>
@@ -62,6 +77,29 @@
         <p><strong>Género:</strong> {{ $patient->gender }}</p>
         <p><strong>Dirección:</strong> {{ $patient->address }}</p>
         <p><strong>Tipo de Sangre:</strong> {{ $patient->blood_type }}</p>
+    </div>
+
+    <!-- Sección NFT Compacta -->
+    <div class="nft-section">
+        <div class="nft-title">Certificado Digital NFT</div>
+        <div class="nft-content">
+            <div class="qr-container">
+                {!! QrCode::size(100)->generate(json_encode([
+                    'type' => 'Medical History NFT',
+                    'patient' => $patient->name,
+                    'doctor' => Auth::user()->name,
+                    'timestamp' => $medicalHistory->created_at->format('Y-m-d H:i:s'),
+                    'hash' => $medicalHistory->hash
+                ])) !!}
+            </div>
+            <div class="nft-details">
+                <p><strong>ID:</strong> {{ $medicalHistory->id }}</p>
+                <p><strong>Paciente:</strong> {{ $patient->name }}</p>
+                <p><strong>Médico:</strong> {{ Auth::user()->name }}</p>
+                <p><strong>Fecha:</strong> {{ $medicalHistory->created_at->format('d/m/Y H:i:s') }}</p>
+                <p><strong>Hash:</strong> {{ substr($medicalHistory->hash, 0, 20) }}...</p>
+            </div>
+        </div>
     </div>
 
     @if($consultations->count() > 0)
@@ -90,22 +128,6 @@
     </table>
     @endif
 
-    <!-- Sección NFT -->
-    <div class="nft-section">
-        <div class="nft-title">Certificado Digital NFT</div>
-        <div class="qr-container">
-            {!! $qrCode !!}
-        </div>
-        <div class="nft-details">
-            <p><strong>ID:</strong> {{ $medicalHistory->id }}</p>
-            <p><strong>Paciente:</strong> {{ $patient->name }}</p>
-            <p><strong>Médico:</strong> {{ Auth::user()->name }}</p>
-            <p><strong>Fecha de Emisión:</strong> {{ $medicalHistory->created_at->format('d/m/Y H:i:s') }}</p>
-            <p><strong>Hash:</strong> {{ $medicalHistory->hash }}</p>
-        </div>
-    </div>
-
-    <!-- Resto de las secciones del historial médico -->
     @if($allergies->count() > 0)
     <h4>Alergias</h4>
     <table>
@@ -129,9 +151,5 @@
         </tbody>
     </table>
     @endif
-
-    <div class="footer">
-        <p>Documento generado el {{ date('d/m/Y H:i:s') }}</p>
-    </div>
 </body>
 </html> 
