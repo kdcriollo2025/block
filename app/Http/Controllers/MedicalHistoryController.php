@@ -10,7 +10,6 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\View;
 use TCPDF;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use PDF;
 
 class MedicalHistoryController extends Controller
 {
@@ -76,29 +75,16 @@ class MedicalHistoryController extends Controller
             return redirect()->route('medico.medical_histories.index');
         }
 
-        // Generar un identificador único para el "NFT"
-        $nftId = "NFT-" . $medicalHistory->hash;
-        
-        // Crear datos para el QR
-        $qrData = [
-            'type' => 'Medical History NFT',
-            'id' => $nftId,
+        $nftData = [
+            'id' => $medicalHistory->id,
             'patient' => $medicalHistory->patient->name,
-            'created' => $medicalHistory->created_at->format('Y-m-d'),
-            'hash' => $medicalHistory->hash
+            'hash' => $medicalHistory->hash,
+            'created_at' => $medicalHistory->created_at->format('Y-m-d H:i:s')
         ];
-
-        // Generar el código QR
-        $qrCode = QrCode::size(200)
-                       ->backgroundColor(255, 255, 255)
-                       ->color(0, 0, 0)
-                       ->generate(json_encode($qrData));
-
-        return view('medical-histories.show', [
-            'medicalHistory' => $medicalHistory,
-            'qrCode' => $qrCode,
-            'nftId' => $nftId
-        ]);
+        
+        $qrCode = QrCode::size(200)->generate(json_encode($nftData));
+        
+        return view('medical_histories.show', compact('medicalHistory', 'qrCode'));
     }
 
     public function edit(MedicalHistory $medicalHistory)
@@ -220,28 +206,15 @@ class MedicalHistoryController extends Controller
 
     public function downloadCertificate(MedicalHistory $medicalHistory)
     {
-        $nftId = "NFT-CERT-" . $medicalHistory->hash;
-        
-        $qrData = [
-            'type' => 'Medical Certificate NFT',
-            'id' => $nftId,
+        $nftData = [
+            'id' => $medicalHistory->id,
             'patient' => $medicalHistory->patient->name,
-            'doctor' => $medicalHistory->patient->doctor->name,
-            'date' => now()->format('Y-m-d'),
-            'hash' => $medicalHistory->hash
+            'hash' => $medicalHistory->hash,
+            'created_at' => $medicalHistory->created_at->format('Y-m-d H:i:s')
         ];
-
-        $qrCode = QrCode::size(200)
-                       ->backgroundColor(255, 255, 255)
-                       ->color(0, 0, 0)
-                       ->generate(json_encode($qrData));
-
-        $pdf = PDF::loadView('medical-histories.certificate', [
-            'medicalHistory' => $medicalHistory,
-            'qrCode' => $qrCode,
-            'nftId' => $nftId
-        ]);
-
-        return $pdf->download('medical-certificate.pdf');
+        
+        $qrCode = QrCode::size(200)->generate(json_encode($nftData));
+        
+        return view('medical_histories.certificate', compact('medicalHistory', 'qrCode'));
     }
 }

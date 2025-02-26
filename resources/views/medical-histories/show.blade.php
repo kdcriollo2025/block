@@ -1,43 +1,31 @@
-<div class="card">
-    <div class="card-header">
-        <h3>Historial Médico</h3>
-    </div>
-    <div class="card-body">
-        <!-- Contenido existente del historial -->
-        
-        <!-- Sección del NFT -->
-        <div class="nft-section mt-4">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h4>NFT Digital Certificate</h4>
-                    <p class="text-muted">ID: {{ $nftId }}</p>
-                    <div class="qr-code-container">
-                        {!! $qrCode !!}
-                    </div>
-                    <p class="mt-3">
-                        <small class="text-muted">
-                            Este código QR representa un certificado digital único 
-                            del historial médico del paciente.
-                        </small>
-                    </p>
+<div class="mt-4">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nftModal">
+        Verificar NFT
+    </button>
+</div>
+
+<!-- Modal NFT -->
+<div class="modal fade" id="nftModal" tabindex="-1" aria-labelledby="nftModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="nftModalLabel">Verificación NFT</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-3">
+                    <h6>Historial Médico NFT</h6>
+                    <p>ID: {{ $medicalHistory->id }}</p>
+                    <p>Paciente: {{ $medicalHistory->patient->name }}</p>
+                    <p>Hash: {{ $medicalHistory->hash }}</p>
                 </div>
+                <div class="qr-code">
+                    {!! $qrCode !!}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>
-</div>
-
-<style>
-.qr-code-container {
-    background: white;
-    padding: 20px;
-    display: inline-block;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.nft-section {
-    background: linear-gradient(145deg, #f3f4f6, #ffffff);
-    border-radius: 15px;
-    padding: 20px;
-}
-</style> 
+</div> 

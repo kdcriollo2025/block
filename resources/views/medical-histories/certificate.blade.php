@@ -1,34 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        .certificate-container {
-            padding: 20px;
-            font-family: Arial, sans-serif;
-        }
-        .qr-section {
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-        }
-        .nft-id {
-            color: #666;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
-    <div class="certificate-container">
-        <!-- Contenido existente del certificado -->
-        
-        <div class="qr-section">
-            <h4>Certificado Digital (NFT)</h4>
-            {!! $qrCode !!}
-            <div class="nft-id">
-                ID: {{ $nftId }}
-            </div>
-        </div>
+<div class="nft-verification mt-4">
+    <h4>Verificación NFT</h4>
+    <div class="qr-code text-center">
+        {!! $qrCode !!}
     </div>
-</body>
-</html> 
+    <div class="nft-details text-center mt-2">
+        <p>ID: {{ $medicalHistory->id }}</p>
+        <p>Hash: {{ $medicalHistory->hash }}</p>
+        <p>Fecha de creación: {{ $medicalHistory->created_at->format('Y-m-d H:i:s') }}</p>
+    </div>
+</div> 
