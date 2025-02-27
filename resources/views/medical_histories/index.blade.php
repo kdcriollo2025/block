@@ -60,14 +60,17 @@
                                                     'type' => 'Medical History NFT',
                                                     'patient' => $history->patient->name,
                                                     'doctor' => Auth::user()->name,
-                                                    'timestamp' => $history->created_at->format('Y-m-d H:i:s'),
-                                                    'hash' => $history->hash
+                                                    'current_hash' => $history->hash,
+                                                    'hash_version' => count(explode('|', $history->hash)),
+                                                    'timestamp' => $history->updated_at->format('Y-m-d H:i:s'),
+                                                    'created_at' => $history->created_at->format('Y-m-d H:i:s')
                                                 ])) !!}
                                             </div>
                                             <div class="nft-details text-start">
                                                 <p class="mb-1"><strong>Médico:</strong> {{ Auth::user()->name }}</p>
-                                                <p class="mb-1"><strong>Fecha:</strong> {{ $history->created_at->format('d/m/Y H:i:s') }}</p>
-                                                <p class="mb-1"><small class="text-muted">Hash: {{ substr($history->hash, 0, 20) }}...</small></p>
+                                                <p class="mb-1"><strong>Última actualización:</strong> {{ $history->updated_at->format('d/m/Y H:i:s') }}</p>
+                                                <p class="mb-1"><strong>Versión Hash:</strong> {{ count(explode('|', $history->hash)) }}</p>
+                                                <p class="mb-1"><small class="text-muted">Hash actual: {{ substr($history->hash, 0, 20) }}...</small></p>
                                             </div>
                                         </div>
                                     </div>

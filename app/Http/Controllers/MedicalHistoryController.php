@@ -75,11 +75,16 @@ class MedicalHistoryController extends Controller
             return redirect()->route('medico.medical_histories.index');
         }
 
+        // Generar datos NFT incluyendo información del hash anterior si existe
+        $hashHistory = explode('|', $medicalHistory->hash);
         $nftData = [
             'id' => $medicalHistory->id,
             'patient' => $medicalHistory->patient->name,
-            'hash' => $medicalHistory->hash,
-            'created_at' => $medicalHistory->created_at->format('Y-m-d H:i:s')
+            'doctor' => Auth::user()->name,
+            'current_hash' => $medicalHistory->hash,
+            'hash_version' => count($hashHistory),
+            'created_at' => $medicalHistory->created_at->format('Y-m-d H:i:s'),
+            'updated_at' => $medicalHistory->updated_at->format('Y-m-d H:i:s')
         ];
         
         $qrCode = QrCode::size(200)->generate(json_encode($nftData));
@@ -113,17 +118,20 @@ class MedicalHistoryController extends Controller
             return redirect()->route('medico.medical_histories.index');
         }
 
-        // Generar nuevo hash si el paciente cambió
-        if ($medicalHistory->patient_id != $validated['patient_id']) {
-            $hashData = [
-                'patient_id' => $validated['patient_id'],
-                'doctor_id' => Auth::user()->medico->id,
-                'timestamp' => now()->timestamp,
-                'random' => Str::random(16)
-            ];
-            
-            $validated['hash'] = hash('sha256', json_encode($hashData));
-        }
+        // Generar nuevo hash manteniendo parte del anterior
+        $previousHash = $medicalHistory->hash;
+        $previousHashPart = substr($previousHash, 0, 16); // Tomamos los primeros 16 caracteres
+
+        $hashData = [
+            'previous_hash' => $previousHashPart,
+            'patient_id' => $validated['patient_id'],
+            'doctor_id' => Auth::user()->medico->id,
+            'timestamp' => now()->timestamp,
+            'random' => Str::random(8)
+        ];
+        
+        $newHash = $previousHashPart . hash('sha256', json_encode($hashData));
+        $validated['hash'] = $newHash;
 
         $medicalHistory->update($validated);
 

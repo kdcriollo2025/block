@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('medical_histories', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('patient_id');
+            $table->foreignId('patient_id')->constrained('patients');
             //$table->date('creation_date');
-            $table->string('hash', 255);
+            $table->text('hash');
             $table->timestamps();
         });
     }
