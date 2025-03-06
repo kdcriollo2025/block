@@ -56,6 +56,9 @@
                                                 <small class="text-muted">ID: {{ $history->id }}</small>
                                             </div>
                                             <div class="qr-container bg-light p-4 rounded-3 mb-3">
+                                                @php
+                                                    $informationStatus = (new App\Http\Controllers\MedicalHistoryController)->getInformationStatus($history);
+                                                @endphp
                                                 {!! QrCode::size(200)->generate(json_encode([
                                                     'type' => 'Medical History NFT',
                                                     'patient' => $history->patient->name,
@@ -63,26 +66,28 @@
                                                     'current_hash' => $history->hash,
                                                     'hash_version' => count(explode('|', $history->hash)),
                                                     'timestamp' => $history->updated_at->format('Y-m-d H:i:s'),
-                                                    'created_at' => $history->created_at->format('Y-m-d H:i:s')
+                                                    'created_at' => $history->created_at->format('Y-m-d H:i:s'),
+                                                    'information_status' => $informationStatus
                                                 ])) !!}
                                             </div>
                                             <div class="nft-details text-start">
                                                 <p class="mb-1"><strong>Médico:</strong> {{ Auth::user()->name }}</p>
                                                 <p class="mb-1"><strong>Última actualización:</strong> {{ $history->updated_at->format('d/m/Y H:i:s') }}</p>
-                                                <p class="mb-1"><strong>Versión Hash:</strong> {{ count(explode('|', $history->hash)) }}</p>
-                                                <p class="mb-1"><small class="text-muted">Hash actual: {{ substr($history->hash, 0, 20) }}...</small></p>
-                                                
-                                                @if(Schema::hasTable('medical_history_changes') && $history->changes()->count() > 0)
-                                                    <div class="mt-3">
-                                                        <h6 class="text-primary">Últimos cambios:</h6>
-                                                        @foreach($history->changes()->orderBy('created_at', 'desc')->take(3)->get() as $change)
-                                                            <div class="change-item small">
-                                                                <i class="fas fa-circle text-{{ $change->change_type == 'added' ? 'success' : ($change->change_type == 'deleted' ? 'danger' : 'warning') }} mr-1"></i>
-                                                                {{ ucfirst($change->change_type) }} {{ $change->record_type }}
-                                                                <br>
-                                                                <small class="text-muted">{{ $change->created_at->format('d/m/Y H:i:s') }}</small>
-                                                            </div>
-                                                        @endforeach
+                                                <p class="mb-1">
+                                                    <strong>Estado de la información:</strong>
+                                                    <span class="badge bg-{{ $informationStatus['status'] === 'valid' ? 'success' : 'warning' }}">
+                                                        {{ $informationStatus['message'] }}
+                                                    </span>
+                                                </p>
+                                                @if($informationStatus['status'] === 'modified')
+                                                    <div class="mt-2 small">
+                                                        <p class="mb-1"><strong>Resumen de cambios:</strong></p>
+                                                        <ul class="list-unstyled">
+                                                            <li>Agregados: {{ $informationStatus['details']['changes_summary']['added'] }}</li>
+                                                            <li>Modificados: {{ $informationStatus['details']['changes_summary']['modified'] }}</li>
+                                                            <li>Eliminados: {{ $informationStatus['details']['changes_summary']['deleted'] }}</li>
+                                                        </ul>
+                                                        <p class="mb-0"><small>Último cambio: {{ $informationStatus['details']['last_change'] }}</small></p>
                                                     </div>
                                                 @endif
                                             </div>
