@@ -102,34 +102,46 @@ class MedicalHistoryController extends Controller
             return redirect()->route('medico.medical_histories.index');
         }
 
-        // Obtener los últimos cambios
-        $recentChanges = MedicalHistoryChange::where('medical_history_id', $medicalHistory->id)
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+        try {
+            // Generar datos NFT
+            $nftData = [
+                'id' => $medicalHistory->id,
+                'patient' => $medicalHistory->patient->name,
+                'doctor' => Auth::user()->name,
+                'current_hash' => $medicalHistory->hash,
+                'hash_version' => count(explode('|', $medicalHistory->hash)),
+                'created_at' => $medicalHistory->created_at->format('Y-m-d H:i:s'),
+                'updated_at' => $medicalHistory->updated_at->format('Y-m-d H:i:s')
+            ];
 
-        // Generar datos NFT con información de cambios
-        $nftData = [
-            'id' => $medicalHistory->id,
-            'patient' => $medicalHistory->patient->name,
-            'doctor' => Auth::user()->name,
-            'current_hash' => $medicalHistory->hash,
-            'hash_version' => count(explode('|', $medicalHistory->hash)),
-            'created_at' => $medicalHistory->created_at->format('Y-m-d H:i:s'),
-            'updated_at' => $medicalHistory->updated_at->format('Y-m-d H:i:s'),
-            'recent_changes' => $recentChanges->map(function($change) {
-                return [
-                    'type' => $change->change_type,
-                    'record' => $change->record_type,
-                    'details' => $change->changes,
-                    'date' => $change->created_at->format('Y-m-d H:i:s')
-                ];
-            })
-        ];
-        
-        $qrCode = QrCode::size(200)->generate(json_encode($nftData));
-        
-        return view('medical_histories.show', compact('medicalHistory', 'qrCode', 'recentChanges'));
+            // Intentar obtener cambios recientes si la tabla existe
+            try {
+                $recentChanges = MedicalHistoryChange::where('medical_history_id', $medicalHistory->id)
+                    ->orderBy('created_at', 'desc')
+                    ->take(5)
+                    ->get();
+
+                if ($recentChanges->count() > 0) {
+                    $nftData['recent_changes'] = $recentChanges->map(function($change) {
+                        return [
+                            'type' => $change->change_type,
+                            'record' => $change->record_type,
+                            'details' => $change->changes,
+                            'date' => $change->created_at->format('Y-m-d H:i:s')
+                        ];
+                    });
+                }
+            } catch (\Exception $e) {
+                // Si hay error al obtener cambios, continuar sin ellos
+                $nftData['recent_changes'] = [];
+            }
+            
+            $qrCode = QrCode::size(200)->generate(json_encode($nftData));
+            
+            return view('medical_histories.show', compact('medicalHistory', 'qrCode'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al cargar el historial médico');
+        }
     }
 
     public function edit(MedicalHistory $medicalHistory)

@@ -21,6 +21,11 @@ class MedicalHistory extends Model
         return $this->belongsTo(Patient::class);
     }
 
+    public function changes()
+    {
+        return $this->hasMany(MedicalHistoryChange::class);
+    }
+
     public function allergyRecords()
     {
         return $this->hasMany(AllergyRecord::class, 'medical_history_id');
