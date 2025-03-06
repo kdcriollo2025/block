@@ -104,7 +104,7 @@ class MedicalHistoryController extends Controller
     }
 
     // Método para obtener el estado de la información
-    private function getInformationStatus(MedicalHistory $medicalHistory)
+    public function getInformationStatus(MedicalHistory $medicalHistory)
     {
         if ($this->hasChanges($medicalHistory)) {
             $changes = $medicalHistory->changes()
