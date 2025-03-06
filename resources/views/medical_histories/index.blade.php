@@ -56,9 +56,6 @@
                                                 <small class="text-muted">ID: {{ $history->id }}</small>
                                             </div>
                                             <div class="qr-container bg-light p-4 rounded-3 mb-3">
-                                                @php
-                                                    $informationStatus = (new App\Http\Controllers\MedicalHistoryController)->getInformationStatus($history);
-                                                @endphp
                                                 {!! QrCode::size(200)->generate(json_encode([
                                                     'type' => 'Medical History NFT',
                                                     'patient' => $history->patient->name,
@@ -67,7 +64,8 @@
                                                     'hash_version' => count(explode('|', $history->hash)),
                                                     'timestamp' => $history->updated_at->format('Y-m-d H:i:s'),
                                                     'created_at' => $history->created_at->format('Y-m-d H:i:s'),
-                                                    'information_status' => $informationStatus
+                                                    'status' => $history->changes()->exists() ? 'modified' : 'valid',
+                                                    'message' => $history->changes()->exists() ? 'Información ha sido alterada' : 'Información válida sin alteraciones'
                                                 ])) !!}
                                             </div>
                                             <div class="nft-details text-start">
@@ -75,19 +73,30 @@
                                                 <p class="mb-1"><strong>Última actualización:</strong> {{ $history->updated_at->format('d/m/Y H:i:s') }}</p>
                                                 <p class="mb-1">
                                                     <strong>Estado de la información:</strong>
-                                                    <span class="badge bg-{{ $informationStatus['status'] === 'valid' ? 'success' : 'warning' }}">
-                                                        {{ $informationStatus['message'] }}
+                                                    <span class="badge bg-{{ $history->changes()->exists() ? 'warning' : 'success' }}">
+                                                        {{ $history->changes()->exists() ? 'Información ha sido alterada' : 'Información válida sin alteraciones' }}
                                                     </span>
                                                 </p>
-                                                @if($informationStatus['status'] === 'modified')
+                                                @if($history->changes()->exists())
                                                     <div class="mt-2 small">
                                                         <p class="mb-1"><strong>Resumen de cambios:</strong></p>
+                                                        @php
+                                                            $changeTypes = $history->changes()
+                                                                ->selectRaw('change_type, count(*) as total')
+                                                                ->groupBy('change_type')
+                                                                ->pluck('total', 'change_type')
+                                                                ->toArray();
+                                                        @endphp
                                                         <ul class="list-unstyled">
-                                                            <li>Agregados: {{ $informationStatus['details']['changes_summary']['added'] }}</li>
-                                                            <li>Modificados: {{ $informationStatus['details']['changes_summary']['modified'] }}</li>
-                                                            <li>Eliminados: {{ $informationStatus['details']['changes_summary']['deleted'] }}</li>
+                                                            <li>Agregados: {{ $changeTypes['added'] ?? 0 }}</li>
+                                                            <li>Modificados: {{ $changeTypes['modified'] ?? 0 }}</li>
+                                                            <li>Eliminados: {{ $changeTypes['deleted'] ?? 0 }}</li>
                                                         </ul>
-                                                        <p class="mb-0"><small>Último cambio: {{ $informationStatus['details']['last_change'] }}</small></p>
+                                                        @if($lastChange = $history->changes()->latest()->first())
+                                                            <p class="mb-0">
+                                                                <small>Último cambio: {{ $lastChange->created_at->format('d/m/Y H:i:s') }}</small>
+                                                            </p>
+                                                        @endif
                                                     </div>
                                                 @endif
                                             </div>
