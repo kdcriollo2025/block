@@ -70,7 +70,7 @@ class MedicalHistoryController extends Controller
             ->with('success', 'Historial médico creado exitosamente.');
     }
 
-    public function registerChange($medicalHistory, $changeType, $recordType, $recordId, $changes)
+    private function registerChange($medicalHistory, $changeType, $recordType, $recordId, $changes)
     {
         // Registrar el cambio
         MedicalHistoryChange::create([
@@ -104,7 +104,7 @@ class MedicalHistoryController extends Controller
     }
 
     // Método para obtener el estado de la información
-    public function getInformationStatus(MedicalHistory $medicalHistory)
+    private function getInformationStatus(MedicalHistory $medicalHistory)
     {
         if ($this->hasChanges($medicalHistory)) {
             $changes = $medicalHistory->changes()
@@ -197,23 +197,9 @@ class MedicalHistoryController extends Controller
             return redirect()->route('medico.medical_histories.index');
         }
 
-        // Registrar el cambio antes de actualizar
-        $changes = [
-            'old_patient_id' => $medicalHistory->patient_id,
-            'new_patient_id' => $validated['patient_id'],
-        ];
-
-        $this->registerChange(
-            $medicalHistory,
-            'modified',
-            'medical_history',
-            $medicalHistory->id,
-            $changes
-        );
-
         // Generar nuevo hash manteniendo parte del anterior
         $previousHash = $medicalHistory->hash;
-        $previousHashPart = substr($previousHash, 0, 16);
+        $previousHashPart = substr($previousHash, 0, 16); // Tomamos los primeros 16 caracteres
 
         $hashData = [
             'previous_hash' => $previousHashPart,
