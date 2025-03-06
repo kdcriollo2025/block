@@ -63,7 +63,19 @@
                                                     'current_hash' => $history->hash,
                                                     'hash_version' => count(explode('|', $history->hash)),
                                                     'timestamp' => $history->updated_at->format('Y-m-d H:i:s'),
-                                                    'created_at' => $history->created_at->format('Y-m-d H:i:s')
+                                                    'created_at' => $history->created_at->format('Y-m-d H:i:s'),
+                                                    'recent_changes' => $history->changes()
+                                                        ->orderBy('created_at', 'desc')
+                                                        ->take(5)
+                                                        ->get()
+                                                        ->map(function($change) {
+                                                            return [
+                                                                'type' => $change->change_type,
+                                                                'record' => $change->record_type,
+                                                                'details' => $change->changes,
+                                                                'date' => $change->created_at->format('Y-m-d H:i:s')
+                                                            ];
+                                                        })
                                                 ])) !!}
                                             </div>
                                             <div class="nft-details text-start">
@@ -71,6 +83,20 @@
                                                 <p class="mb-1"><strong>Última actualización:</strong> {{ $history->updated_at->format('d/m/Y H:i:s') }}</p>
                                                 <p class="mb-1"><strong>Versión Hash:</strong> {{ count(explode('|', $history->hash)) }}</p>
                                                 <p class="mb-1"><small class="text-muted">Hash actual: {{ substr($history->hash, 0, 20) }}...</small></p>
+                                                
+                                                @if($history->changes()->count() > 0)
+                                                <div class="mt-3">
+                                                    <h6 class="text-primary">Últimos cambios:</h6>
+                                                    @foreach($history->changes()->orderBy('created_at', 'desc')->take(3)->get() as $change)
+                                                    <div class="change-item small">
+                                                        <i class="fas fa-circle text-{{ $change->change_type == 'added' ? 'success' : ($change->change_type == 'deleted' ? 'danger' : 'warning') }} mr-1"></i>
+                                                        {{ ucfirst($change->change_type) }} {{ $change->record_type }}
+                                                        <br>
+                                                        <small class="text-muted">{{ $change->created_at->format('d/m/Y H:i:s') }}</small>
+                                                    </div>
+                                                    @endforeach
+                                                </div>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
