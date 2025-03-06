@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class MedicalHistoryChange extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'medical_history_id',
         'change_type',
