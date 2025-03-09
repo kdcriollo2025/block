@@ -64,7 +64,7 @@
                                                     'timestamp' => now()->format('Y-m-d H:i:s'),
                                                     'created_at' => $history->created_at->format('Y-m-d H:i:s'),
                                                     'status' => 'valid',
-                                                    'message' => 'Información válida sin alteraciones'
+                                                    'message' => 'Certificado verificado correctamente'
                                                 ])) !!}
                                             </div>
                                             <div class="nft-details text-start">
@@ -73,10 +73,9 @@
                                                 <p class="mb-1">
                                                     <strong>Estado de la información:</strong>
                                                     <span class="badge bg-success" id="statusBadge{{ $history->id }}">
-                                                        Información válida sin alteraciones
+                                                        Certificado verificado correctamente
                                                     </span>
                                                 </p>
-                                                <p class="mb-1"><strong>Hash:</strong> <span id="hashDisplay{{ $history->id }}" class="text-muted small">{{ substr($history->hash, 0, 20) }}...</span></p>
                                             </div>
                                         </div>
                                     </div>
@@ -172,15 +171,14 @@
             // Actualizar el estado visual
             const statusBadge = document.getElementById('statusBadge{{ $history->id }}');
             if (isValid) {
-                statusBadge.textContent = 'Información válida sin alteraciones';
+                statusBadge.textContent = 'Certificado verificado correctamente';
                 statusBadge.className = 'badge bg-success';
             } else {
-                statusBadge.textContent = 'Información ha sido alterada';
+                statusBadge.textContent = 'Se detectaron modificaciones en el registro';
                 statusBadge.className = 'badge bg-danger';
             }
             
-            // No actualizar el hash visible en pantalla
-            // Solo actualizar la fecha
+            // Actualizar la fecha
             document.getElementById('lastUpdate{{ $history->id }}').textContent = new Date().toLocaleString();
             
             // Generar datos para el nuevo QR (incluyendo el hash que solo será visible al escanear)
@@ -191,7 +189,7 @@
                 current_hash: newHash, // Este hash solo será visible al escanear
                 timestamp: timestamp,
                 status: isValid ? 'valid' : 'modified',
-                message: isValid ? 'Información válida sin alteraciones' : 'Información ha sido alterada',
+                message: isValid ? 'Certificado verificado correctamente' : 'Se detectaron modificaciones en el registro',
                 scan_time: timestamp
             };
             
