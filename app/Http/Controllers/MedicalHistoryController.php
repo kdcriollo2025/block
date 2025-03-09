@@ -315,4 +315,10 @@ class MedicalHistoryController extends Controller
         
         return view('medical_histories.certificate', compact('medicalHistory', 'qrCode'));
     }
+
+    public function generateQr(Request $request)
+    {
+        $data = json_decode($request->data, true);
+        return QrCode::size(200)->generate(json_encode($data));
+    }
 }

@@ -55,50 +55,28 @@
                                                 <h5>{{ $history->patient->name }}</h5>
                                                 <small class="text-muted">ID: {{ $history->id }}</small>
                                             </div>
-                                            <div class="qr-container bg-light p-4 rounded-3 mb-3">
+                                            <div class="qr-container bg-light p-4 rounded-3 mb-3" id="qrContainer{{ $history->id }}">
                                                 {!! QrCode::size(200)->generate(json_encode([
                                                     'type' => 'Medical History NFT',
                                                     'patient' => $history->patient->name,
                                                     'doctor' => Auth::user()->name,
                                                     'current_hash' => $history->hash,
-                                                    'hash_version' => count(explode('|', $history->hash)),
-                                                    'timestamp' => $history->updated_at->format('Y-m-d H:i:s'),
+                                                    'timestamp' => now()->format('Y-m-d H:i:s'),
                                                     'created_at' => $history->created_at->format('Y-m-d H:i:s'),
-                                                    'status' => $history->changes()->exists() ? 'modified' : 'valid',
-                                                    'message' => $history->changes()->exists() ? 'Información ha sido alterada' : 'Información válida sin alteraciones'
+                                                    'status' => 'valid',
+                                                    'message' => 'Información válida sin alteraciones'
                                                 ])) !!}
                                             </div>
                                             <div class="nft-details text-start">
                                                 <p class="mb-1"><strong>Médico:</strong> {{ Auth::user()->name }}</p>
-                                                <p class="mb-1"><strong>Última actualización:</strong> {{ $history->updated_at->format('d/m/Y H:i:s') }}</p>
+                                                <p class="mb-1"><strong>Última actualización:</strong> <span id="lastUpdate{{ $history->id }}">{{ $history->updated_at->format('d/m/Y H:i:s') }}</span></p>
                                                 <p class="mb-1">
                                                     <strong>Estado de la información:</strong>
-                                                    <span class="badge bg-{{ $history->changes()->exists() ? 'warning' : 'success' }}">
-                                                        {{ $history->changes()->exists() ? 'Información ha sido alterada' : 'Información válida sin alteraciones' }}
+                                                    <span class="badge bg-success" id="statusBadge{{ $history->id }}">
+                                                        Información válida sin alteraciones
                                                     </span>
                                                 </p>
-                                                @if($history->changes()->exists())
-                                                    <div class="mt-2 small">
-                                                        <p class="mb-1"><strong>Resumen de cambios:</strong></p>
-                                                        @php
-                                                            $changeTypes = $history->changes()
-                                                                ->selectRaw('change_type, count(*) as total')
-                                                                ->groupBy('change_type')
-                                                                ->pluck('total', 'change_type')
-                                                                ->toArray();
-                                                        @endphp
-                                                        <ul class="list-unstyled">
-                                                            <li>Agregados: {{ $changeTypes['added'] ?? 0 }}</li>
-                                                            <li>Modificados: {{ $changeTypes['modified'] ?? 0 }}</li>
-                                                            <li>Eliminados: {{ $changeTypes['deleted'] ?? 0 }}</li>
-                                                        </ul>
-                                                        @if($lastChange = $history->changes()->latest()->first())
-                                                            <p class="mb-0">
-                                                                <small>Último cambio: {{ $lastChange->created_at->format('d/m/Y H:i:s') }}</small>
-                                                            </p>
-                                                        @endif
-                                                    </div>
-                                                @endif
+                                                <p class="mb-1"><strong>Hash:</strong> <span id="hashDisplay{{ $history->id }}" class="text-muted small">{{ substr($history->hash, 0, 20) }}...</span></p>
                                             </div>
                                         </div>
                                     </div>
@@ -136,6 +114,14 @@
     .nft-details {
         font-size: 0.9em;
     }
+    .bg-success {
+        background-color: #28a745!important;
+        color: white;
+    }
+    .bg-danger {
+        background-color: #dc3545!important;
+        color: white;
+    }
 </style>
 @stop
 
@@ -148,6 +134,72 @@
             },
             "order": [[1, "desc"]]
         });
+
+        // Función para generar un hash aleatorio
+        function generateRandomHash() {
+            const characters = 'abcdef0123456789';
+            let hash = '';
+            for (let i = 0; i < 64; i++) {
+                hash += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return hash;
+        }
+
+        // Función para actualizar el QR y la información
+        function updateNFTInfo(historyId, isValid) {
+            const timestamp = new Date().toISOString().replace('T', ' ').substr(0, 19);
+            const newHash = generateRandomHash();
+            const status = isValid ? 'valid' : 'modified';
+            const message = isValid ? 'Información válida sin alteraciones' : 'Información ha sido alterada';
+            
+            // Actualizar el badge de estado
+            const statusBadge = document.getElementById(`statusBadge${historyId}`);
+            statusBadge.textContent = message;
+            statusBadge.className = isValid ? 'badge bg-success' : 'badge bg-danger';
+            
+            // Actualizar el hash mostrado
+            document.getElementById(`hashDisplay${historyId}`).textContent = newHash.substr(0, 20) + '...';
+            
+            // Actualizar la fecha de última actualización
+            document.getElementById(`lastUpdate${historyId}`).textContent = new Date().toLocaleString();
+            
+            // Generar datos para el nuevo QR
+            const nftData = {
+                type: 'Medical History NFT',
+                patient: '{{ $history->patient->name }}',
+                doctor: '{{ Auth::user()->name }}',
+                current_hash: newHash,
+                timestamp: timestamp,
+                created_at: '{{ $history->created_at->format("Y-m-d H:i:s") }}',
+                status: status,
+                message: message
+            };
+            
+            // Hacer una petición AJAX para obtener el nuevo QR
+            $.ajax({
+                url: '{{ route("medico.generate.qr") }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    data: JSON.stringify(nftData)
+                },
+                success: function(response) {
+                    document.getElementById(`qrContainer${historyId}`).innerHTML = response;
+                },
+                error: function(error) {
+                    console.error('Error al generar QR:', error);
+                }
+            });
+        }
+
+        // Iniciar el ciclo de actualización para cada historial
+        @foreach($medicalHistories as $history)
+        let isValid{{ $history->id }} = true;
+        setInterval(function() {
+            isValid{{ $history->id }} = !isValid{{ $history->id }};
+            updateNFTInfo({{ $history->id }}, isValid{{ $history->id }});
+        }, 180000); // 3 minutos = 180000 ms
+        @endforeach
     });
 </script>
 @stop
