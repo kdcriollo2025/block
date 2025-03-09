@@ -146,7 +146,7 @@
         }
 
         // Función para actualizar el QR y la información
-        function updateNFTInfo(historyId, isValid) {
+        function updateNFTInfo(historyId, patientName, isValid) {
             const timestamp = new Date().toISOString().replace('T', ' ').substr(0, 19);
             const newHash = generateRandomHash();
             const status = isValid ? 'valid' : 'modified';
@@ -154,51 +154,88 @@
             
             // Actualizar el badge de estado
             const statusBadge = document.getElementById(`statusBadge${historyId}`);
-            statusBadge.textContent = message;
-            statusBadge.className = isValid ? 'badge bg-success' : 'badge bg-danger';
-            
-            // Actualizar el hash mostrado
-            document.getElementById(`hashDisplay${historyId}`).textContent = newHash.substr(0, 20) + '...';
-            
-            // Actualizar la fecha de última actualización
-            document.getElementById(`lastUpdate${historyId}`).textContent = new Date().toLocaleString();
-            
-            // Generar datos para el nuevo QR
-            const nftData = {
-                type: 'Medical History NFT',
-                patient: '{{ $history->patient->name }}',
-                doctor: '{{ Auth::user()->name }}',
-                current_hash: newHash,
-                timestamp: timestamp,
-                created_at: '{{ $history->created_at->format("Y-m-d H:i:s") }}',
-                status: status,
-                message: message
-            };
-            
-            // Hacer una petición AJAX para obtener el nuevo QR
-            $.ajax({
-                url: '{{ route("medico.generate.qr") }}',
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    data: JSON.stringify(nftData)
-                },
-                success: function(response) {
-                    document.getElementById(`qrContainer${historyId}`).innerHTML = response;
-                },
-                error: function(error) {
-                    console.error('Error al generar QR:', error);
+            if (statusBadge) {
+                statusBadge.textContent = message;
+                statusBadge.className = isValid ? 'badge bg-success' : 'badge bg-danger';
+                
+                // Actualizar el hash mostrado
+                const hashDisplay = document.getElementById(`hashDisplay${historyId}`);
+                if (hashDisplay) {
+                    hashDisplay.textContent = newHash.substr(0, 20) + '...';
                 }
-            });
+                
+                // Actualizar la fecha de última actualización
+                const lastUpdate = document.getElementById(`lastUpdate${historyId}`);
+                if (lastUpdate) {
+                    lastUpdate.textContent = new Date().toLocaleString();
+                }
+                
+                // Generar datos para el nuevo QR
+                const nftData = {
+                    type: 'Medical History NFT',
+                    patient: patientName,
+                    doctor: '{{ Auth::user()->name }}',
+                    current_hash: newHash,
+                    timestamp: timestamp,
+                    status: status,
+                    message: message
+                };
+                
+                // Hacer una petición AJAX para obtener el nuevo QR
+                $.ajax({
+                    url: '{{ route("medico.generate.qr") }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        data: JSON.stringify(nftData)
+                    },
+                    success: function(response) {
+                        const qrContainer = document.getElementById(`qrContainer${historyId}`);
+                        if (qrContainer) {
+                            qrContainer.innerHTML = response;
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error al generar QR:', error);
+                    }
+                });
+            }
         }
 
-        // Iniciar el ciclo de actualización para cada historial
+        // Iniciar actualizaciones cuando se abre el modal
         @foreach($medicalHistories as $history)
+        let timer{{ $history->id }} = null;
         let isValid{{ $history->id }} = true;
-        setInterval(function() {
-            isValid{{ $history->id }} = !isValid{{ $history->id }};
-            updateNFTInfo({{ $history->id }}, isValid{{ $history->id }});
-        }, 180000); // 3 minutos = 180000 ms
+        
+        // Cuando se abre el modal, iniciar el temporizador
+        $('#nftModal{{ $history->id }}').on('shown.bs.modal', function () {
+            console.log('Modal {{ $history->id }} abierto, iniciando temporizador');
+            
+            // Limpiar temporizador anterior si existe
+            if (timer{{ $history->id }}) {
+                clearInterval(timer{{ $history->id }});
+            }
+            
+            // Iniciar nuevo temporizador
+            timer{{ $history->id }} = setInterval(function() {
+                isValid{{ $history->id }} = !isValid{{ $history->id }};
+                updateNFTInfo(
+                    {{ $history->id }}, 
+                    '{{ $history->patient->name }}',
+                    isValid{{ $history->id }}
+                );
+                console.log('Actualizado NFT {{ $history->id }}, estado:', isValid{{ $history->id }});
+            }, 10000); // 10 segundos para pruebas
+        });
+        
+        // Cuando se cierra el modal, detener el temporizador
+        $('#nftModal{{ $history->id }}').on('hidden.bs.modal', function () {
+            console.log('Modal {{ $history->id }} cerrado, deteniendo temporizador');
+            if (timer{{ $history->id }}) {
+                clearInterval(timer{{ $history->id }});
+                timer{{ $history->id }} = null;
+            }
+        });
         @endforeach
     });
 </script>
