@@ -153,7 +153,7 @@
         @foreach($medicalHistories as $history)
         // Variable para controlar el estado y almacenar el historial de hashes
         let openCount{{ $history->id }} = 0;
-        let hashHistory{{ $history->id }} = ['{{ $history->hash }}'];
+        let hashHistory{{ $history->id }} = ['{{ substr($history->hash, 0, 20) }}'];
         
         // Cuando se abre el modal, actualizar automáticamente
         $('#nftModal{{ $history->id }}').on('shown.bs.modal', function() {
@@ -185,20 +185,31 @@
             // Actualizar la fecha
             document.getElementById('lastUpdate{{ $history->id }}').textContent = new Date().toLocaleString();
             
-            // Generar datos para el nuevo QR (incluyendo el historial completo de hashes)
-            const nftData = {
+            // Crear un objeto con la información completa para el QR
+            const fullData = {
                 type: 'Medical History NFT',
                 patient: '{{ $history->patient->name }}',
                 doctor: '{{ Auth::user()->name }}',
                 current_hash: newHash,
-                hash_history: hashHistory{{ $history->id }}, // Historial completo de hashes
-                hash_count: hashHistory{{ $history->id }}.length, // Número de hashes acumulados
+                previous_hashes: hashHistory{{ $history->id }}.slice(0, -1), // Todos los hashes anteriores
+                hash_count: hashHistory{{ $history->id }}.length,
                 timestamp: timestamp,
+                created_at: '{{ $history->created_at->format("Y-m-d H:i:s") }}',
                 status: isValid ? 'valid' : 'modified',
                 message: isValid ? 'Certificado verificado correctamente' : 'Se detectaron modificaciones en el registro',
-                scan_time: timestamp,
-                open_count: openCount{{ $history->id }} // Número de veces que se ha abierto el modal
+                verification_count: openCount{{ $history->id }},
+                verification_history: [
+                    {
+                        time: timestamp,
+                        hash: newHash,
+                        status: isValid ? 'valid' : 'modified'
+                    }
+                ]
             };
+            
+            // Convertir a JSON y asegurarse de que no haya problemas de codificación
+            const jsonData = JSON.stringify(fullData);
+            console.log('Datos para QR:', jsonData);
             
             // Actualizar el QR con AJAX
             $.ajax({
@@ -206,7 +217,7 @@
                 method: 'POST',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    data: JSON.stringify(nftData)
+                    data: jsonData
                 },
                 success: function(response) {
                     document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
