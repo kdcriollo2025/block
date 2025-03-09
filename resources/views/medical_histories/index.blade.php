@@ -81,7 +81,6 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" id="btnVerifyNft{{ $history->id }}" class="btn btn-primary">Verificar NFT</button>
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                                     </div>
                                 </div>
@@ -122,9 +121,6 @@
     .bg-danger {
         background-color: #dc3545!important;
         color: white;
-    }
-    .btn-update-nft {
-        margin-top: 10px;
     }
 </style>
 @stop
