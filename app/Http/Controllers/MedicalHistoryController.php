@@ -318,21 +318,41 @@ class MedicalHistoryController extends Controller
 
     public function generateQr(Request $request)
     {
-        // Generar QR directamente con los datos recibidos
-        return QrCode::size(200)->generate($request->data);
+        try {
+            // Decodificar los datos para verificar que son JSON válido
+            $decodedData = json_decode($request->data);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                \Log::error('Error decodificando JSON: ' . json_last_error_msg());
+                \Log::error('Datos recibidos: ' . $request->data);
+                return 'Error en formato de datos';
+            }
+            
+            // Generar QR con los datos recibidos
+            return QrCode::size(200)->errorCorrection('H')->generate($request->data);
+        } catch (\Exception $e) {
+            \Log::error('Error generando QR: ' . $e->getMessage());
+            return 'Error generando QR: ' . $e->getMessage();
+        }
     }
 
     public function generateQrImage(Request $request)
     {
-        $data = $request->query('data');
-        
-        // Generar QR como imagen
-        $qrCode = QrCode::format('png')
-                        ->size(200)
-                        ->margin(1)
-                        ->generate($data);
-        
-        // Devolver como imagen
-        return response($qrCode)->header('Content-Type', 'image/png');
+        try {
+            $data = $request->query('data');
+            
+            // Generar QR como imagen
+            $qrCode = QrCode::format('png')
+                            ->size(200)
+                            ->margin(1)
+                            ->errorCorrection('H')
+                            ->generate($data);
+            
+            // Devolver como imagen
+            return response($qrCode)->header('Content-Type', 'image/png');
+        } catch (\Exception $e) {
+            \Log::error('Error generando imagen QR: ' . $e->getMessage());
+            return response('Error generando QR: ' . $e->getMessage(), 500);
+        }
     }
 }

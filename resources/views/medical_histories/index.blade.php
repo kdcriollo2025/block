@@ -56,12 +56,12 @@
                                                 <small class="text-muted">ID: {{ $history->id }}</small>
                                             </div>
                                             <div class="qr-container bg-light p-4 rounded-3 mb-3" id="qrContainer{{ $history->id }}">
+                                                <!-- QR inicial con estructura simplificada -->
                                                 {!! QrCode::size(200)->generate(json_encode([
                                                     'patient' => $history->patient->name,
                                                     'doctor' => Auth::user()->name,
-                                                    'opens' => 0,
-                                                    'hash_chain' => $history->hash,
-                                                    'status' => "Verificado",
+                                                    'hash_history' => [substr($history->hash, 0, 10)],
+                                                    'status' => 'Verificado',
                                                     'time' => now()->format('Y-m-d H:i:s')
                                                 ])) !!}
                                             </div>
@@ -134,25 +134,25 @@
 
         // Configurar comportamiento para cada modal de historial
         @foreach($medicalHistories as $history)
-        // Contador de aperturas y cadena de hashes
-        let openCount{{ $history->id }} = 0;
-        let hashChain{{ $history->id }} = "{{ $history->hash }}";
+        // Inicializar el historial de hashes como un array con el hash original acortado
+        let hashHistory{{ $history->id }} = [
+            "{{ substr($history->hash, 0, 10) }}"
+        ];
         
         // Cuando se abre el modal, actualizar automáticamente
         $('#nftModal{{ $history->id }}').on('shown.bs.modal', function() {
-            // Incrementar contador
-            openCount{{ $history->id }}++;
+            console.log('Modal {{ $history->id }} abierto');
             
             // Generar nuevo hash simple (solo 8 caracteres para que sea manejable)
             const newHash = Math.random().toString(16).substring(2, 10);
             
-            // Añadir al final de la cadena de hashes
-            hashChain{{ $history->id }} += "->" + newHash;
+            // Añadir al array de hashes
+            hashHistory{{ $history->id }}.push(newHash);
             
-            // Alternar estado
-            const isValid = openCount{{ $history->id }} % 2 === 0;
+            // Determinar si la información es válida o no (alterna cada vez)
+            const isValid = hashHistory{{ $history->id }}.length % 2 === 0;
             
-            // Actualizar estado visual
+            // Actualizar el estado visual
             const statusBadge = document.getElementById('statusBadge{{ $history->id }}');
             if (isValid) {
                 statusBadge.textContent = 'Certificado verificado correctamente';
@@ -162,24 +162,26 @@
                 statusBadge.className = 'badge bg-danger';
             }
             
-            // Actualizar fecha
+            // Actualizar la fecha
             document.getElementById('lastUpdate{{ $history->id }}').textContent = new Date().toLocaleString();
             
-            // Datos simples para el QR
+            // Crear un objeto con la información completa para el QR
             const qrData = {
                 patient: "{{ $history->patient->name }}",
                 doctor: "{{ Auth::user()->name }}",
-                opens: openCount{{ $history->id }},
-                hash_chain: hashChain{{ $history->id }},
+                hash_history: hashHistory{{ $history->id }},
                 status: isValid ? "Verificado" : "Modificado",
                 time: new Date().toLocaleString()
             };
             
+            // Mostrar en consola para depuración
+            console.log('Datos para QR:', qrData);
+            console.log('Historial de hashes:', hashHistory{{ $history->id }});
+            
             // Convertir a JSON
             const jsonStr = JSON.stringify(qrData);
-            console.log("Datos QR:", jsonStr);
             
-            // Actualizar QR
+            // Actualizar el QR con AJAX
             $.ajax({
                 url: "{{ route('medico.generate.qr') }}",
                 method: "POST",
@@ -189,7 +191,10 @@
                 },
                 success: function(response) {
                     document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
-                    console.log("QR actualizado, hash chain:", hashChain{{ $history->id }});
+                    console.log('QR actualizado con éxito');
+                },
+                error: function(error) {
+                    console.error('Error al generar QR:', error);
                 }
             });
         });
