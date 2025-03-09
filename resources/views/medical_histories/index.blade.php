@@ -81,6 +81,7 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
+                                        <button type="button" id="btnVerifyNft{{ $history->id }}" class="btn btn-primary">Verificar NFT</button>
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                                     </div>
                                 </div>
@@ -148,29 +149,53 @@
             return hash;
         }
 
-        // Función para actualizar el QR y el hash automáticamente cada minuto
-        function updateQRCode(historyId, patientName) {
+        // Agregar botón de verificación a cada modal
+        @foreach($medicalHistories as $history)
+        // Agregar botón al footer del modal
+        $('#nftModal{{ $history->id }} .modal-footer').prepend(
+            '<button type="button" id="btnVerifyNft{{ $history->id }}" class="btn btn-primary">Verificar NFT</button>'
+        );
+        
+        // Variable para controlar el estado
+        let isValid{{ $history->id }} = true;
+        
+        // Manejar clic en el botón de verificación
+        $('#btnVerifyNft{{ $history->id }}').on('click', function() {
+            // Alternar entre válido e inválido
+            isValid{{ $history->id }} = !isValid{{ $history->id }};
+            
+            // Generar nuevo hash y timestamp
             const newHash = generateRandomHash();
             const timestamp = new Date().toISOString().replace('T', ' ').substr(0, 19);
-
-            // Actualizar el hash mostrado
-            document.getElementById(`hashDisplay${historyId}`).textContent = newHash.substr(0, 20) + '...';
-
-            // Actualizar la fecha de última actualización
-            document.getElementById(`lastUpdate${historyId}`).textContent = new Date().toLocaleString();
-
+            
+            // Actualizar el estado
+            const statusBadge = document.getElementById('statusBadge{{ $history->id }}');
+            if (isValid{{ $history->id }}) {
+                statusBadge.textContent = 'Información válida sin alteraciones';
+                statusBadge.className = 'badge bg-success';
+            } else {
+                statusBadge.textContent = 'Información ha sido alterada';
+                statusBadge.className = 'badge bg-danger';
+            }
+            
+            // Actualizar el hash
+            document.getElementById('hashDisplay{{ $history->id }}').textContent = newHash.substr(0, 20) + '...';
+            
+            // Actualizar la fecha
+            document.getElementById('lastUpdate{{ $history->id }}').textContent = new Date().toLocaleString();
+            
             // Generar datos para el nuevo QR
             const nftData = {
                 type: 'Medical History NFT',
-                patient: patientName,
+                patient: '{{ $history->patient->name }}',
                 doctor: '{{ Auth::user()->name }}',
                 current_hash: newHash,
                 timestamp: timestamp,
-                status: 'valid',
-                message: 'Información válida sin alteraciones'
+                status: isValid{{ $history->id }} ? 'valid' : 'modified',
+                message: isValid{{ $history->id }} ? 'Información válida sin alteraciones' : 'Información ha sido alterada'
             };
-
-            // Hacer una petición AJAX para obtener el nuevo QR
+            
+            // Actualizar el QR
             $.ajax({
                 url: '{{ route("medico.generate.qr") }}',
                 method: 'POST',
@@ -179,19 +204,13 @@
                     data: JSON.stringify(nftData)
                 },
                 success: function(response) {
-                    document.getElementById(`qrContainer${historyId}`).innerHTML = response;
+                    document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
                 },
                 error: function(error) {
                     console.error('Error al generar QR:', error);
                 }
             });
-        }
-
-        // Configurar actualización automática cada minuto
-        @foreach($medicalHistories as $history)
-            setInterval(function() {
-                updateQRCode({{ $history->id }}, '{{ $history->patient->name }}');
-            }, 60000); // 60 segundos
+        });
         @endforeach
     });
 </script>
