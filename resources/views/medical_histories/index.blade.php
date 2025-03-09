@@ -137,32 +137,26 @@
             "order": [[1, "desc"]]
         });
 
-        // Función para generar hash aleatorio
-        function generateRandomHash() {
-            return Math.random().toString(16).substring(2, 10);
-        }
-
-        // Configurar comportamiento para cada modal de historial
         @foreach($medicalHistories as $history)
-        // Generar 20 hashes aleatorios al inicio
-        const allHashes{{ $history->id }} = Array.from({length: 20}, () => generateRandomHash());
-        
-        // Variables globales para este historial
-        window.hashHistory{{ $history->id }} = ["{{ substr($history->hash, 0, 10) }}"];
-        window.currentIndex{{ $history->id }} = 0;
-        
+        // Pre-generar 20 hashes aleatorios
+        const initialHashes{{ $history->id }} = [
+            "{{ substr($history->hash, 0, 10) }}",  // Hash original
+            ...Array.from({length: 20}, () => Math.random().toString(16).substr(2, 10))  // 20 hashes aleatorios
+        ];
+
+        // Inicializar el QR con todos los hashes
+        const initialQrData{{ $history->id }} = {
+            patient: "{{ $history->patient->name }}",
+            doctor: "{{ Auth::user()->name }}",
+            hash_history: initialHashes{{ $history->id }},
+            status: "Verificado",
+            time: new Date().toLocaleString()
+        };
+
         // Función para actualizar el QR
-        function updateQR{{ $history->id }}() {
-            if (window.currentIndex{{ $history->id }} >= allHashes{{ $history->id }}.length) {
-                return; // No más hashes disponibles
-            }
-            
-            // Añadir el siguiente hash pre-generado
-            window.hashHistory{{ $history->id }}.push(allHashes{{ $history->id }}[window.currentIndex{{ $history->id }}]);
-            window.currentIndex{{ $history->id }}++;
-            
-            // Determinar si la información es válida o no (alterna cada vez)
-            const isValid = window.hashHistory{{ $history->id }}.length % 2 === 0;
+        function updateQR{{ $history->id }}(currentIndex) {
+            const visibleHashes = initialHashes{{ $history->id }}.slice(0, currentIndex + 1);
+            const isValid = currentIndex % 2 === 0;
             
             // Actualizar el estado visual
             const statusBadge = document.getElementById('statusBadge{{ $history->id }}');
@@ -177,58 +171,15 @@
             // Actualizar la fecha
             document.getElementById('lastUpdate{{ $history->id }}').textContent = new Date().toLocaleString();
             
-            // Crear un objeto con la información completa para el QR
             const qrData = {
                 patient: "{{ $history->patient->name }}",
                 doctor: "{{ Auth::user()->name }}",
-                hash_history: window.hashHistory{{ $history->id }},
-                total_hashes: window.hashHistory{{ $history->id }}.length,
-                remaining_hashes: allHashes{{ $history->id }}.length - window.currentIndex{{ $history->id }},
+                hash_history: visibleHashes,
                 status: isValid ? "Verificado" : "Modificado",
                 time: new Date().toLocaleString()
             };
             
-            // Mostrar en consola para depuración
-            console.log('Historial de hashes:', window.hashHistory{{ $history->id }});
-            console.log('Hashes restantes:', allHashes{{ $history->id }}.length - window.currentIndex{{ $history->id }});
-            
-            // Convertir a JSON
-            const jsonStr = JSON.stringify(qrData);
-            
-            // Actualizar el QR con AJAX
-            $.ajax({
-                url: "{{ route('medico.generate.qr') }}",
-                method: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    data: jsonStr
-                },
-                success: function(response) {
-                    document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
-                }
-            });
-        }
-        
-        // Hacer el QR clickeable
-        $('#qrContainer{{ $history->id }}').on('click', function() {
-            updateQR{{ $history->id }}();
-        });
-
-        // Cuando se abre el modal, reiniciar el estado
-        $('#nftModal{{ $history->id }}').on('show.bs.modal', function() {
-            window.hashHistory{{ $history->id }} = ["{{ substr($history->hash, 0, 10) }}"];
-            window.currentIndex{{ $history->id }} = 0;
-            
-            // Actualizar el QR inicial
-            const qrData = {
-                patient: "{{ $history->patient->name }}",
-                doctor: "{{ Auth::user()->name }}",
-                hash_history: window.hashHistory{{ $history->id }},
-                total_hashes: 1,
-                remaining_hashes: allHashes{{ $history->id }}.length,
-                status: "Verificado",
-                time: new Date().toLocaleString()
-            };
+            console.log('Hashes visibles:', visibleHashes);
             
             $.ajax({
                 url: "{{ route('medico.generate.qr') }}",
@@ -241,6 +192,23 @@
                     document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
                 }
             });
+        }
+
+        // Variable para rastrear el índice actual
+        let currentHashIndex{{ $history->id }} = 0;
+
+        // Hacer el QR clickeable
+        $('#qrContainer{{ $history->id }}').on('click', function() {
+            if (currentHashIndex{{ $history->id }} < initialHashes{{ $history->id }}.length - 1) {
+                currentHashIndex{{ $history->id }}++;
+                updateQR{{ $history->id }}(currentHashIndex{{ $history->id }});
+            }
+        });
+
+        // Cuando se abre el modal, mostrar el estado inicial
+        $('#nftModal{{ $history->id }}').on('show.bs.modal', function() {
+            currentHashIndex{{ $history->id }} = 0;
+            updateQR{{ $history->id }}(currentHashIndex{{ $history->id }});
         });
         @endforeach
     });
