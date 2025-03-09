@@ -318,20 +318,7 @@ class MedicalHistoryController extends Controller
 
     public function generateQr(Request $request)
     {
-        try {
-            $data = json_decode($request->data, true);
-            
-            // Asegurarse de que los datos se decodifican correctamente
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                \Log::error('Error decodificando JSON: ' . json_last_error_msg());
-                $data = ['error' => 'Error en formato de datos'];
-            }
-            
-            // Generar QR con los datos completos
-            return QrCode::size(200)->errorCorrection('H')->generate($request->data);
-        } catch (\Exception $e) {
-            \Log::error('Error generando QR: ' . $e->getMessage());
-            return 'Error generando QR';
-        }
+        // Generar QR directamente con los datos recibidos
+        return QrCode::size(200)->generate($request->data);
     }
 }

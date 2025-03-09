@@ -134,45 +134,27 @@
             "order": [[1, "desc"]]
         });
 
-        // Función para generar un hash aleatorio
-        function generateRandomHash() {
-            const characters = 'abcdef0123456789';
-            let hash = '';
-            for (let i = 0; i < 16; i++) {
-                hash += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return hash;
-        }
-
-        // Solución para el problema de aria-hidden
-        $('.modal').on('shown.bs.modal', function() {
-            $(this).removeAttr('aria-hidden');
-        });
-
         // Configurar comportamiento para cada modal de historial
         @foreach($medicalHistories as $history)
-        // Variable para controlar el estado y almacenar el historial de hashes
+        // Contador de aperturas y cadena de hashes
         let openCount{{ $history->id }} = 0;
-        let hashHistory{{ $history->id }} = ['{{ substr($history->hash, 0, 20) }}'];
+        let hashChain{{ $history->id }} = "{{ $history->hash }}";
         
         // Cuando se abre el modal, actualizar automáticamente
         $('#nftModal{{ $history->id }}').on('shown.bs.modal', function() {
-            console.log('Modal {{ $history->id }} abierto');
-            
-            // Incrementar contador de aperturas
+            // Incrementar contador
             openCount{{ $history->id }}++;
             
-            // Determinar si la información es válida o no (alterna cada vez)
+            // Generar nuevo hash simple (solo 8 caracteres para que sea manejable)
+            const newHash = Math.random().toString(16).substring(2, 10);
+            
+            // Añadir al final de la cadena de hashes
+            hashChain{{ $history->id }} += "->" + newHash;
+            
+            // Alternar estado
             const isValid = openCount{{ $history->id }} % 2 === 0;
             
-            // Generar nuevo hash y timestamp
-            const newHash = generateRandomHash();
-            const timestamp = new Date().toISOString().replace('T', ' ').substr(0, 19);
-            
-            // Agregar el nuevo hash al historial
-            hashHistory{{ $history->id }}.push(newHash);
-            
-            // Actualizar el estado visual
+            // Actualizar estado visual
             const statusBadge = document.getElementById('statusBadge{{ $history->id }}');
             if (isValid) {
                 statusBadge.textContent = 'Certificado verificado correctamente';
@@ -182,50 +164,34 @@
                 statusBadge.className = 'badge bg-danger';
             }
             
-            // Actualizar la fecha
+            // Actualizar fecha
             document.getElementById('lastUpdate{{ $history->id }}').textContent = new Date().toLocaleString();
             
-            // Crear un objeto con la información completa para el QR
-            const fullData = {
-                type: 'Medical History NFT',
-                patient: '{{ $history->patient->name }}',
-                doctor: '{{ Auth::user()->name }}',
-                current_hash: newHash,
-                previous_hashes: hashHistory{{ $history->id }}.slice(0, -1), // Todos los hashes anteriores
-                hash_count: hashHistory{{ $history->id }}.length,
-                timestamp: timestamp,
-                created_at: '{{ $history->created_at->format("Y-m-d H:i:s") }}',
-                status: isValid ? 'valid' : 'modified',
-                message: isValid ? 'Certificado verificado correctamente' : 'Se detectaron modificaciones en el registro',
-                verification_count: openCount{{ $history->id }},
-                verification_history: [
-                    {
-                        time: timestamp,
-                        hash: newHash,
-                        status: isValid ? 'valid' : 'modified'
-                    }
-                ]
+            // Datos simples para el QR
+            const qrData = {
+                patient: "{{ $history->patient->name }}",
+                doctor: "{{ Auth::user()->name }}",
+                opens: openCount{{ $history->id }},
+                hash_chain: hashChain{{ $history->id }},
+                status: isValid ? "Verificado" : "Modificado",
+                time: new Date().toLocaleString()
             };
             
-            // Convertir a JSON y asegurarse de que no haya problemas de codificación
-            const jsonData = JSON.stringify(fullData);
-            console.log('Datos para QR:', jsonData);
+            // Convertir a JSON
+            const jsonStr = JSON.stringify(qrData);
+            console.log("Datos QR:", jsonStr);
             
-            // Actualizar el QR con AJAX
+            // Actualizar QR
             $.ajax({
-                url: '{{ route("medico.generate.qr") }}',
-                method: 'POST',
+                url: "{{ route('medico.generate.qr') }}",
+                method: "POST",
                 data: {
-                    _token: '{{ csrf_token() }}',
-                    data: jsonData
+                    _token: "{{ csrf_token() }}",
+                    data: jsonStr
                 },
                 success: function(response) {
                     document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
-                    console.log('QR actualizado para historial {{ $history->id }}');
-                    console.log('Historial de hashes:', hashHistory{{ $history->id }});
-                },
-                error: function(error) {
-                    console.error('Error al generar QR:', error);
+                    console.log("QR actualizado, hash chain:", hashChain{{ $history->id }});
                 }
             });
         });
