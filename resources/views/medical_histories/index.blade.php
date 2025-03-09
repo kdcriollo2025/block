@@ -82,7 +82,6 @@
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                                        <button type="button" id="btnToggleNft{{ $history->id }}" class="btn btn-primary">Alternar estado NFT</button>
                                     </div>
                                 </div>
                             </div>
@@ -149,44 +148,37 @@
             return hash;
         }
 
-        // Agregar botones de actualización manual
-        @foreach($medicalHistories as $history)
-        let isValid{{ $history->id }} = true;
-        
-        // Agregar botón de actualización al modal
-        $('#nftModal{{ $history->id }} .modal-footer').prepend(
-            '<button type="button" id="btnToggleNft{{ $history->id }}" class="btn btn-primary">Alternar estado NFT</button>'
-        );
-        
-        // Manejar clic en el botón
-        $('#btnToggleNft{{ $history->id }}').on('click', function() {
-            isValid{{ $history->id }} = !isValid{{ $history->id }};
-            
+        // Función para simular verificación blockchain
+        function simulateBlockchainVerification(historyId, patientName) {
+            // Simulamos una verificación aleatoria (en un blockchain real sería una verificación real)
+            const isValid = Math.random() > 0.5; // 50% de probabilidad de ser válido
             const timestamp = new Date().toISOString().replace('T', ' ').substr(0, 19);
             const newHash = generateRandomHash();
-            const status = isValid{{ $history->id }} ? 'valid' : 'modified';
-            const message = isValid{{ $history->id }} ? 'Información válida sin alteraciones' : 'Información ha sido alterada';
+            const status = isValid ? 'valid' : 'modified';
+            const message = isValid ? 'Información válida sin alteraciones' : 'Información ha sido alterada';
             
             // Actualizar el badge de estado
-            const statusBadge = document.getElementById(`statusBadge{{ $history->id }}`);
+            const statusBadge = document.getElementById(`statusBadge${historyId}`);
             statusBadge.textContent = message;
-            statusBadge.className = isValid{{ $history->id }} ? 'badge bg-success' : 'badge bg-danger';
+            statusBadge.className = isValid ? 'badge bg-success' : 'badge bg-danger';
             
             // Actualizar el hash mostrado
-            document.getElementById(`hashDisplay{{ $history->id }}`).textContent = newHash.substr(0, 20) + '...';
+            document.getElementById(`hashDisplay${historyId}`).textContent = newHash.substr(0, 20) + '...';
             
             // Actualizar la fecha de última actualización
-            document.getElementById(`lastUpdate{{ $history->id }}`).textContent = new Date().toLocaleString();
+            document.getElementById(`lastUpdate${historyId}`).textContent = new Date().toLocaleString();
             
             // Generar datos para el nuevo QR
             const nftData = {
                 type: 'Medical History NFT',
-                patient: '{{ $history->patient->name }}',
+                patient: patientName,
                 doctor: '{{ Auth::user()->name }}',
                 current_hash: newHash,
                 timestamp: timestamp,
                 status: status,
-                message: message
+                message: message,
+                blockchain_verification: isValid ? 'passed' : 'failed',
+                verification_time: timestamp
             };
             
             // Hacer una petición AJAX para obtener el nuevo QR
@@ -198,12 +190,32 @@
                     data: JSON.stringify(nftData)
                 },
                 success: function(response) {
-                    document.getElementById(`qrContainer{{ $history->id }}`).innerHTML = response;
+                    document.getElementById(`qrContainer${historyId}`).innerHTML = response;
                 },
                 error: function(error) {
                     console.error('Error al generar QR:', error);
                 }
             });
+        }
+
+        // Configurar verificación automática cuando se abre el modal
+        @foreach($medicalHistories as $history)
+        $('#nftModal{{ $history->id }}').on('shown.bs.modal', function () {
+            // Simular verificación inicial
+            simulateBlockchainVerification({{ $history->id }}, '{{ $history->patient->name }}');
+            
+            // Configurar verificación periódica (cada 10 segundos)
+            const verificationInterval = setInterval(function() {
+                simulateBlockchainVerification({{ $history->id }}, '{{ $history->patient->name }}');
+            }, 10000);
+            
+            // Guardar el intervalo para limpiarlo cuando se cierre el modal
+            $(this).data('verificationInterval', verificationInterval);
+        });
+        
+        // Limpiar intervalo cuando se cierra el modal
+        $('#nftModal{{ $history->id }}').on('hidden.bs.modal', function () {
+            clearInterval($(this).data('verificationInterval'));
         });
         @endforeach
     });
