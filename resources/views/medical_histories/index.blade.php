@@ -154,26 +154,28 @@
             $(this).removeAttr('aria-hidden');
         });
 
-        // Configurar el comportamiento del botón de verificación para cada historial
+        // Configurar comportamiento para cada modal de historial
         @foreach($medicalHistories as $history)
-        // Variable para controlar el estado
-        let isValid{{ $history->id }} = true;
+        // Variable para controlar el estado (alternará cada vez que se abra el modal)
+        let openCount{{ $history->id }} = 0;
         
-        // Usar on() en lugar de click() para mejor delegación de eventos
-        $(document).on('click', '#btnVerifyNft{{ $history->id }}', function(e) {
-            e.preventDefault();
-            console.log('Botón verificar NFT clickeado para historial {{ $history->id }}');
+        // Cuando se abre el modal, actualizar automáticamente
+        $('#nftModal{{ $history->id }}').on('shown.bs.modal', function() {
+            console.log('Modal {{ $history->id }} abierto');
             
-            // Alternar entre válido e inválido
-            isValid{{ $history->id }} = !isValid{{ $history->id }};
+            // Incrementar contador de aperturas
+            openCount{{ $history->id }}++;
+            
+            // Determinar si la información es válida o no (alterna cada vez)
+            const isValid = openCount{{ $history->id }} % 2 === 0;
             
             // Generar nuevo hash y timestamp
             const newHash = generateRandomHash();
             const timestamp = new Date().toISOString().replace('T', ' ').substr(0, 19);
             
-            // Actualizar el estado
+            // Actualizar el estado visual
             const statusBadge = document.getElementById('statusBadge{{ $history->id }}');
-            if (isValid{{ $history->id }}) {
+            if (isValid) {
                 statusBadge.textContent = 'Información válida sin alteraciones';
                 statusBadge.className = 'badge bg-success';
             } else {
@@ -181,42 +183,38 @@
                 statusBadge.className = 'badge bg-danger';
             }
             
-            // Actualizar el hash
-            document.getElementById('hashDisplay{{ $history->id }}').textContent = newHash.substr(0, 20) + '...';
-            
-            // Actualizar la fecha
+            // No actualizar el hash visible en pantalla
+            // Solo actualizar la fecha
             document.getElementById('lastUpdate{{ $history->id }}').textContent = new Date().toLocaleString();
             
-            // Actualizar el QR directamente sin AJAX
-            const qrContainer = document.getElementById('qrContainer{{ $history->id }}');
+            // Generar datos para el nuevo QR (incluyendo el hash que solo será visible al escanear)
+            const nftData = {
+                type: 'Medical History NFT',
+                patient: '{{ $history->patient->name }}',
+                doctor: '{{ Auth::user()->name }}',
+                current_hash: newHash, // Este hash solo será visible al escanear
+                timestamp: timestamp,
+                status: isValid ? 'valid' : 'modified',
+                message: isValid ? 'Información válida sin alteraciones' : 'Información ha sido alterada',
+                scan_time: timestamp
+            };
             
-            // Crear una imagen temporal para simular la actualización del QR
-            const tempImg = document.createElement('img');
-            tempImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
-            tempImg.style.width = '200px';
-            tempImg.style.height = '200px';
-            
-            // Reemplazar el contenido del contenedor QR
-            qrContainer.innerHTML = '';
-            qrContainer.appendChild(tempImg);
-            
-            // Simular carga del nuevo QR
-            setTimeout(function() {
-                // En un entorno real, aquí se cargaría el nuevo QR desde el servidor
-                // Para esta simulación, simplemente mostramos un mensaje
-                const qrInfo = document.createElement('div');
-                qrInfo.className = 'p-3 bg-light rounded text-center';
-                qrInfo.innerHTML = `
-                    <div class="mb-2">QR actualizado</div>
-                    <div class="mb-2">Estado: ${isValid{{ $history->id }} ? 'Válido' : 'Alterado'}</div>
-                    <div class="mb-2">Hash: ${newHash.substr(0, 10)}...</div>
-                    <div class="mb-2">Timestamp: ${timestamp}</div>
-                `;
-                qrContainer.innerHTML = '';
-                qrContainer.appendChild(qrInfo);
-                
-                console.log('QR actualizado para historial {{ $history->id }}');
-            }, 500);
+            // Actualizar el QR con AJAX
+            $.ajax({
+                url: '{{ route("medico.generate.qr") }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    data: JSON.stringify(nftData)
+                },
+                success: function(response) {
+                    document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
+                    console.log('QR actualizado para historial {{ $history->id }}');
+                },
+                error: function(error) {
+                    console.error('Error al generar QR:', error);
+                }
+            });
         });
         @endforeach
     });
