@@ -321,4 +321,18 @@ class MedicalHistoryController extends Controller
         // Generar QR directamente con los datos recibidos
         return QrCode::size(200)->generate($request->data);
     }
+
+    public function generateQrImage(Request $request)
+    {
+        $data = $request->query('data');
+        
+        // Generar QR como imagen
+        $qrCode = QrCode::format('png')
+                        ->size(200)
+                        ->margin(1)
+                        ->generate($data);
+        
+        // Devolver como imagen
+        return response($qrCode)->header('Content-Type', 'image/png');
+    }
 }

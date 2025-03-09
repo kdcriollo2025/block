@@ -57,14 +57,12 @@
                                             </div>
                                             <div class="qr-container bg-light p-4 rounded-3 mb-3" id="qrContainer{{ $history->id }}">
                                                 {!! QrCode::size(200)->generate(json_encode([
-                                                    'type' => 'Medical History NFT',
                                                     'patient' => $history->patient->name,
                                                     'doctor' => Auth::user()->name,
-                                                    'current_hash' => $history->hash,
-                                                    'timestamp' => now()->format('Y-m-d H:i:s'),
-                                                    'created_at' => $history->created_at->format('Y-m-d H:i:s'),
-                                                    'status' => 'valid',
-                                                    'message' => 'Certificado verificado correctamente'
+                                                    'opens' => 0,
+                                                    'hash_chain' => $history->hash,
+                                                    'status' => "Verificado",
+                                                    'time' => now()->format('Y-m-d H:i:s')
                                                 ])) !!}
                                             </div>
                                             <div class="nft-details text-start">
