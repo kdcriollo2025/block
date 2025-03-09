@@ -134,10 +134,26 @@
 
         // Configurar comportamiento para cada modal de historial
         @foreach($medicalHistories as $history)
-        // Inicializar el historial de hashes como un array con el hash original acortado
-        let hashHistory{{ $history->id }} = [
-            "{{ substr($history->hash, 0, 10) }}"
-        ];
+        // Inicializar o recuperar el historial de hashes desde localStorage
+        let storageKey = 'hashHistory_{{ $history->id }}';
+        let hashHistory{{ $history->id }};
+        
+        // Intentar recuperar del localStorage
+        const savedHistory = localStorage.getItem(storageKey);
+        if (savedHistory) {
+            try {
+                hashHistory{{ $history->id }} = JSON.parse(savedHistory);
+                console.log('Historial recuperado del localStorage:', hashHistory{{ $history->id }});
+            } catch (e) {
+                console.error('Error al recuperar historial:', e);
+                hashHistory{{ $history->id }} = ["{{ substr($history->hash, 0, 10) }}"];
+            }
+        } else {
+            // Si no existe, inicializar con el hash original
+            hashHistory{{ $history->id }} = ["{{ substr($history->hash, 0, 10) }}"];
+            // Guardar en localStorage
+            localStorage.setItem(storageKey, JSON.stringify(hashHistory{{ $history->id }}));
+        }
         
         // Cuando se abre el modal, actualizar automáticamente
         $('#nftModal{{ $history->id }}').on('shown.bs.modal', function() {
@@ -148,6 +164,9 @@
             
             // Añadir al array de hashes
             hashHistory{{ $history->id }}.push(newHash);
+            
+            // Guardar en localStorage
+            localStorage.setItem(storageKey, JSON.stringify(hashHistory{{ $history->id }}));
             
             // Determinar si la información es válida o no (alterna cada vez)
             const isValid = hashHistory{{ $history->id }}.length % 2 === 0;
@@ -191,10 +210,43 @@
                 },
                 success: function(response) {
                     document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
-                    console.log('QR actualizado con éxito');
+                    console.log('QR actualizado con éxito. Total hashes:', hashHistory{{ $history->id }}.length);
                 },
                 error: function(error) {
                     console.error('Error al generar QR:', error);
+                }
+            });
+        });
+        
+        // Botón para reiniciar el historial (opcional, para pruebas)
+        $('#nftModal{{ $history->id }} .modal-footer').append(
+            '<button type="button" class="btn btn-warning" id="resetHistory{{ $history->id }}">Reiniciar Historial</button>'
+        );
+        
+        $('#resetHistory{{ $history->id }}').on('click', function() {
+            hashHistory{{ $history->id }} = ["{{ substr($history->hash, 0, 10) }}"];
+            localStorage.setItem(storageKey, JSON.stringify(hashHistory{{ $history->id }}));
+            alert('Historial reiniciado');
+            
+            // Actualizar QR con el historial reiniciado
+            const qrData = {
+                patient: "{{ $history->patient->name }}",
+                doctor: "{{ Auth::user()->name }}",
+                hash_history: hashHistory{{ $history->id }},
+                status: "Verificado",
+                time: new Date().toLocaleString()
+            };
+            
+            $.ajax({
+                url: "{{ route('medico.generate.qr') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    data: JSON.stringify(qrData)
+                },
+                success: function(response) {
+                    document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
+                    console.log('QR reiniciado');
                 }
             });
         });
