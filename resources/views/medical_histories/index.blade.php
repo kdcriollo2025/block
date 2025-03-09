@@ -137,13 +137,30 @@
             "order": [[1, "desc"]]
         });
 
+        // Función para generar hash aleatorio
+        function generateRandomHash() {
+            return Math.random().toString(16).substring(2, 10);
+        }
+
         // Configurar comportamiento para cada modal de historial
         @foreach($medicalHistories as $history)
+        // Generar 20 hashes aleatorios al inicio
+        const allHashes{{ $history->id }} = Array.from({length: 20}, () => generateRandomHash());
+        
         // Variables globales para este historial
         window.hashHistory{{ $history->id }} = ["{{ substr($history->hash, 0, 10) }}"];
+        window.currentIndex{{ $history->id }} = 0;
         
         // Función para actualizar el QR
         function updateQR{{ $history->id }}() {
+            if (window.currentIndex{{ $history->id }} >= allHashes{{ $history->id }}.length) {
+                return; // No más hashes disponibles
+            }
+            
+            // Añadir el siguiente hash pre-generado
+            window.hashHistory{{ $history->id }}.push(allHashes{{ $history->id }}[window.currentIndex{{ $history->id }}]);
+            window.currentIndex{{ $history->id }}++;
+            
             // Determinar si la información es válida o no (alterna cada vez)
             const isValid = window.hashHistory{{ $history->id }}.length % 2 === 0;
             
@@ -165,12 +182,15 @@
                 patient: "{{ $history->patient->name }}",
                 doctor: "{{ Auth::user()->name }}",
                 hash_history: window.hashHistory{{ $history->id }},
+                total_hashes: window.hashHistory{{ $history->id }}.length,
+                remaining_hashes: allHashes{{ $history->id }}.length - window.currentIndex{{ $history->id }},
                 status: isValid ? "Verificado" : "Modificado",
                 time: new Date().toLocaleString()
             };
             
             // Mostrar en consola para depuración
             console.log('Historial de hashes:', window.hashHistory{{ $history->id }});
+            console.log('Hashes restantes:', allHashes{{ $history->id }}.length - window.currentIndex{{ $history->id }});
             
             // Convertir a JSON
             const jsonStr = JSON.stringify(qrData);
@@ -191,14 +211,36 @@
         
         // Hacer el QR clickeable
         $('#qrContainer{{ $history->id }}').on('click', function() {
-            // Generar nuevo hash simple (solo 8 caracteres para que sea manejable)
-            const newHash = Math.random().toString(16).substring(2, 10);
-            
-            // Añadir al array de hashes
-            window.hashHistory{{ $history->id }}.push(newHash);
-            
-            // Actualizar QR
             updateQR{{ $history->id }}();
+        });
+
+        // Cuando se abre el modal, reiniciar el estado
+        $('#nftModal{{ $history->id }}').on('show.bs.modal', function() {
+            window.hashHistory{{ $history->id }} = ["{{ substr($history->hash, 0, 10) }}"];
+            window.currentIndex{{ $history->id }} = 0;
+            
+            // Actualizar el QR inicial
+            const qrData = {
+                patient: "{{ $history->patient->name }}",
+                doctor: "{{ Auth::user()->name }}",
+                hash_history: window.hashHistory{{ $history->id }},
+                total_hashes: 1,
+                remaining_hashes: allHashes{{ $history->id }}.length,
+                status: "Verificado",
+                time: new Date().toLocaleString()
+            };
+            
+            $.ajax({
+                url: "{{ route('medico.generate.qr') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    data: JSON.stringify(qrData)
+                },
+                success: function(response) {
+                    document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
+                }
+            });
         });
         @endforeach
     });
