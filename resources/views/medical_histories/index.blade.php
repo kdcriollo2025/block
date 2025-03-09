@@ -55,16 +55,7 @@
                                                 <h5>{{ $history->patient->name }}</h5>
                                                 <small class="text-muted">ID: {{ $history->id }}</small>
                                             </div>
-                                            
-                                            <!-- Contador de hashes -->
-                                            <div class="mb-3">
-                                                <p><strong>Hashes generados:</strong> <span id="hashCount{{ $history->id }}">1</span></p>
-                                                <button type="button" class="btn btn-success mb-3" id="addHash{{ $history->id }}">
-                                                    <i class="fas fa-plus-circle"></i> Añadir Hash
-                                                </button>
-                                            </div>
-                                            
-                                            <div class="qr-container bg-light p-4 rounded-3 mb-3" id="qrContainer{{ $history->id }}">
+                                            <div class="qr-container bg-light p-4 rounded-3 mb-3 cursor-pointer" id="qrContainer{{ $history->id }}" style="cursor: pointer;">
                                                 <!-- QR inicial con estructura simplificada -->
                                                 {!! QrCode::size(200)->generate(json_encode([
                                                     'patient' => $history->patient->name,
@@ -87,7 +78,6 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-warning" id="resetHistory{{ $history->id }}">Reiniciar</button>
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                                     </div>
                                 </div>
@@ -112,6 +102,11 @@
         padding: 15px;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease;
+    }
+    .qr-container:hover {
+        transform: scale(1.02);
+        cursor: pointer;
     }
     .patient-info {
         border-bottom: 2px solid #e9ecef;
@@ -146,7 +141,6 @@
         @foreach($medicalHistories as $history)
         // Variables globales para este historial
         window.hashHistory{{ $history->id }} = ["{{ substr($history->hash, 0, 10) }}"];
-        window.hashCount{{ $history->id }} = 1;
         
         // Función para actualizar el QR
         function updateQR{{ $history->id }}() {
@@ -163,9 +157,6 @@
                 statusBadge.className = 'badge bg-danger';
             }
             
-            // Actualizar contador
-            document.getElementById('hashCount{{ $history->id }}').textContent = window.hashHistory{{ $history->id }}.length;
-            
             // Actualizar la fecha
             document.getElementById('lastUpdate{{ $history->id }}').textContent = new Date().toLocaleString();
             
@@ -174,13 +165,11 @@
                 patient: "{{ $history->patient->name }}",
                 doctor: "{{ Auth::user()->name }}",
                 hash_history: window.hashHistory{{ $history->id }},
-                hash_count: window.hashHistory{{ $history->id }}.length,
                 status: isValid ? "Verificado" : "Modificado",
                 time: new Date().toLocaleString()
             };
             
             // Mostrar en consola para depuración
-            console.log('Datos para QR:', qrData);
             console.log('Historial de hashes:', window.hashHistory{{ $history->id }});
             
             // Convertir a JSON
@@ -196,16 +185,12 @@
                 },
                 success: function(response) {
                     document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
-                    console.log('QR actualizado con éxito. Total hashes:', window.hashHistory{{ $history->id }}.length);
-                },
-                error: function(error) {
-                    console.error('Error al generar QR:', error);
                 }
             });
         }
         
-        // Botón para añadir hash
-        $('#addHash{{ $history->id }}').on('click', function() {
+        // Hacer el QR clickeable
+        $('#qrContainer{{ $history->id }}').on('click', function() {
             // Generar nuevo hash simple (solo 8 caracteres para que sea manejable)
             const newHash = Math.random().toString(16).substring(2, 10);
             
@@ -214,15 +199,6 @@
             
             // Actualizar QR
             updateQR{{ $history->id }}();
-            
-            alert('Hash añadido: ' + newHash);
-        });
-        
-        // Botón para reiniciar el historial
-        $('#resetHistory{{ $history->id }}').on('click', function() {
-            window.hashHistory{{ $history->id }} = ["{{ substr($history->hash, 0, 10) }}"];
-            updateQR{{ $history->id }}();
-            alert('Historial reiniciado');
         });
         @endforeach
     });
