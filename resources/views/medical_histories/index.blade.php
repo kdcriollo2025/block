@@ -149,18 +149,15 @@
             return hash;
         }
 
-        // Agregar botón de verificación a cada modal
+        // Configurar el comportamiento del botón de verificación para cada historial
         @foreach($medicalHistories as $history)
-        // Agregar botón al footer del modal
-        $('#nftModal{{ $history->id }} .modal-footer').prepend(
-            '<button type="button" id="btnVerifyNft{{ $history->id }}" class="btn btn-primary">Verificar NFT</button>'
-        );
-        
         // Variable para controlar el estado
         let isValid{{ $history->id }} = true;
         
         // Manejar clic en el botón de verificación
-        $('#btnVerifyNft{{ $history->id }}').on('click', function() {
+        $('#btnVerifyNft{{ $history->id }}').click(function() {
+            console.log('Botón verificar NFT clickeado para historial {{ $history->id }}');
+            
             // Alternar entre válido e inválido
             isValid{{ $history->id }} = !isValid{{ $history->id }};
             
@@ -205,6 +202,7 @@
                 },
                 success: function(response) {
                     document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
+                    console.log('QR actualizado para historial {{ $history->id }}');
                 },
                 error: function(error) {
                     console.error('Error al generar QR:', error);
