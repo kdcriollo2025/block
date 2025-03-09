@@ -82,6 +82,7 @@
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                        <button type="button" id="btnToggleNft{{ $history->id }}" class="btn btn-primary">Alternar estado NFT</button>
                                     </div>
                                 </div>
                             </div>
@@ -122,6 +123,9 @@
         background-color: #dc3545!important;
         color: white;
     }
+    .btn-update-nft {
+        margin-top: 10px;
+    }
 </style>
 @stop
 
@@ -145,96 +149,61 @@
             return hash;
         }
 
-        // Función para actualizar el QR y la información
-        function updateNFTInfo(historyId, patientName, isValid) {
-            const timestamp = new Date().toISOString().replace('T', ' ').substr(0, 19);
-            const newHash = generateRandomHash();
-            const status = isValid ? 'valid' : 'modified';
-            const message = isValid ? 'Información válida sin alteraciones' : 'Información ha sido alterada';
-            
-            // Actualizar el badge de estado
-            const statusBadge = document.getElementById(`statusBadge${historyId}`);
-            if (statusBadge) {
-                statusBadge.textContent = message;
-                statusBadge.className = isValid ? 'badge bg-success' : 'badge bg-danger';
-                
-                // Actualizar el hash mostrado
-                const hashDisplay = document.getElementById(`hashDisplay${historyId}`);
-                if (hashDisplay) {
-                    hashDisplay.textContent = newHash.substr(0, 20) + '...';
-                }
-                
-                // Actualizar la fecha de última actualización
-                const lastUpdate = document.getElementById(`lastUpdate${historyId}`);
-                if (lastUpdate) {
-                    lastUpdate.textContent = new Date().toLocaleString();
-                }
-                
-                // Generar datos para el nuevo QR
-                const nftData = {
-                    type: 'Medical History NFT',
-                    patient: patientName,
-                    doctor: '{{ Auth::user()->name }}',
-                    current_hash: newHash,
-                    timestamp: timestamp,
-                    status: status,
-                    message: message
-                };
-                
-                // Hacer una petición AJAX para obtener el nuevo QR
-                $.ajax({
-                    url: '{{ route("medico.generate.qr") }}',
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        data: JSON.stringify(nftData)
-                    },
-                    success: function(response) {
-                        const qrContainer = document.getElementById(`qrContainer${historyId}`);
-                        if (qrContainer) {
-                            qrContainer.innerHTML = response;
-                        }
-                    },
-                    error: function(error) {
-                        console.error('Error al generar QR:', error);
-                    }
-                });
-            }
-        }
-
-        // Iniciar actualizaciones cuando se abre el modal
+        // Agregar botones de actualización manual
         @foreach($medicalHistories as $history)
-        let timer{{ $history->id }} = null;
         let isValid{{ $history->id }} = true;
         
-        // Cuando se abre el modal, iniciar el temporizador
-        $('#nftModal{{ $history->id }}').on('shown.bs.modal', function () {
-            console.log('Modal {{ $history->id }} abierto, iniciando temporizador');
-            
-            // Limpiar temporizador anterior si existe
-            if (timer{{ $history->id }}) {
-                clearInterval(timer{{ $history->id }});
-            }
-            
-            // Iniciar nuevo temporizador
-            timer{{ $history->id }} = setInterval(function() {
-                isValid{{ $history->id }} = !isValid{{ $history->id }};
-                updateNFTInfo(
-                    {{ $history->id }}, 
-                    '{{ $history->patient->name }}',
-                    isValid{{ $history->id }}
-                );
-                console.log('Actualizado NFT {{ $history->id }}, estado:', isValid{{ $history->id }});
-            }, 10000); // 10 segundos para pruebas
-        });
+        // Agregar botón de actualización al modal
+        $('#nftModal{{ $history->id }} .modal-footer').prepend(
+            '<button type="button" id="btnToggleNft{{ $history->id }}" class="btn btn-primary">Alternar estado NFT</button>'
+        );
         
-        // Cuando se cierra el modal, detener el temporizador
-        $('#nftModal{{ $history->id }}').on('hidden.bs.modal', function () {
-            console.log('Modal {{ $history->id }} cerrado, deteniendo temporizador');
-            if (timer{{ $history->id }}) {
-                clearInterval(timer{{ $history->id }});
-                timer{{ $history->id }} = null;
-            }
+        // Manejar clic en el botón
+        $('#btnToggleNft{{ $history->id }}').on('click', function() {
+            isValid{{ $history->id }} = !isValid{{ $history->id }};
+            
+            const timestamp = new Date().toISOString().replace('T', ' ').substr(0, 19);
+            const newHash = generateRandomHash();
+            const status = isValid{{ $history->id }} ? 'valid' : 'modified';
+            const message = isValid{{ $history->id }} ? 'Información válida sin alteraciones' : 'Información ha sido alterada';
+            
+            // Actualizar el badge de estado
+            const statusBadge = document.getElementById(`statusBadge{{ $history->id }}`);
+            statusBadge.textContent = message;
+            statusBadge.className = isValid{{ $history->id }} ? 'badge bg-success' : 'badge bg-danger';
+            
+            // Actualizar el hash mostrado
+            document.getElementById(`hashDisplay{{ $history->id }}`).textContent = newHash.substr(0, 20) + '...';
+            
+            // Actualizar la fecha de última actualización
+            document.getElementById(`lastUpdate{{ $history->id }}`).textContent = new Date().toLocaleString();
+            
+            // Generar datos para el nuevo QR
+            const nftData = {
+                type: 'Medical History NFT',
+                patient: '{{ $history->patient->name }}',
+                doctor: '{{ Auth::user()->name }}',
+                current_hash: newHash,
+                timestamp: timestamp,
+                status: status,
+                message: message
+            };
+            
+            // Hacer una petición AJAX para obtener el nuevo QR
+            $.ajax({
+                url: '{{ route("medico.generate.qr") }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    data: JSON.stringify(nftData)
+                },
+                success: function(response) {
+                    document.getElementById(`qrContainer{{ $history->id }}`).innerHTML = response;
+                },
+                error: function(error) {
+                    console.error('Error al generar QR:', error);
+                }
+            });
         });
         @endforeach
     });
