@@ -55,6 +55,15 @@
                                                 <h5>{{ $history->patient->name }}</h5>
                                                 <small class="text-muted">ID: {{ $history->id }}</small>
                                             </div>
+                                            
+                                            <!-- Contador de hashes -->
+                                            <div class="mb-3">
+                                                <p><strong>Hashes generados:</strong> <span id="hashCount{{ $history->id }}">1</span></p>
+                                                <button type="button" class="btn btn-success mb-3" id="addHash{{ $history->id }}">
+                                                    <i class="fas fa-plus-circle"></i> Añadir Hash
+                                                </button>
+                                            </div>
+                                            
                                             <div class="qr-container bg-light p-4 rounded-3 mb-3" id="qrContainer{{ $history->id }}">
                                                 <!-- QR inicial con estructura simplificada -->
                                                 {!! QrCode::size(200)->generate(json_encode([
@@ -78,6 +87,7 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
+                                        <button type="button" class="btn btn-warning" id="resetHistory{{ $history->id }}">Reiniciar</button>
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                                     </div>
                                 </div>
@@ -134,42 +144,14 @@
 
         // Configurar comportamiento para cada modal de historial
         @foreach($medicalHistories as $history)
-        // Inicializar o recuperar el historial de hashes desde localStorage
-        let storageKey = 'hashHistory_{{ $history->id }}';
-        let hashHistory{{ $history->id }};
+        // Variables globales para este historial
+        window.hashHistory{{ $history->id }} = ["{{ substr($history->hash, 0, 10) }}"];
+        window.hashCount{{ $history->id }} = 1;
         
-        // Intentar recuperar del localStorage
-        const savedHistory = localStorage.getItem(storageKey);
-        if (savedHistory) {
-            try {
-                hashHistory{{ $history->id }} = JSON.parse(savedHistory);
-                console.log('Historial recuperado del localStorage:', hashHistory{{ $history->id }});
-            } catch (e) {
-                console.error('Error al recuperar historial:', e);
-                hashHistory{{ $history->id }} = ["{{ substr($history->hash, 0, 10) }}"];
-            }
-        } else {
-            // Si no existe, inicializar con el hash original
-            hashHistory{{ $history->id }} = ["{{ substr($history->hash, 0, 10) }}"];
-            // Guardar en localStorage
-            localStorage.setItem(storageKey, JSON.stringify(hashHistory{{ $history->id }}));
-        }
-        
-        // Cuando se abre el modal, actualizar automáticamente
-        $('#nftModal{{ $history->id }}').on('shown.bs.modal', function() {
-            console.log('Modal {{ $history->id }} abierto');
-            
-            // Generar nuevo hash simple (solo 8 caracteres para que sea manejable)
-            const newHash = Math.random().toString(16).substring(2, 10);
-            
-            // Añadir al array de hashes
-            hashHistory{{ $history->id }}.push(newHash);
-            
-            // Guardar en localStorage
-            localStorage.setItem(storageKey, JSON.stringify(hashHistory{{ $history->id }}));
-            
+        // Función para actualizar el QR
+        function updateQR{{ $history->id }}() {
             // Determinar si la información es válida o no (alterna cada vez)
-            const isValid = hashHistory{{ $history->id }}.length % 2 === 0;
+            const isValid = window.hashHistory{{ $history->id }}.length % 2 === 0;
             
             // Actualizar el estado visual
             const statusBadge = document.getElementById('statusBadge{{ $history->id }}');
@@ -181,6 +163,9 @@
                 statusBadge.className = 'badge bg-danger';
             }
             
+            // Actualizar contador
+            document.getElementById('hashCount{{ $history->id }}').textContent = window.hashHistory{{ $history->id }}.length;
+            
             // Actualizar la fecha
             document.getElementById('lastUpdate{{ $history->id }}').textContent = new Date().toLocaleString();
             
@@ -188,14 +173,15 @@
             const qrData = {
                 patient: "{{ $history->patient->name }}",
                 doctor: "{{ Auth::user()->name }}",
-                hash_history: hashHistory{{ $history->id }},
+                hash_history: window.hashHistory{{ $history->id }},
+                hash_count: window.hashHistory{{ $history->id }}.length,
                 status: isValid ? "Verificado" : "Modificado",
                 time: new Date().toLocaleString()
             };
             
             // Mostrar en consola para depuración
             console.log('Datos para QR:', qrData);
-            console.log('Historial de hashes:', hashHistory{{ $history->id }});
+            console.log('Historial de hashes:', window.hashHistory{{ $history->id }});
             
             // Convertir a JSON
             const jsonStr = JSON.stringify(qrData);
@@ -210,45 +196,33 @@
                 },
                 success: function(response) {
                     document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
-                    console.log('QR actualizado con éxito. Total hashes:', hashHistory{{ $history->id }}.length);
+                    console.log('QR actualizado con éxito. Total hashes:', window.hashHistory{{ $history->id }}.length);
                 },
                 error: function(error) {
                     console.error('Error al generar QR:', error);
                 }
             });
+        }
+        
+        // Botón para añadir hash
+        $('#addHash{{ $history->id }}').on('click', function() {
+            // Generar nuevo hash simple (solo 8 caracteres para que sea manejable)
+            const newHash = Math.random().toString(16).substring(2, 10);
+            
+            // Añadir al array de hashes
+            window.hashHistory{{ $history->id }}.push(newHash);
+            
+            // Actualizar QR
+            updateQR{{ $history->id }}();
+            
+            alert('Hash añadido: ' + newHash);
         });
         
-        // Botón para reiniciar el historial (opcional, para pruebas)
-        $('#nftModal{{ $history->id }} .modal-footer').append(
-            '<button type="button" class="btn btn-warning" id="resetHistory{{ $history->id }}">Reiniciar Historial</button>'
-        );
-        
+        // Botón para reiniciar el historial
         $('#resetHistory{{ $history->id }}').on('click', function() {
-            hashHistory{{ $history->id }} = ["{{ substr($history->hash, 0, 10) }}"];
-            localStorage.setItem(storageKey, JSON.stringify(hashHistory{{ $history->id }}));
+            window.hashHistory{{ $history->id }} = ["{{ substr($history->hash, 0, 10) }}"];
+            updateQR{{ $history->id }}();
             alert('Historial reiniciado');
-            
-            // Actualizar QR con el historial reiniciado
-            const qrData = {
-                patient: "{{ $history->patient->name }}",
-                doctor: "{{ Auth::user()->name }}",
-                hash_history: hashHistory{{ $history->id }},
-                status: "Verificado",
-                time: new Date().toLocaleString()
-            };
-            
-            $.ajax({
-                url: "{{ route('medico.generate.qr') }}",
-                method: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    data: JSON.stringify(qrData)
-                },
-                success: function(response) {
-                    document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
-                    console.log('QR reiniciado');
-                }
-            });
         });
         @endforeach
     });
