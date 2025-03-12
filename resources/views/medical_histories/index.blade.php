@@ -75,8 +75,8 @@
                                                     </span>
                                                 </p>
                                                 <div class="mt-3 text-center">
-                                                    <button type="button" class="btn btn-primary" onclick="agregarNuevoHash{{ $history->id }}()">
-                                                        <i class="fas fa-plus-circle"></i> Agregar nuevo hash
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="agregarNuevoHash{{ $history->id }}()">
+                                                        <i class="fas fa-sync-alt"></i> Verificar integridad
                                                     </button>
                                                 </div>
                                             </div>
@@ -156,13 +156,23 @@
         // Actualizar la fecha
         document.getElementById('lastUpdate{{ $history->id }}').textContent = new Date().toLocaleString();
         
+        // Cambiar el estado de la información (alternando entre verificado y modificado)
+        var statusBadge = document.getElementById('statusBadge{{ $history->id }}');
+        if (hashCounter{{ $history->id }} % 2 === 0) {
+            statusBadge.textContent = 'Se detectaron modificaciones en el registro';
+            statusBadge.className = 'badge bg-danger';
+        } else {
+            statusBadge.textContent = 'Certificado verificado correctamente';
+            statusBadge.className = 'badge bg-success';
+        }
+        
         // Generar datos para el QR
         var qrData = {
             patient: "{{ $history->patient->name }}",
             doctor: "{{ Auth::user()->name }}",
             hash: nuevoHash,
             previous_hash: "{{ substr($history->hash, 0, 10) }}",
-            status: "Verificado",
+            status: hashCounter{{ $history->id }} % 2 === 0 ? "Modificado" : "Verificado",
             time: new Date().toLocaleString(),
             counter: hashCounter{{ $history->id }}
         };
@@ -179,12 +189,16 @@
                 // Actualizar el QR
                 document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
                 
-                // Mostrar alerta
-                alert("Nuevo hash agregado: " + nuevoHash);
+                // Mostrar mensaje según el estado
+                if (hashCounter{{ $history->id }} % 2 === 0) {
+                    alert("ALERTA: Se han detectado modificaciones en la información del historial médico.\n\nSe ha registrado esta alteración en la cadena de verificación.");
+                } else {
+                    alert("Verificación completada: La integridad del historial médico ha sido verificada correctamente.");
+                }
             },
             error: function(error) {
                 console.error("Error al generar QR:", error);
-                alert("Error al generar QR. Por favor, intente nuevamente.");
+                alert("Error al verificar la integridad. Por favor, intente nuevamente.");
             }
         });
     }
