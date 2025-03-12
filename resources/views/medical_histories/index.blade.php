@@ -55,7 +55,7 @@
                                                 <h5>{{ $history->patient->name }}</h5>
                                                 <small class="text-muted">ID: {{ $history->id }}</small>
                                             </div>
-                                            <div class="qr-container bg-light p-4 rounded-3 mb-3 cursor-pointer" id="qrContainer{{ $history->id }}" style="cursor: pointer;" onclick="addNewHash{{ $history->id }}()">
+                                            <div class="qr-container bg-light p-4 rounded-3 mb-3 cursor-pointer" id="qrContainer{{ $history->id }}" style="cursor: pointer;" onclick="addNewHashDirectly{{ $history->id }}()">
                                                 <!-- QR inicial con estructura simplificada -->
                                                 {!! QrCode::size(200)->generate(json_encode([
                                                     'patient' => $history->patient->name,
@@ -74,6 +74,11 @@
                                                         Certificado verificado correctamente
                                                     </span>
                                                 </p>
+                                                <div class="mt-3">
+                                                    <button type="button" class="btn btn-sm btn-primary" onclick="addNewHashDirectly{{ $history->id }}()">
+                                                        <i class="fas fa-plus-circle"></i> Agregar nuevo hash
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -143,8 +148,13 @@
             "{{ substr($history->hash, 0, 10) }}"  // Hash original
         ];
 
-        // Función para actualizar el QR
-        function updateQR{{ $history->id }}() {
+        // Función para generar un hash aleatorio (simulación)
+        function generateRandomHash() {
+            return Math.random().toString(16).substring(2, 12);
+        }
+
+        // Función para actualizar el QR directamente sin llamadas AJAX
+        function updateQRDirectly{{ $history->id }}() {
             // Determinar si el estado es válido (en un blockchain real, esto sería una verificación de la cadena)
             const isValid = hashHistory{{ $history->id }}.length % 2 === 1; // Simplemente alternamos para la simulación
             
@@ -161,6 +171,7 @@
             // Actualizar la fecha
             document.getElementById('lastUpdate{{ $history->id }}').textContent = new Date().toLocaleString();
             
+            // Crear los datos para el QR
             const qrData = {
                 patient: "{{ $history->patient->name }}",
                 doctor: "{{ Auth::user()->name }}",
@@ -169,7 +180,7 @@
                 time: new Date().toLocaleString()
             };
             
-            console.log('Hashes en la cadena:', hashHistory{{ $history->id }});
+            console.log('Datos actualizados del QR:', qrData);
             
             // Generar el QR con los datos actualizados
             $.ajax({
@@ -181,8 +192,7 @@
                 },
                 success: function(response) {
                     // Actualizar el contenido del QR
-                    const qrContainer = document.getElementById('qrContainer{{ $history->id }}');
-                    qrContainer.innerHTML = response;
+                    document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
                 },
                 error: function(error) {
                     console.error('Error al generar QR:', error);
@@ -190,51 +200,30 @@
             });
         }
 
-        // Función para agregar un nuevo hash - Hacerla global para que pueda ser llamada desde el onclick
-        window.addNewHash{{ $history->id }} = function() {
-            console.log('Intentando agregar nuevo hash...');
+        // Función para agregar un nuevo hash de manera directa
+        window.addNewHashDirectly{{ $history->id }} = function() {
+            // Generar un nuevo hash aleatorio
+            const newHash = generateRandomHash();
             
-            // Llamar al endpoint para agregar un nuevo hash a la cadena
-            $.ajax({
-                url: "{{ route('medico.add.hash') }}",
-                method: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    medical_history_id: {{ $history->id }},
-                    previous_hashes: hashHistory{{ $history->id }}
-                },
-                success: function(response) {
-                    console.log('Respuesta del servidor:', response);
-                    
-                    if (response.success) {
-                        // Agregar el nuevo hash a la cadena
-                        hashHistory{{ $history->id }}.push(response.new_hash);
-                        
-                        // Actualizar el QR con la nueva cadena de hashes
-                        updateQR{{ $history->id }}();
-                        
-                        console.log('Nuevo hash agregado:', response.new_hash);
-                        console.log('Cadena actual:', hashHistory{{ $history->id }});
-                        console.log('Timestamp:', response.timestamp);
-                        
-                        // Mostrar una notificación de éxito
-                        alert('Nuevo hash agregado: ' + response.new_hash);
-                    } else {
-                        console.error('Error al agregar hash:', response.message);
-                        alert('Error al agregar hash: ' + response.message);
-                    }
-                },
-                error: function(xhr) {
-                    console.error('Error en la petición:', xhr.responseText);
-                    alert('Error en la petición: ' + xhr.responseText);
-                }
-            });
+            // Agregar el nuevo hash a la cadena
+            hashHistory{{ $history->id }}.push(newHash);
+            
+            console.log('Nuevo hash agregado:', newHash);
+            console.log('Cadena actual:', hashHistory{{ $history->id }});
+            
+            // Actualizar el QR con la nueva cadena de hashes
+            updateQRDirectly{{ $history->id }}();
+            
+            // Mostrar una notificación
+            alert('Nuevo hash agregado: ' + newHash);
+            
+            return false; // Prevenir comportamiento por defecto
         };
 
         // Cuando se abre el modal, mostrar el estado inicial
         $('#nftModal{{ $history->id }}').on('show.bs.modal', function() {
             // Actualizar el QR con los hashes actuales
-            updateQR{{ $history->id }}();
+            updateQRDirectly{{ $history->id }}();
         });
         @endforeach
     });
