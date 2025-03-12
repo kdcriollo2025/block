@@ -86,7 +86,6 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserType::class.':medico'])
     
     // Ruta para generar QR y agregar hash
     Route::post('/generate-qr', [MedicalHistoryController::class, 'generateQr'])->name('generate.qr');
-    Route::post('/add-hash-to-chain', [MedicalHistoryController::class, 'addHashToChain'])->name('add.hash');
     
     // Rutas para alergias
     Route::resource('allergy_records', AllergyRecordController::class);
