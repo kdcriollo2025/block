@@ -84,6 +84,10 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserType::class.':medico'])
         ->name('medical_histories.download-pdf');
     Route::resource('medical_histories', MedicalHistoryController::class);
     
+    // Ruta para generar QR y agregar hash
+    Route::post('/generate-qr', [MedicalHistoryController::class, 'generateQr'])->name('generate.qr');
+    Route::post('/add-hash-to-chain', [MedicalHistoryController::class, 'addHashToChain'])->name('add.hash');
+    
     // Rutas para alergias
     Route::resource('allergy_records', AllergyRecordController::class);
     
@@ -119,10 +123,5 @@ Route::prefix('blockchain')->group(function () {
     Route::post('/nft/transfer', [BlockchainNFT::class, 'transferNFT'])->name('nft.transfer');
 });
 
-// Agregar esta ruta
-Route::post('/medico/generate-qr', [App\Http\Controllers\MedicalHistoryController::class, 'generateQr'])->name('medico.generate.qr');
-
-// Ruta para agregar un nuevo hash a la cadena
-Route::post('/medico/add-hash-to-chain', [App\Http\Controllers\MedicalHistoryController::class, 'addHashToChain'])->name('medico.add.hash');
-
+// Ruta para generar imágenes QR
 Route::get('/qr-generator', [App\Http\Controllers\MedicalHistoryController::class, 'generateQrImage']);

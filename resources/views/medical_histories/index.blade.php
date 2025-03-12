@@ -55,7 +55,7 @@
                                                 <h5>{{ $history->patient->name }}</h5>
                                                 <small class="text-muted">ID: {{ $history->id }}</small>
                                             </div>
-                                            <div class="qr-container bg-light p-4 rounded-3 mb-3 cursor-pointer" id="qrContainer{{ $history->id }}" style="cursor: pointer;">
+                                            <div class="qr-container bg-light p-4 rounded-3 mb-3 cursor-pointer" id="qrContainer{{ $history->id }}" style="cursor: pointer;" onclick="addNewHash{{ $history->id }}()">
                                                 <!-- QR inicial con estructura simplificada -->
                                                 {!! QrCode::size(200)->generate(json_encode([
                                                     'patient' => $history->patient->name,
@@ -139,7 +139,7 @@
 
         @foreach($medicalHistories as $history)
         // Inicializar array de hashes con el hash original
-        const hashHistory{{ $history->id }} = [
+        let hashHistory{{ $history->id }} = [
             "{{ substr($history->hash, 0, 10) }}"  // Hash original
         ];
 
@@ -171,6 +171,7 @@
             
             console.log('Hashes en la cadena:', hashHistory{{ $history->id }});
             
+            // Generar el QR con los datos actualizados
             $.ajax({
                 url: "{{ route('medico.generate.qr') }}",
                 method: "POST",
@@ -179,16 +180,20 @@
                     data: JSON.stringify(qrData)
                 },
                 success: function(response) {
-                    document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
-                    
-                    // Volver a agregar el evento de clic al QR después de actualizarlo
-                    $('#qrContainer{{ $history->id }}').off('click').on('click', addNewHash{{ $history->id }});
+                    // Actualizar el contenido del QR
+                    const qrContainer = document.getElementById('qrContainer{{ $history->id }}');
+                    qrContainer.innerHTML = response;
+                },
+                error: function(error) {
+                    console.error('Error al generar QR:', error);
                 }
             });
         }
 
-        // Función para agregar un nuevo hash
-        function addNewHash{{ $history->id }}() {
+        // Función para agregar un nuevo hash - Hacerla global para que pueda ser llamada desde el onclick
+        window.addNewHash{{ $history->id }} = function() {
+            console.log('Intentando agregar nuevo hash...');
+            
             // Llamar al endpoint para agregar un nuevo hash a la cadena
             $.ajax({
                 url: "{{ route('medico.add.hash') }}",
@@ -199,6 +204,8 @@
                     previous_hashes: hashHistory{{ $history->id }}
                 },
                 success: function(response) {
+                    console.log('Respuesta del servidor:', response);
+                    
                     if (response.success) {
                         // Agregar el nuevo hash a la cadena
                         hashHistory{{ $history->id }}.push(response.new_hash);
@@ -207,19 +214,22 @@
                         updateQR{{ $history->id }}();
                         
                         console.log('Nuevo hash agregado:', response.new_hash);
+                        console.log('Cadena actual:', hashHistory{{ $history->id }});
                         console.log('Timestamp:', response.timestamp);
+                        
+                        // Mostrar una notificación de éxito
+                        alert('Nuevo hash agregado: ' + response.new_hash);
                     } else {
                         console.error('Error al agregar hash:', response.message);
+                        alert('Error al agregar hash: ' + response.message);
                     }
                 },
                 error: function(xhr) {
                     console.error('Error en la petición:', xhr.responseText);
+                    alert('Error en la petición: ' + xhr.responseText);
                 }
             });
-        }
-
-        // Hacer el QR clickeable
-        $('#qrContainer{{ $history->id }}').on('click', addNewHash{{ $history->id }});
+        };
 
         // Cuando se abre el modal, mostrar el estado inicial
         $('#nftModal{{ $history->id }}').on('show.bs.modal', function() {

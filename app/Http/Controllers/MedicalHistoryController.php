@@ -363,6 +363,8 @@ class MedicalHistoryController extends Controller
     public function addHashToChain(Request $request)
     {
         try {
+            \Log::info('Solicitud recibida para agregar hash:', $request->all());
+            
             $validated = $request->validate([
                 'medical_history_id' => 'required|exists:medical_histories,id',
                 'previous_hashes' => 'required|array',
@@ -373,6 +375,11 @@ class MedicalHistoryController extends Controller
             
             // Verificar que el médico tiene acceso a este historial
             if ($medicalHistory->patient->doctor_id !== Auth::user()->medico->id) {
+                \Log::warning('Intento de acceso no autorizado al historial médico:', [
+                    'user_id' => Auth::id(),
+                    'medical_history_id' => $medicalHistory->id
+                ]);
+                
                 return response()->json([
                     'success' => false,
                     'message' => 'No tiene permiso para modificar este historial'
@@ -392,6 +399,11 @@ class MedicalHistoryController extends Controller
             // Truncar el hash para que sea más manejable en el QR
             $shortHash = substr($newHash, 0, 10);
             
+            \Log::info('Nuevo hash generado:', [
+                'medical_history_id' => $medicalHistory->id,
+                'short_hash' => $shortHash
+            ]);
+            
             // Devolver el nuevo hash
             return response()->json([
                 'success' => true,
@@ -399,7 +411,11 @@ class MedicalHistoryController extends Controller
                 'timestamp' => now()->format('Y-m-d H:i:s')
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error agregando hash a la cadena: ' . $e->getMessage());
+            \Log::error('Error agregando hash a la cadena: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request' => $request->all()
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Error al agregar hash: ' . $e->getMessage()
