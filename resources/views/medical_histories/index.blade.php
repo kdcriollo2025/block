@@ -55,15 +55,16 @@
                                                 <h5>{{ $history->patient->name }}</h5>
                                                 <small class="text-muted">ID: {{ $history->id }}</small>
                                             </div>
-                                            <div class="qr-container bg-light p-4 rounded-3 mb-3 cursor-pointer" id="qrContainer{{ $history->id }}" style="cursor: pointer;" onclick="addNewHashDirectly{{ $history->id }}()">
+                                            <div class="qr-container bg-light p-4 rounded-3 mb-3 cursor-pointer" id="qrContainer{{ $history->id }}" style="cursor: pointer;">
                                                 <!-- QR inicial con estructura simplificada -->
-                                                {!! QrCode::size(200)->generate(json_encode([
+                                                <img src="{{ url('/qr-generator') }}?data={{ urlencode(json_encode([
                                                     'patient' => $history->patient->name,
                                                     'doctor' => Auth::user()->name,
                                                     'hash_history' => [substr($history->hash, 0, 10)],
                                                     'status' => 'Verificado',
-                                                    'time' => now()->format('Y-m-d H:i:s')
-                                                ])) !!}
+                                                    'time' => now()->format('Y-m-d H:i:s'),
+                                                    'count' => 1
+                                                ])) }}" width="200" height="200" alt="QR Code" />
                                             </div>
                                             <div class="nft-details text-start">
                                                 <p class="mb-1"><strong>Médico:</strong> {{ Auth::user()->name }}</p>
@@ -75,7 +76,7 @@
                                                     </span>
                                                 </p>
                                                 <div class="mt-3">
-                                                    <button type="button" class="btn btn-sm btn-primary" onclick="addNewHashDirectly{{ $history->id }}()">
+                                                    <button type="button" class="btn btn-sm btn-primary" id="addHashBtn{{ $history->id }}">
                                                         <i class="fas fa-plus-circle"></i> Agregar nuevo hash
                                                     </button>
                                                 </div>
@@ -143,88 +144,55 @@
         });
 
         @foreach($medicalHistories as $history)
-        // Inicializar array de hashes con el hash original
-        let hashHistory{{ $history->id }} = [
-            "{{ substr($history->hash, 0, 10) }}"  // Hash original
-        ];
-
-        // Función para generar un hash aleatorio (simulación)
-        function generateRandomHash() {
-            return Math.random().toString(16).substring(2, 12);
-        }
-
-        // Función para actualizar el QR directamente sin llamadas AJAX
-        function updateQRDirectly{{ $history->id }}() {
-            // Determinar si el estado es válido (en un blockchain real, esto sería una verificación de la cadena)
-            const isValid = hashHistory{{ $history->id }}.length % 2 === 1; // Simplemente alternamos para la simulación
+        // Inicializar variables para el QR
+        let patientName{{ $history->id }} = "{{ $history->patient->name }}";
+        let doctorName{{ $history->id }} = "{{ Auth::user()->name }}";
+        let initialHash{{ $history->id }} = "{{ substr($history->hash, 0, 10) }}";
+        let hashCount{{ $history->id }} = 1;
+        
+        // Función simple para generar un nuevo QR
+        function regenerateQR{{ $history->id }}() {
+            // Generar un nuevo hash aleatorio
+            let newHash = Math.random().toString(16).substring(2, 12);
+            hashCount{{ $history->id }}++;
             
-            // Actualizar el estado visual
-            const statusBadge = document.getElementById('statusBadge{{ $history->id }}');
-            if (isValid) {
-                statusBadge.textContent = 'Certificado verificado correctamente';
-                statusBadge.className = 'badge bg-success';
-            } else {
-                statusBadge.textContent = 'Se detectaron modificaciones en el registro';
-                statusBadge.className = 'badge bg-danger';
-            }
+            // Crear datos para el QR
+            let qrData = {
+                patient: patientName{{ $history->id }},
+                doctor: doctorName{{ $history->id }},
+                hash_history: [initialHash{{ $history->id }}, newHash],
+                status: "Verificado",
+                time: new Date().toLocaleString(),
+                count: hashCount{{ $history->id }}
+            };
+            
+            // Convertir a JSON
+            let jsonData = JSON.stringify(qrData);
             
             // Actualizar la fecha
             document.getElementById('lastUpdate{{ $history->id }}').textContent = new Date().toLocaleString();
             
-            // Crear los datos para el QR
-            const qrData = {
-                patient: "{{ $history->patient->name }}",
-                doctor: "{{ Auth::user()->name }}",
-                hash_history: hashHistory{{ $history->id }},
-                status: isValid ? "Verificado" : "Modificado",
-                time: new Date().toLocaleString()
-            };
+            // Crear la URL para el QR
+            let qrUrl = "{{ url('/qr-generator') }}?data=" + encodeURIComponent(jsonData);
             
-            console.log('Datos actualizados del QR:', qrData);
+            // Actualizar la imagen del QR
+            let qrContainer = document.getElementById('qrContainer{{ $history->id }}');
+            qrContainer.innerHTML = '<img src="' + qrUrl + '" width="200" height="200" alt="QR Code" />';
             
-            // Generar el QR con los datos actualizados
-            $.ajax({
-                url: "{{ route('medico.generate.qr') }}",
-                method: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    data: JSON.stringify(qrData)
-                },
-                success: function(response) {
-                    // Actualizar el contenido del QR
-                    document.getElementById('qrContainer{{ $history->id }}').innerHTML = response;
-                },
-                error: function(error) {
-                    console.error('Error al generar QR:', error);
-                }
-            });
+            // Mostrar alerta
+            alert('Nuevo hash agregado: ' + newHash + '\nTotal de hashes: ' + hashCount{{ $history->id }});
         }
-
-        // Función para agregar un nuevo hash de manera directa
-        window.addNewHashDirectly{{ $history->id }} = function() {
-            // Generar un nuevo hash aleatorio
-            const newHash = generateRandomHash();
-            
-            // Agregar el nuevo hash a la cadena
-            hashHistory{{ $history->id }}.push(newHash);
-            
-            console.log('Nuevo hash agregado:', newHash);
-            console.log('Cadena actual:', hashHistory{{ $history->id }});
-            
-            // Actualizar el QR con la nueva cadena de hashes
-            updateQRDirectly{{ $history->id }}();
-            
-            // Mostrar una notificación
-            alert('Nuevo hash agregado: ' + newHash);
-            
-            return false; // Prevenir comportamiento por defecto
-        };
-
-        // Cuando se abre el modal, mostrar el estado inicial
-        $('#nftModal{{ $history->id }}').on('show.bs.modal', function() {
-            // Actualizar el QR con los hashes actuales
-            updateQRDirectly{{ $history->id }}();
+        
+        // Asignar la función al botón
+        document.getElementById('addHashBtn{{ $history->id }}').addEventListener('click', function() {
+            regenerateQR{{ $history->id }}();
         });
+        
+        // Asignar la función al QR
+        document.getElementById('qrContainer{{ $history->id }}').addEventListener('click', function() {
+            regenerateQR{{ $history->id }}();
+        });
+        
         @endforeach
     });
 </script>
