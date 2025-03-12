@@ -122,4 +122,7 @@ Route::prefix('blockchain')->group(function () {
 // Agregar esta ruta
 Route::post('/medico/generate-qr', [App\Http\Controllers\MedicalHistoryController::class, 'generateQr'])->name('medico.generate.qr');
 
+// Ruta para agregar un nuevo hash a la cadena
+Route::post('/medico/add-hash-to-chain', [App\Http\Controllers\MedicalHistoryController::class, 'addHashToChain'])->name('medico.add.hash');
+
 Route::get('/qr-generator', [App\Http\Controllers\MedicalHistoryController::class, 'generateQrImage']);

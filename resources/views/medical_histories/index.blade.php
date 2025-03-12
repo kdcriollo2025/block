@@ -74,6 +74,20 @@
                                                         Certificado verificado correctamente
                                                     </span>
                                                 </p>
+                                                <!-- Visualización de la cadena de hashes -->
+                                                <div class="mt-3">
+                                                    <p><strong>Cadena de hashes:</strong> <small class="text-muted">(Haz clic en el QR para agregar un nuevo hash)</small></p>
+                                                    <div class="hash-chain-container border rounded p-2 bg-light" style="max-height: 150px; overflow-y: auto;">
+                                                        <div id="hashChain{{ $history->id }}" class="hash-chain">
+                                                            <!-- Los hashes se agregarán dinámicamente aquí -->
+                                                            <div class="hash-block mb-1 p-1 border-bottom">
+                                                                <span class="badge bg-info">Bloque #1</span>
+                                                                <span class="hash-value">{{ substr($history->hash, 0, 10) }}</span>
+                                                                <small class="text-muted">{{ $history->created_at->format('d/m/Y H:i:s') }}</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -124,6 +138,32 @@
         background-color: #dc3545!important;
         color: white;
     }
+    .hash-chain-container {
+        font-family: monospace;
+        font-size: 0.85em;
+    }
+    .hash-block {
+        display: flex;
+        align-items: center;
+        transition: background-color 0.3s ease;
+    }
+    .hash-block:hover {
+        background-color: #f0f0f0;
+    }
+    .hash-value {
+        font-weight: bold;
+        color: #0056b3;
+    }
+    .me-2 {
+        margin-right: 0.5rem;
+    }
+    .mx-2 {
+        margin-left: 0.5rem;
+        margin-right: 0.5rem;
+    }
+    .ms-2 {
+        margin-left: 0.5rem;
+    }
 </style>
 @stop
 
@@ -138,25 +178,15 @@
         });
 
         @foreach($medicalHistories as $history)
-        // Pre-generar 20 hashes aleatorios
-        const initialHashes{{ $history->id }} = [
-            "{{ substr($history->hash, 0, 10) }}",  // Hash original
-            ...Array.from({length: 20}, () => Math.random().toString(16).substr(2, 10))  // 20 hashes aleatorios
+        // Inicializar array de hashes con el hash original
+        const hashHistory{{ $history->id }} = [
+            "{{ substr($history->hash, 0, 10) }}"  // Hash original
         ];
 
-        // Inicializar el QR con todos los hashes
-        const initialQrData{{ $history->id }} = {
-            patient: "{{ $history->patient->name }}",
-            doctor: "{{ Auth::user()->name }}",
-            hash_history: initialHashes{{ $history->id }},
-            status: "Verificado",
-            time: new Date().toLocaleString()
-        };
-
         // Función para actualizar el QR
-        function updateQR{{ $history->id }}(currentIndex) {
-            const visibleHashes = initialHashes{{ $history->id }}.slice(0, currentIndex + 1);
-            const isValid = currentIndex % 2 === 0;
+        function updateQR{{ $history->id }}() {
+            // Determinar si el estado es válido (en un blockchain real, esto sería una verificación de la cadena)
+            const isValid = hashHistory{{ $history->id }}.length % 2 === 1; // Simplemente alternamos para la simulación
             
             // Actualizar el estado visual
             const statusBadge = document.getElementById('statusBadge{{ $history->id }}');
@@ -174,12 +204,12 @@
             const qrData = {
                 patient: "{{ $history->patient->name }}",
                 doctor: "{{ Auth::user()->name }}",
-                hash_history: visibleHashes,
+                hash_history: hashHistory{{ $history->id }},
                 status: isValid ? "Verificado" : "Modificado",
                 time: new Date().toLocaleString()
             };
             
-            console.log('Hashes visibles:', visibleHashes);
+            console.log('Hashes en la cadena:', hashHistory{{ $history->id }});
             
             $.ajax({
                 url: "{{ route('medico.generate.qr') }}",
@@ -194,21 +224,84 @@
             });
         }
 
-        // Variable para rastrear el índice actual
-        let currentHashIndex{{ $history->id }} = 0;
+        // Función para actualizar la visualización de la cadena de hashes
+        function updateHashChainDisplay{{ $history->id }}() {
+            const hashChainContainer = document.getElementById('hashChain{{ $history->id }}');
+            
+            // Limpiar el contenedor
+            hashChainContainer.innerHTML = '';
+            
+            // Agregar cada hash a la visualización
+            hashHistory{{ $history->id }}.forEach((hash, index) => {
+                const hashBlock = document.createElement('div');
+                hashBlock.className = 'hash-block mb-1 p-1 border-bottom';
+                
+                const blockNumber = document.createElement('span');
+                blockNumber.className = 'badge bg-info me-2';
+                blockNumber.textContent = `Bloque #${index + 1}`;
+                
+                const hashValue = document.createElement('span');
+                hashValue.className = 'hash-value mx-2';
+                hashValue.textContent = hash;
+                
+                const timestamp = document.createElement('small');
+                timestamp.className = 'text-muted ms-2';
+                timestamp.textContent = index === 0 ? 
+                    '{{ $history->created_at->format("d/m/Y H:i:s") }}' : 
+                    new Date().toLocaleString();
+                
+                hashBlock.appendChild(blockNumber);
+                hashBlock.appendChild(hashValue);
+                hashBlock.appendChild(timestamp);
+                
+                hashChainContainer.appendChild(hashBlock);
+            });
+            
+            // Hacer scroll al último hash
+            hashChainContainer.scrollTop = hashChainContainer.scrollHeight;
+        }
 
         // Hacer el QR clickeable
         $('#qrContainer{{ $history->id }}').on('click', function() {
-            if (currentHashIndex{{ $history->id }} < initialHashes{{ $history->id }}.length - 1) {
-                currentHashIndex{{ $history->id }}++;
-                updateQR{{ $history->id }}(currentHashIndex{{ $history->id }});
-            }
+            // Llamar al endpoint para agregar un nuevo hash a la cadena
+            $.ajax({
+                url: "{{ route('medico.add.hash') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    medical_history_id: {{ $history->id }},
+                    previous_hashes: hashHistory{{ $history->id }}
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Agregar el nuevo hash a la cadena
+                        hashHistory{{ $history->id }}.push(response.new_hash);
+                        
+                        // Actualizar el QR con la nueva cadena de hashes
+                        updateQR{{ $history->id }}();
+                        
+                        // Actualizar la visualización de la cadena de hashes
+                        updateHashChainDisplay{{ $history->id }}();
+                        
+                        console.log('Nuevo hash agregado:', response.new_hash);
+                        console.log('Timestamp:', response.timestamp);
+                    } else {
+                        console.error('Error al agregar hash:', response.message);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error en la petición:', xhr.responseText);
+                }
+            });
         });
 
         // Cuando se abre el modal, mostrar el estado inicial
         $('#nftModal{{ $history->id }}').on('show.bs.modal', function() {
-            currentHashIndex{{ $history->id }} = 0;
-            updateQR{{ $history->id }}(currentHashIndex{{ $history->id }});
+            // Actualizar el QR con los hashes actuales
+            updateQR{{ $history->id }}();
+            
+            // Actualizar la visualización de la cadena de hashes
+            updateHashChainDisplay{{ $history->id }}();
         });
         @endforeach
     });

@@ -355,4 +355,55 @@ class MedicalHistoryController extends Controller
             return response('Error generando QR: ' . $e->getMessage(), 500);
         }
     }
+
+    /**
+     * Agrega un nuevo hash a la cadena del historial médico
+     * Simula el comportamiento de un blockchain
+     */
+    public function addHashToChain(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'medical_history_id' => 'required|exists:medical_histories,id',
+                'previous_hashes' => 'required|array',
+            ]);
+
+            // Obtener el historial médico
+            $medicalHistory = MedicalHistory::findOrFail($validated['medical_history_id']);
+            
+            // Verificar que el médico tiene acceso a este historial
+            if ($medicalHistory->patient->doctor_id !== Auth::user()->medico->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tiene permiso para modificar este historial'
+                ], 403);
+            }
+
+            // Generar un nuevo hash basado en los hashes anteriores y datos actuales
+            $hashData = [
+                'previous_hashes' => $validated['previous_hashes'],
+                'medical_history_id' => $medicalHistory->id,
+                'timestamp' => now()->timestamp,
+                'random' => Str::random(8)
+            ];
+            
+            $newHash = hash('sha256', json_encode($hashData));
+            
+            // Truncar el hash para que sea más manejable en el QR
+            $shortHash = substr($newHash, 0, 10);
+            
+            // Devolver el nuevo hash
+            return response()->json([
+                'success' => true,
+                'new_hash' => $shortHash,
+                'timestamp' => now()->format('Y-m-d H:i:s')
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error agregando hash a la cadena: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al agregar hash: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
