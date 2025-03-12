@@ -20,8 +20,6 @@ use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\BlockchainNFT;
 
-
-
 /*
 |-------------------------------------------------------------------------- 
 | Web Routes
@@ -125,6 +123,3 @@ Route::prefix('blockchain')->group(function () {
 Route::post('/medico/generate-qr', [App\Http\Controllers\MedicalHistoryController::class, 'generateQr'])->name('medico.generate.qr');
 
 Route::get('/qr-generator', [App\Http\Controllers\MedicalHistoryController::class, 'generateQrImage']);
-// Ruta para actualizar el hash y regenerar el QR
-Route::post('/medico/medical_histories/{medicalHistory}/generate-hash', [MedicalHistoryController::class, 'generateNewHash'])
-    ->name('medical_histories.generate_hash');
